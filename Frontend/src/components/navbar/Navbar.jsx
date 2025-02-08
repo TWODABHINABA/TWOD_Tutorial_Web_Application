@@ -38,7 +38,7 @@ const CustomNavbar = () => {
         <a  onClick={() => navigate("/login")} className="text-sm mr-6 inline-flex items-center ">
           <span className="icon-lock mr-1"><MdLogin /></span> Log In
         </a>
-        <a onClick={()=>navigate("/register")} className="text-sm inline-flex items-center">
+        <a onClick={()=> navigate("/register")} className="text-sm inline-flex items-center">
           <span className="icon-person mr-1"><FaUser /></span> Register
         </a>
       </div>

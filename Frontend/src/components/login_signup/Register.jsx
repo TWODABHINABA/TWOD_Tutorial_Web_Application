@@ -1,58 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../components/User-management/api";
-// import UserService from '../User-management/UserService';
-
-// import user_id from '../Assets/ID.png';
-// import user_pic from '../Assets/person.png';
-// import email_pic from "../../assets/../assets./rea";
-// import password_pic from '../Assets/password.png';
-// import role_pic from '../Assets/role.png';
+import api from "../User-management/api";
 
 const Register = () => {
   const [action, setAction] = useState("Sign Up");
   const [name,setName]=useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     email: "",
-//     password: "",
-//   });
+
   const navigate = useNavigate();
 
-//   const handleInputChange = (event) => {
-//     const { name, value } = event.target;
-//     setFormData({ ...formData, [name]: value });
-//   };
+
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/register",{name, email, password});
-    //   setFormData({ name: "", email: "", password: "" });
+      const data =await api.post("/register", {name, email, password});
+      // localStorage.setItem("token", data.token);
+      console.log(data);
       alert("User Registration Successful");
       setAction("Login");
-    } catch (error) {
-      alert("User Registration Failed");
+    } catch (err) {
+      console.error("Registration failed: 500", err.message);
     }
   };
 
-//   const handleLogin = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const userData = await UserService.login(email, password);
-//       if (userData.token) {
-//         localStorage.setItem("token", userData.token);
-//         alert("Login Successful");
-//         navigate("/profile");
-//       } else {
-//         alert("Error");
-//       }
-//     } catch (error) {
-//       alert("Error");
-//     }
-//   };
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const userData=await api.post("/login", {email, password});
+      localStorage.setItem("token", userData.data.token);
+      alert("Login Successful");
+      navigate("/");
+    } catch (error) {
+      alert("Error");
+    }
+  };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-200 to-blue-400">
@@ -113,12 +96,7 @@ const Register = () => {
                   &rarr; Login
                 </div>
               )}
-              <button
-                className="w-32 h-12 bg-blue-600 text-white rounded-full text-2xl font-bold"
-                type="submit"
-              >
-                Register
-              </button>
+              <button type="submit">Register</button>
             </div>
           </form>
         )}
@@ -128,9 +106,8 @@ const Register = () => {
         ) : (
           <form className="mt-8 flex flex-col gap-4" onSubmit={handleLogin}>
             <div className="flex items-center w-[68vh] h-16 bg-gray-200 rounded-md px-4">
-              {/* <img src={field.img} alt="" className="mr-4" /> */}
               <input
-                name="mail"
+                name="email"
                 type="email"
                 value={email}
                 placeholder="Enter your email"
@@ -141,14 +118,13 @@ const Register = () => {
               />
             </div>
             <div className="flex items-center w-[68vh] h-16 bg-gray-200 rounded-md px-4">
-              {/* <img src={field.img} alt="" className="mr-4" /> */}
               <input
                 name="password"
                 type="password"
                 value={password}
                 placeholder="Enter your Password"
                 onChange={(e) => {
-                  setEmail(e.target.value);
+                  setPassword(e.target.value);
                 }}
                 required
               />
