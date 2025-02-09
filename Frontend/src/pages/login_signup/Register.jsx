@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 // import UserService from '../User-management/UserService';
-
 // import user_id from '../Assets/ID.png';
 // import user_pic from '../Assets/person.png';
 // import email_pic from "../../assets/../assets./rea";
 // import password_pic from '../Assets/password.png';
 // import role_pic from '../Assets/role.png';
-
 const Register = () => {
   const [action, setAction] = useState("Sign Up");
   const [name,setName]=useState("");
@@ -20,12 +18,10 @@ const Register = () => {
 //     password: "",
 //   });
   const navigate = useNavigate();
-
 //   const handleInputChange = (event) => {
 //     const { name, value } = event.target;
 //     setFormData({ ...formData, [name]: value });
 //   };
-
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
@@ -37,23 +33,21 @@ const Register = () => {
       alert("User Registration Failed");
     }
   };
-
-//   const handleLogin = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const userData = await UserService.login(email, password);
-//       if (userData.token) {
-//         localStorage.setItem("token", userData.token);
-//         alert("Login Successful");
-//         navigate("/profile");
-//       } else {
-//         alert("Error");
-//       }
-//     } catch (error) {
-//       alert("Error");
-//     }
-//   };
-
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const userData = await UserService.login(email, password);
+      if (userData.token) {
+        localStorage.setItem("token", userData.token);
+        alert("Login Successful");
+        navigate("/profile");
+      } else {
+        alert("Error");
+      }
+    } catch (error) {
+      alert("Error");
+    }
+  };
   return (
     <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-200 to-blue-400">
       <div className="flex flex-col items-center justify-center w-[85.4vh] h-[95vh] bg-red-300 bg-opacity-50 rounded-2xl shadow-2xl p-6">
@@ -61,7 +55,6 @@ const Register = () => {
           <div className="text-4xl font-bold text-black">{action}</div>
           <div className="w-10 h-1 bg-black rounded-full"></div>
         </div>
-
         {action === "Login" ? (
           <form></form>
         ) : (
@@ -75,7 +68,6 @@ const Register = () => {
                 required
               />
             </div>
-
             <div className="flex items-center w-[68vh] h-16 bg-gray-200 rounded-md px-4">
               <input
                 type="email"
@@ -85,7 +77,6 @@ const Register = () => {
                 required
               />
             </div>
-
             <div className="flex items-center w-[68vh] h-16 bg-gray-200 rounded-md px-4">
               <input
                 type="password"
@@ -95,7 +86,6 @@ const Register = () => {
                 required
               />
             </div>
-
             <div className="flex items-center justify-center gap-6 mt-4">
               {action !== "Sign Up" && (
                 <div
@@ -122,7 +112,6 @@ const Register = () => {
             </div>
           </form>
         )}
-
         {action === "Sign Up" ? (
           <form></form>
         ) : (

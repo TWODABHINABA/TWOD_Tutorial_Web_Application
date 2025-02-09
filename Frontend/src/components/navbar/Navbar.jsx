@@ -35,10 +35,10 @@ const CustomNavbar = () => {
         </a>
       </div>
       <div className="w-1/2 lg:w-1/4 text-right ">
-        <a  onClick={() => navigate("/login")} className="text-sm mr-6 inline-flex items-center ">
+        <a  onClick={() => navigate("/login")} className="text-sm mr-6 inline-flex items-center cursor-pointer">
           <span className="icon-lock mr-1"><MdLogin /></span> Log In
         </a>
-        <a onClick={()=>navigate("/register")} className="text-sm inline-flex items-center">
+        <a onClick={()=>navigate("/register")} className="text-sm inline-flex items-center cursor-pointer">
           <span className="icon-person mr-1"><FaUser /></span> Register
         </a>
       </div>
