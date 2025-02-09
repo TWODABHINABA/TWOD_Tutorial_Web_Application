@@ -5,7 +5,7 @@ import "./explore.css";
 import course from '../../assets/course.jpg';
 import ShuffleHero from '../../components/SuffleComp';
 import CategorySection from '../../components/categories/CategorySection';
-
+//Explore
 const Explore = () => {
     return (
         <div className='w-full'>
