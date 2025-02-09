@@ -4,11 +4,11 @@ import Footer from '../footer/Footer'
 const Home = () => {
   return (
     <div>
-        <Navbar/>
+        {/* <Navbar/>
         <div className='container'>
 
         </div>
-        <Footer/>
+        <Footer/> */}
     </div>
   )
 }
