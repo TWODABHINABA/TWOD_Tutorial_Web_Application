@@ -1,0 +1,101 @@
+
+.skillup-home-static-banner {
+    background-color: #f7f7f7;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+  
+  .banner {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .container.heading {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+  
+  .container.heading::before,
+  .container.heading::after {
+    content: "";
+    display: block;
+    width: 50px;
+    height: 2px;
+    background-color: #ccc;
+    margin: 0 auto;
+  }
+  
+  .container.heading::before {
+    margin-bottom: 1rem;
+  }
+  
+  .container.heading::after {
+    margin-top: 1rem;
+  }
+  
+  .ban-header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    line-height: 1.2;
+  }
+  
+  .cta-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    background-color: #0070f3;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn:hover {
+    background-color: #005bb5;
+  }
+  
+  .new-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .new-cta p {
+    margin: 0;
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  @media (min-width: 768px) {
+    .ban-header {
+      font-size: 3rem;
+    }
+    
+    .cta-container {
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .new-cta {
+      flex-direction: row;
+      align-items: center;
+    }
+    
+    .new-cta p {
+      margin-right: 1rem;
+    }
+  }
+  

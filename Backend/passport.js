@@ -1,0 +1,46 @@
+const passport = require("passport");
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const Person = require("./Models/person");
+const JWT_SECRET=process.env.JWT_SECRET;
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: process.env.CALLBACK_URL,
+      passReqToCallback: true,
+    },
+    async (request, accessToken, refreshToken, profile, done) => {
+      try {
+        let user = await Person.findOne({ email: profile.emails[0].value });
+        if (!user) {
+          user = new Person({
+            // _id:profile.id,
+            name: profile.displayName,
+            email: profile.emails[0].value,
+          });
+          await user.save();
+        }
+        const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+          expiresIn: "1h",
+        });
+        // res.json({ token });
+        console.log(token);
+        done(null, user,token);
+      } catch (err) {
+        done(err, null);
+      }
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
