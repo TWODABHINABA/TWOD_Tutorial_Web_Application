@@ -1,14 +1,14 @@
 import React from 'react'
-import Navbar from "../navbar/Navbar"
-import Footer from '../footer/Footer'
+import Navbar from '../components/navbar/Navbar'
+import Footer from '../components/footer/Footer'
 const Home = () => {
   return (
     <div>
-        {/* <Navbar/>
+        <Navbar/>
         <div className='container'>
 
         </div>
-        <Footer/> */}
+        <Footer/>
     </div>
   )
 }
