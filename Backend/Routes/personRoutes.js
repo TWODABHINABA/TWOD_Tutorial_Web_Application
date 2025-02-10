@@ -86,17 +86,22 @@ router.post("/login", async (req, res) => {
     });
     res.json({ token });
   } catch (error) {
-    res.status(400).json({ message: "Error logging in" });
+    res.status(500).json({ message: "Error logging in" });
   }
 });
-router.get("/:id", authMiddleware, async (req, res) => {
-  const person_id = req.params.id;
+router.get("/me", authMiddleware, async (req, res) => {
+  // const person_id = req.params.id;
+  // const token = req.headers.authorization?.split(" ")[1];
+  const {email}=req.body;
   try {
-    const user = await Person.findOne({ _id: person_id });
+    // const user = await Person.findOne({ _id: person_id });
+    // res.status(200).json(user);
+    // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await Person.findOne(email).select("-password");
     res.status(200).json(user);
-    if (!user) {
-      res.status(404).json("Invalid ID");
-    }
+    // if (!user) {
+    //   res.status(404).json("Invalid ID");
+    // }
   } catch (error) {
     res.status(500).json(error, "Internal server error");
   }

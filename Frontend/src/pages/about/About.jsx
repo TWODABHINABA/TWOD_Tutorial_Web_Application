@@ -3,7 +3,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './about.css';
 import CustomNavbar from '../../components/navbar/Navbar';
-import Foote from '../../components/footer/Footer';
+import Footer from '../../components/footer/Footer';
 
 const About = () => {
   useEffect(() => {
@@ -60,7 +60,7 @@ const About = () => {
           </div>
         </div>
       </section>
-      <Foote />
+      <Footer />
     </>
   );
 };

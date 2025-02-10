@@ -29,9 +29,10 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     e.preventDefault();
     try {
       const userData=await api.post("/login", {email, password});
-      localStorage.setItem("token", userData.data.token);
+      const t=localStorage.setItem("token", userData.data.token);
       alert("Login Successful");
-      navigate("/contact")
+      navigate("/user");
+      // console.log(t);
     } catch (error) {
       alert("Error");
     }
