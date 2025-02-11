@@ -21,8 +21,11 @@ passport.use(
             // _id:profile.id,
             name: profile.displayName,
             email: profile.emails[0].value,
+            profilePicture:profile.photos[0].value
           });
           await user.save();
+          console.log(user);
+          
         }
         const token = jwt.sign({ id: user._id }, JWT_SECRET, {
           expiresIn: "1h",

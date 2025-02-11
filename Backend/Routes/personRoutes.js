@@ -44,7 +44,8 @@ router.get(
 );
 
 router.get("/auth/callback/success", async (req, res) => {
-  if (!req.user) res.redirect("/auth/callback/failure");
+  if (!req.user) 
+    res.redirect("/auth/callback/failure");
   const a = await req.user;
   console.log(a);
   res.send("successfully Logged in");
@@ -120,7 +121,7 @@ router.get("/me", authMiddleware, async (req, res) => {
 router.put("/update/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, birthday, email, password } = req.body;
+    const { name, phone, birthday, email, password,profilePicture } = req.body;
     const userUpdate = await Person.findById(id);
     if (!userUpdate) {
       res.status(404).json(error, "User Not Found");
@@ -130,6 +131,7 @@ router.put("/update/:id", authMiddleware, async (req, res) => {
     userUpdate.birthday = birthday;
     userUpdate.email = email;
     userUpdate.password = password;
+    userUpdate.profilePicture=profilePicture
 
     await userUpdate.save();
     res.status(200).json(userUpdate);
