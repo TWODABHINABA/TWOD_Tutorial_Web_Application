@@ -9,21 +9,40 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone,setPhone]=useState("");
+  const [birthday,setBirthday]=useState("");
+  const [profilePicture, setProfilePicture] = useState(null);
 
   const navigate = useNavigate();
 
+  const handleFileChange = (e) => {
+    setProfilePicture(e.target.files[0]); // Set selected file
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("phone", phone);
+    formData.append("birthday", birthday);
+    formData.append("email", email);
+    formData.append("password", password);
+    if (profilePicture) {
+      formData.append("profilePicture", profilePicture);
+    }
+
     try {
-      const data =await api.post("/register", {name, email, password});
-      // localStorage.setItem("token", data.token);
-      console.log(data);
+      const response = await api.post("/register", formData)
+
+      console.log(response.data);
       alert("User Registration Successful");
       setAction("Login");
     } catch (err) {
-      console.error("Registration failed: 500", err.message);
+      console.error("Registration failed:", err.message);
     }
   };
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -97,6 +116,24 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
+
+              <input
+                type="text"
+                value={phone}
+                placeholder="Enter your Phone Number"
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+
+              <input
+                type="text"
+                value={birthday}
+                placeholder="Enter your Date of Birth (YYYY-MMM-DD)"
+                onChange={(e) => setBirthday(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
               <input
                 type="email"
                 value={email}
@@ -112,6 +149,13 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+              />
+              <input
+                type="file"
+                name="profilePicture"
+                onChange={handleFileChange}
+                accept="image/*"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
