@@ -1,16 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import './CategorySec.css';
-
+import { Link } from 'react-router-dom';
 const categories = [
-  { title: "Science", courses: "1,391 courses", icon: "uil uil-atom" },
-  { title: "Business", courses: "3,234 courses", icon: "uil uil-briefcase" },
-  { title: "Finance Accounting", courses: "931 courses", icon: "uil uil-calculator" },
-  { title: "Design", courses: "7,291 courses", icon: "uil uil-pen" },
-  { title: "Music", courses: "9,114 courses", icon: "uil uil-music" },
-  { title: "Marketing", courses: "2,391 courses", icon: "uil uil-chart-pie" },
-  { title: "Photography", courses: "7,991 courses", icon: "uil uil-camera" },
-  { title: "Animation", courses: "6,491 courses", icon: "uil uil-circle-layer" },
+  { title: "AI & ML", courses: "1,391 courses", icon: "uil uil-atom",slug:"ai-ml" },
+  { title: "ReactJs", courses: "3,234 courses", icon: "uil uil-briefcase",slug:"react-js" },
+  { title: "HTML", courses: "2,391 courses", icon: "uil uil-chart-pie",slug:"html" },
+  { title: "Python", courses: "6,491 courses", icon: "uil uil-circle-layer",slug:"python" },
+  { title: "English", courses: "7,991 courses", icon: "uil uil-camera",slug:"english" },
+  { title: "Maths", courses: "7,291 courses", icon: "uil uil-pen",slug:"maths" },
+  { title: "Science", courses: "931 courses", icon: "uil uil-calculator",slug:"science" },
+  { title: "Social", courses: "9,114 courses", icon: "uil uil-music",slug:"social" },
 ];
 
 const containerVariants = {
@@ -55,20 +55,27 @@ const CategorySection = () => {
           viewport={{ once: true, amount: 0.2 }}
         >
           {categories.map((cat, index) => (
-            <motion.a
+            <motion.div
               key={index}
-              href="#"
+              // href="#"
               className="category grid-item"
               variants={cardVariants}
             >
-              <div className="icon">
-                <i className={cat.icon}></i>
-              </div>
-              <div className="content">
-                <h3>{cat.title}</h3>
-                <span>{cat.courses}</span>
-              </div>
-            </motion.a>
+              <Link 
+                to={`/category/${cat.slug}`} 
+                className="category-link"
+              >
+
+                  <div className="icon">
+                  <i className={cat.icon}></i>
+                </div>
+                <div className="content">
+                  <h3>{cat.title}</h3>
+                  <span>{cat.courses}</span>
+                </div>
+              </Link>
+
+            </motion.div>
           ))}
         </motion.div>
       </div>
