@@ -118,26 +118,30 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/update/:id", authMiddleware, async (req, res) => {
+router.put("/update/:id", authMiddleware, upload.single("profilePicture"), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, birthday, email, password,profilePicture } = req.body;
-    const userUpdate = await Person.findById(id);
-    if (!userUpdate) {
-      res.status(404).json(error, "User Not Found");
-    }
-    userUpdate.name = name;
-    userUpdate.phone = phone;
-    userUpdate.birthday = birthday;
-    userUpdate.email = email;
-    userUpdate.password = password;
-    userUpdate.profilePicture=profilePicture
+    const updates = {}; 
 
-    await userUpdate.save();
-    res.status(200).json(userUpdate);
+    if (req.body.name) updates.name = req.body.name;
+    if (req.body.phone) updates.phone = req.body.phone;
+    if (req.body.birthday) updates.birthday = req.body.birthday;
+    if (req.body.email) updates.email = req.body.email;
+    
+    if (req.file) {
+      updates.profilePicture = "/uploads/" + req.file.filename;
+    }
+
+    const updatedUser = await Person.findByIdAndUpdate(id, { $set: updates }, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User Not Found" });
+    }
+
+    res.status(200).json(updatedUser);
   } catch (err) {
-    console.log("Error Saving Data");
-    res.status(500).json(err, "Internal Server error");
+    console.error("Error Updating Data", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
