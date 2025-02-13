@@ -10,8 +10,8 @@ import Register from './pages/login_signup/Register'
 import About from './pages/about/About'
 import Contact from './pages/contact/Contact'
 import UserInfo from './pages/Person/UserInfo'
-import CourseTemplate from './pages/course/CourseTemplate'
-import CategoryPage from './pages/course/CourseTemplate'
+import CategoryCoursesPage from "./pages/course/CategoryCoursesPage";
+import CourseDetailsPage from "./pages/course/CourseDetailsPage";
 function App() {
   return (
     <Router>
@@ -22,8 +22,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/user" element={<UserInfo />} />
-        <Route path="/category/:categorySlug" element={<CategoryPage />} />
-        <Route path="/courses/:courseId" element={<CourseTemplate />} />
+        <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
+        <Route path="/course/:courseName" element={<CourseDetailsPage />} />
       </Routes>
     </Router>
   )
