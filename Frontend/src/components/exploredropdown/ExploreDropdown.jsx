@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import api from "../User-management/api";
 
 // ----- Dynamic Data -----
 const categoriesData = [
@@ -34,6 +35,17 @@ const categoriesData = [
     courses: ["C", "C++", "JAVA", "Python", "PHP", "Rust"],
   },
 ];
+const fetchCourseId = async (course) => {
+  try {
+    const response = await api.get(
+      `/courses?name=${course}`
+    );
+    console.log(response);
+    return response.data._id; // Ensure backend returns course._id
+  } catch (error) {
+    console.error("Error fetching course ID:", error);
+  }
+};
 
 // ----- Reusable FlyoutLink Component -----
 // Now with an optional href prop.
@@ -151,10 +163,7 @@ const MPCSubjects = () => {
       >
         Mathematics
       </Link>
-      <Link
-        to="/course/Physics"
-        className="block text-sm hover:underline p-2"
-      >
+      <Link to="/course/Physics" className="block text-sm hover:underline p-2">
         Physics
       </Link>
       <Link
@@ -170,16 +179,10 @@ const MPCSubjects = () => {
 const BiPCSubjects = () => {
   return (
     <div className="w-48 bg-white p-6 shadow-xl absolute">
-      <Link
-        to="/course/Biology"
-        className="block text-sm hover:underline p-2"
-      >
+      <Link to="/course/Biology" className="block text-sm hover:underline p-2">
         Biology
       </Link>
-      <Link
-        to="/course/Physics"
-        className="block text-sm hover:underline p-2"
-      >
+      <Link to="/course/Physics" className="block text-sm hover:underline p-2">
         Physics
       </Link>
       <Link
@@ -222,7 +225,7 @@ const DynamicCategoryFlyout = ({ category }) => {
   // Otherwise, render a dynamic flyout listing courses
   return (
     <div className="w-48 bg-white p-6 shadow-xl absolute">
-      {category.courses.map((course) => (
+      {/* {category.courses.map((course) => (
         <Link
           key={course}
           to={`/course/${encodeURIComponent(course)}`}
@@ -230,6 +233,23 @@ const DynamicCategoryFlyout = ({ category }) => {
         >
           {course}
         </Link>
+      ))} */}
+
+      {category.courses.map((course) => (
+        <Link
+          key={course}
+          to="#"
+          onClick={async (e) => {
+            e.preventDefault();
+            const id = await fetchCourseId(course);
+            if (id) window.location.href = `/courses/${id}`;
+          }}
+          className="block text-sm hover:underline p-2"
+        >
+          {course}
+          
+        </Link>
+        
       ))}
     </div>
   );

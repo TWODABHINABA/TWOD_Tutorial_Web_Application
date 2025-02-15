@@ -23,7 +23,8 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/user" element={<UserInfo />} />
         <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
-        <Route path="/course/:courseName" element={<CourseDetailsPage />} />
+        {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
+        <Route path="/courses/:courseId" element={<CourseDetailsPage />} />
       </Routes>
     </Router>
   )

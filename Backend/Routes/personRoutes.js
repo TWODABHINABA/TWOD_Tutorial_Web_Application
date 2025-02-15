@@ -1,8 +1,8 @@
 const express = require("express");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const multer=require("multer");
-const path=require("path");
+const multer = require("multer");
+const path = require("path");
 const router = express.Router();
 const Person = require("../Models/person");
 const { error } = require("console");
@@ -44,8 +44,7 @@ router.get(
 );
 
 router.get("/auth/callback/success", async (req, res) => {
-  if (!req.user) 
-    res.redirect("/auth/callback/failure");
+  if (!req.user) res.redirect("/auth/callback/failure");
   const a = await req.user;
   console.log(a);
   res.send("successfully Logged in");
@@ -56,24 +55,29 @@ router.get("/auth/callback/failure", (req, res) => {
   res.send("Error");
 });
 
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-      cb(null, "uploads/"); 
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname)); 
-  }
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
 });
 
 const upload = multer({ storage: storage });
 
-
-router.post("/register",upload.single("profilePicture"), async (req, res) => {
+router.post("/register", upload.single("profilePicture"), async (req, res) => {
   const { name, phone, birthday, email, password } = req.body;
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
   try {
-    const newUser = new Person({ name, phone, birthday, email, password, profilePicture });
+    const newUser = new Person({
+      name,
+      phone,
+      birthday,
+      email,
+      password,
+      profilePicture,
+    });
     await newUser.save();
     res.status(200).json({ newUser });
   } catch (error) {
@@ -93,7 +97,7 @@ router.post("/login", async (req, res) => {
     } else if (!isPasswordMatch) {
       return res.status(400).json("Invalid Password");
     }
-    const token = jwt.sign({ id: loginUser._id }, JWT_SECRET, {
+    const token = jwt.sign({ id: loginUser._id ,name:loginUser.name}, JWT_SECRET, {
       expiresIn: "1h",
     });
     res.json({ token });
@@ -118,32 +122,52 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/update/:id", authMiddleware, upload.single("profilePicture"), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updates = {}; 
+// router.get("/:id", authMiddleware, async (req, res) => {
+//   try {
+//     const userid = req.params.id;
+//     const user = await Person.findById(userid).select("-password");
+//     console.log(user);
+//     res.json(user);
+//   } catch (error) {
+//     res.status(500).json(error, "Not Found");
+//   }
+// });
 
-    if (req.body.name) updates.name = req.body.name;
-    if (req.body.phone) updates.phone = req.body.phone;
-    if (req.body.birthday) updates.birthday = req.body.birthday;
-    if (req.body.email) updates.email = req.body.email;
-    
-    if (req.file) {
-      updates.profilePicture = "/uploads/" + req.file.filename;
+router.put(
+  "/update/:id",
+  authMiddleware,
+  upload.single("profilePicture"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = {};
+
+      if (req.body.name) updates.name = req.body.name;
+      if (req.body.phone) updates.phone = req.body.phone;
+      if (req.body.birthday) updates.birthday = req.body.birthday;
+      if (req.body.email) updates.email = req.body.email;
+
+      if (req.file) {
+        updates.profilePicture = "/uploads/" + req.file.filename;
+      }
+
+      const updatedUser = await Person.findByIdAndUpdate(
+        id,
+        { $set: updates },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User Not Found" });
+      }
+
+      res.status(200).json(updatedUser);
+    } catch (err) {
+      console.error("Error Updating Data", err);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-
-    const updatedUser = await Person.findByIdAndUpdate(id, { $set: updates }, { new: true });
-
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User Not Found" });
-    }
-
-    res.status(200).json(updatedUser);
-  } catch (err) {
-    console.error("Error Updating Data", err);
-    res.status(500).json({ error: "Internal Server Error" });
   }
-});
+);
 
 router.delete("/delete/:id", authMiddleware, async (req, res) => {
   try {

@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import api from "../../components/User-management/api";
 import "./UserInfo.css";
 
 const UserInfo = () => {
+  // const { id } = useParams();
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [updatedUser, setUpdatedUser] = useState({});
   const navigate = useNavigate();
 
+  // console.log(id);
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -30,12 +32,30 @@ const UserInfo = () => {
           profilePicture: response.data.profilePicture,
         });
       } catch (err) {
-        setError(err.message);
+        setError("data not come",err.message);
       }
     };
 
     fetchUser();
   }, [navigate]);
+
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const token = localStorage.getItem("token"); 
+  //       const response = await api.get(`/${id}`, {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
+  //       setUser(response.data);
+  //       console.log(response.data);
+  //     } catch (err) {
+  //       setError("User not found or unauthorized");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchUser();
+  // }, [id]);
 
   const handleInputChange = (e) => {
     setUpdatedUser((prev) => ({
