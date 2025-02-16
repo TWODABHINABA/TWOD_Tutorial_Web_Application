@@ -51,6 +51,7 @@ router.post("/:id/feedback",authMiddleware, async (req, res) => {
     const feedback = {
       user: req.user.id,
       name: req.user.name,
+      profilePicture: req.user.profilePicture,
       rating,
       comment,
     };
