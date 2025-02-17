@@ -6,6 +6,7 @@ const authMiddleware = require("../Auth/Authentication");
 router.post("/add", authMiddleware, async (req, res) => {
   try {
     const {
+      courseType,
       name,
       overview,
       description,
@@ -18,6 +19,7 @@ router.post("/add", authMiddleware, async (req, res) => {
     } = req.body;
 
     const newCourse = new Course({
+      courseType,
       name,
       overview,
       description,
@@ -108,6 +110,33 @@ router.get("/courses",authMiddleware,  async (req, res) => {
     res.json(course); // Send the full course object, frontend will extract `_id`
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+
+router.get("/categories", async (req, res) => {
+  try {
+    // Aggregate courses by courseType (category)
+    const categories = await Course.aggregate([
+      {
+        $group: {
+          _id: "$courseType",
+          // type: "$courseType",
+          courses: { $push: "$name" }, // Collect course names
+        },
+      },
+    ]);
+
+    // Format response
+    const formattedCategories = categories.map((cat) => ({
+      name: cat._id,
+      // category: cat.type, // courseType as category name
+      courses: cat.courses, // List of courses under the category
+    }));
+
+    res.json(formattedCategories);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
 

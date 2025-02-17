@@ -23,6 +23,7 @@ const CurriculumSchema = new mongoose.Schema({
 });
 
 const courseSchema = new mongoose.Schema({
+  courseType: { type: String, required: true, unique: true },
   name: { type: String, required: true, unique: true },
   overview: { type: String, required: true },
   description:{type: String},

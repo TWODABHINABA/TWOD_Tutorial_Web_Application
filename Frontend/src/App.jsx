@@ -12,6 +12,7 @@ import Contact from './pages/contact/Contact'
 import UserInfo from './pages/Person/UserInfo'
 import CategoryCoursesPage from "./pages/course/CategoryCoursesPage";
 import CourseDetailsPage from "./pages/course/CourseDetailsPage";
+import { Resource } from './pages/resource/Resource'
 function App() {
   return (
     <Router>
@@ -22,6 +23,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/user" element={<UserInfo />} />
+        <Route path="/resources" element={<Resource/>}/>
         <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
         {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
         <Route path="/courses/:courseId" element={<CourseDetailsPage />} />

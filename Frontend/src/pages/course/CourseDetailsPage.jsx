@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../components/User-management/api";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import { ClipLoader } from "react-spinners";
 
 const CourseDetailsPage = () => {
-  const { name } = useParams();
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [feedback, setFeedback] = useState({ rating: "", comment: "" });
@@ -45,7 +45,13 @@ const CourseDetailsPage = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  // if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={80} color="#3498db"/>
+      </div>
+    );
   if (error) return <p>Error: {error}</p>;
   if (!course) return <p>Course not found</p>;
 
