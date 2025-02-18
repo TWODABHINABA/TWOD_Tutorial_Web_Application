@@ -4,40 +4,64 @@ import { Link, useParams } from "react-router-dom";
 import api from "../../components/User-management/api";
 
 const CategoryCoursesPage = () => {
-  const { categoryName } = useParams();
+  // const { categoryName } = useParams();
   const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
+
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
   // const decodedCategoryName = decodeURIComponent(categoryName);
   // const [isMounted, setIsMounted] = useState(false);
   // const category = categories.find(
   //   (cat) => cat.name.toLowerCase() === decodedCategoryName.toLowerCase()
   // );
 
-  console.log(categoryName);
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        const response = await api.get(`/category/${categoryName}`); 
-        setCourse(response.data);
-        console.log(response.data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (categoryName) {
-      fetchCourse();
+  // console.log(categoryName);
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get("/categories");
+      console.log(response.data); // API call to backend
+      return response.data; // Expected format: [{ name: "Web Development", courses: ["React", "NodeJs"] }]
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      return [];
     }
-  }, [categoryName]);
+  };
+  useEffect(() => {
+    fetchCategories().then(setCategories);
+  }, []);
+
+  const fetchCourseId = async (course) => {
+    try {
+      const response = await api.get(`/courses?name=${course}`);
+      return response.data._id; // Ensure backend returns course._id
+    } catch (error) {
+      console.error("Error fetching course ID:", error);
+    }
+  };
+  // useEffect(() => {
+  //   const fetchCourse = async () => {
+  //     try {
+  //       const response = await api.get(`/category/${categoryName}`);
+  //       setCourse(response.data);
+  //       console.log(response.data);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   if (categoryName) {
+  //     fetchCourse();
+  //   }
+  // }, [categoryName]);
 
   // useEffect(() => {
   //   setIsMounted(true);
   // }, []);
 
-  if (!course) {
+  if (!categories) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate__animated animate__fadeIn">
         <div className="max-w-md text-center">
@@ -61,22 +85,27 @@ const CategoryCoursesPage = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            {course.categoryType} Courses
+            {categories.map((cat) => cat.name)} Courses
           </h1>
           <div className="mt-2 h-1 w-20 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"></div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {course.category.map((module, idx) => (
+          {categories.map((cat, idx) => (
             <div
               key={idx}
               className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${
-                module? "opacity-100" : "opacity-0"
+                cat ? "opacity-100" : "opacity-0"
               } transition-opacity duration-500`}
               style={{ transitionDelay: `${idx * 50}ms` }}
             >
               <Link
-                to={`/course/${encodeURIComponent(course.category)}`}
+                // to={`/courses/${encodeURIComponent(cat.courses)}`}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const id = await fetchCourseId(cat.courses);
+                  if (id) window.location.href = `/courses/${id}`;
+                }}
                 className="block p-6"
               >
                 <div className="flex items-center">
@@ -96,7 +125,7 @@ const CategoryCoursesPage = () => {
                     </svg>
                   </div>
                   <h3 className="ml-4 text-lg font-semibold text-gray-800">
-                    {course}
+                    {categories.map((cat) => cat.name)}
                   </h3>
                 </div>
               </Link>

@@ -37,8 +37,10 @@ import api from "../User-management/api";
 // ];
 const fetchCategories = async () => {
   try {
-    const response = await api.get("/categories"); // API call to backend
+    const response = await api.get("/categories");
+    // console.log(response.data);  // API call to backend
     return response.data; // Expected format: [{ name: "Web Development", courses: ["React", "NodeJs"] }]
+    
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
