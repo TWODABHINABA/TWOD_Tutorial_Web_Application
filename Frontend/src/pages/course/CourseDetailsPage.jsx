@@ -1,4 +1,4 @@
-// src/CourseDetailsPage.jsx
+
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../components/User-management/api";
@@ -12,10 +12,11 @@ const CourseDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  console.log(courseId);
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await api.get(`/courses/${courseId}`); // Corrected URL
+        const response = await api.get(`/courses/${courseId}`); 
         setCourse(response.data);
         console.log(response.data);
       } catch (err) {
@@ -45,7 +46,7 @@ const CourseDetailsPage = () => {
     }
   };
 
-  // if (loading) return <p>Loading...</p>;
+
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen">
@@ -76,7 +77,7 @@ const CourseDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans animate-fade-in">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
-        {/* Course Header */}
+       
         <header className="mb-12">
           <div className="space-y-4">
             <Link
@@ -107,11 +108,11 @@ const CourseDetailsPage = () => {
           </div>
         </header>
 
-        {/* Main Content Grid */}
+        
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column */}
+          
           <div className="lg:col-span-2 space-y-12">
-            {/* Course Description */}
+           
             <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
               <h3 className="text-2xl font-bold mb-4 text-gray-800">
                 Course Overview
@@ -121,7 +122,7 @@ const CourseDetailsPage = () => {
               </p>
             </section>
 
-            {/* Curriculum */}
+            
             <section className="space-y-6">
               <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
               <div className="space-y-4">
@@ -182,7 +183,7 @@ const CourseDetailsPage = () => {
               </div>
             </section>
 
-            {/* Testimonials */}
+            
             {course.feedbacks && (
               <section className="space-y-6">
                 <h3 className="text-3xl font-bold text-gray-800">
@@ -195,13 +196,13 @@ const CourseDetailsPage = () => {
                       className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
                     >
                       <div className="flex items-start space-x-4">
-                        {/* <div className="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center"> */}
+                        
                         <img
                           src={`http://localhost:6001${feedback.profilePicture}`}
                           alt="Profile"
                           className="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center"
                         />
-                        {/* </div> */}
+                        
                         <div>
                           <p className="mt-3 font-medium text-gray-800">
                             {feedback.name}
@@ -232,9 +233,9 @@ const CourseDetailsPage = () => {
             )}
           </div>
 
-          {/* Right Column (Sidebar) */}
+          
           <div className="space-y-8">
-            {/* Enrollment Card */}
+            
             <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
               <div className="space-y-6">
                 <div className="text-center">
@@ -263,7 +264,7 @@ const CourseDetailsPage = () => {
                   </button>
                 </div>
 
-                {/* Quick Facts */}
+                
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <svg
@@ -317,14 +318,14 @@ const CourseDetailsPage = () => {
               </div>
             </div>
 
-            {/* Rating Card */}
+            
             <form
               onSubmit={handleFeedbackSubmit}
               className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
             >
               <h3 className="text-xl font-bold">Leave Your Feedback</h3>
 
-              {/* Star Rating Input */}
+             
               <div className="flex space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -342,7 +343,7 @@ const CourseDetailsPage = () => {
                 ))}
               </div>
 
-              {/* Comment Input */}
+   
               <textarea
                 value={feedback.comment}
                 onChange={(e) =>
@@ -353,7 +354,7 @@ const CourseDetailsPage = () => {
                 required
               ></textarea>
 
-              {/* Submit Button */}
+
               <button
                 type="submit"
                 className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700"

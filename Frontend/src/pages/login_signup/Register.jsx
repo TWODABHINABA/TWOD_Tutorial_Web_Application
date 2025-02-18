@@ -1,23 +1,30 @@
-
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 
 const Register = ({ onClose, initialAction = "Sign Up" }) => {
-
   const [action, setAction] = useState(initialAction);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone,setPhone]=useState("");
-  const [birthday,setBirthday]=useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
+  const [adminExists, setAdminExists] = useState(false);
 
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     setProfilePicture(e.target.files[0]); // Set selected file
   };
+
+
+  useEffect(() => {
+    api.get("/check-admin")
+      .then(response => setAdminExists(response.data.adminExists))
+      .catch(error => console.error("Error checking admin existence", error));
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -28,12 +35,14 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     formData.append("birthday", birthday);
     formData.append("email", email);
     formData.append("password", password);
+    formData.append("role", role);
+
     if (profilePicture) {
       formData.append("profilePicture", profilePicture);
     }
 
     try {
-      const response = await api.post("/register", formData)
+      const response = await api.post("/register", formData);
 
       console.log(response.data);
       alert("User Registration Successful");
@@ -43,12 +52,11 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     }
   };
 
-
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const userData=await api.post("/login", {email, password});
-      const t=localStorage.setItem("token", userData.data.token);
+      const userData = await api.post("/login", { email, password });
+      const t = localStorage.setItem("token", userData.data.token);
       alert("Login Successful");
       navigate("/user");
       // console.log(t);
@@ -150,6 +158,22 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
+
+              {!adminExists && (
+                <div className="mb-2">
+                  <label className="block font-medium">Role</label>
+                  <select
+                    name="role"
+                    value={role}
+                    onChange={(e)=>setRole(e.target.value)}
+                    className="w-full p-2 border rounded"
+                    required
+                  >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              )}
               <input
                 type="file"
                 name="profilePicture"

@@ -8,7 +8,7 @@ module.exports=async(req,res,next)=>{
     try {
         const decoded=jwt.verify(token,process.env.JWT_SECRET);
         // req.user=decoded;
-        const user = await Per.findById(decoded.id).select("name profilePicture");
+        const user = await Per.findById(decoded.id);
         req.user = { id: decoded.id, name: user.name , profilePicture: user.profilePicture};
         next();
     } catch (error) {

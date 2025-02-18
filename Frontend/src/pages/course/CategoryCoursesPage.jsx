@@ -1,21 +1,43 @@
 // src/CategoryCoursesPage.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { categories } from "./data";
+import api from "../../components/User-management/api";
 
 const CategoryCoursesPage = () => {
   const { categoryName } = useParams();
-  const decodedCategoryName = decodeURIComponent(categoryName);
-  const [isMounted, setIsMounted] = useState(false);
-  const category = categories.find(
-    (cat) => cat.name.toLowerCase() === decodedCategoryName.toLowerCase()
-  );
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  // const decodedCategoryName = decodeURIComponent(categoryName);
+  // const [isMounted, setIsMounted] = useState(false);
+  // const category = categories.find(
+  //   (cat) => cat.name.toLowerCase() === decodedCategoryName.toLowerCase()
+  // );
 
+  console.log(categoryName);
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    const fetchCourse = async () => {
+      try {
+        const response = await api.get(`/category/${categoryName}`); 
+        setCourse(response.data);
+        console.log(response.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!category) {
+    if (categoryName) {
+      fetchCourse();
+    }
+  }, [categoryName]);
+
+  // useEffect(() => {
+  //   setIsMounted(true);
+  // }, []);
+
+  if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate__animated animate__fadeIn">
         <div className="max-w-md text-center">
@@ -39,22 +61,22 @@ const CategoryCoursesPage = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            {category.name} Courses
+            {course.categoryType} Courses
           </h1>
           <div className="mt-2 h-1 w-20 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"></div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {category.courses.map((course, idx) => (
+          {course.category.map((module, idx) => (
             <div
               key={idx}
               className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${
-                isMounted ? "opacity-100" : "opacity-0"
+                module? "opacity-100" : "opacity-0"
               } transition-opacity duration-500`}
               style={{ transitionDelay: `${idx * 50}ms` }}
             >
               <Link
-                to={`/course/${encodeURIComponent(course)}`}
+                to={`/course/${encodeURIComponent(course.category)}`}
                 className="block p-6"
               >
                 <div className="flex items-center">

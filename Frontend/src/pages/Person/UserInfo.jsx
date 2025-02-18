@@ -101,6 +101,12 @@ const UserInfo = () => {
 
   if (error) return <p className="error-message">Error: {error}</p>;
 
+
+  const handleLogout=async(e)=>{
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    window.location.href = "/";
+  }
   return (
     <>
       <Navbar />
@@ -126,7 +132,7 @@ const UserInfo = () => {
               <div className="content">
                 <p>Account Settings</p>
                 <p>All Courses</p>
-                <p>Logout</p>
+                <p onClick={handleLogout} className="cursor-pointer text-red-500">Logout</p>
               </div>
             </div>
             <div class= "vertical"></div>

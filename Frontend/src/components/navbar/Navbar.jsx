@@ -27,10 +27,13 @@ const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
   );
 };
 
+const isAuthenticated=localStorage.getItem("token");
+
 const CustomNavbar = () => {
   const navigate = useNavigate();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+
 
   return (
     <>
@@ -103,6 +106,7 @@ const CustomNavbar = () => {
             <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
+            {!isAuthenticated?(<></>):(<AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>)}
           </NavbarCollapse>
         </Navbar>
       </div>

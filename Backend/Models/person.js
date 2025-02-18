@@ -27,6 +27,12 @@ const personSchema = new mongoose.Schema({
   profilePicture: { 
     type: String 
   },
+
+  role: {
+    type: String,
+    enum: ["admin", "user"],
+    default: "user",
+  },
 });
 
 personSchema.pre("save", async function (next) {
@@ -43,6 +49,19 @@ personSchema.pre("save", async function (next) {
     return next(error);
   }
 });
+
+
+personSchema.pre("save", async function (next) {
+  const person = this;
+  if (person.role === "admin") {
+    const existingAdmin = await mongoose.model("person").findOne({ role: "admin" });
+    if (existingAdmin && existingAdmin._id.toString() !== person._id.toString()) {
+      return next(new Error("An admin already exists!"));
+    }
+  }
+  next();
+});
+
 
 personSchema.methods.comparePassword = async function (candidatePassword) {
   try {

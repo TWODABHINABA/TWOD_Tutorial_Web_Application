@@ -14,10 +14,14 @@ router.post("/add", authMiddleware, async (req, res) => {
       price,
       discountPrice,
       duration,
-      instructor,
       level,
     } = req.body;
 
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Only the admin can add courses!" });
+    }
     const newCourse = new Course({
       courseType,
       name,
@@ -27,7 +31,7 @@ router.post("/add", authMiddleware, async (req, res) => {
       price,
       discountPrice,
       duration,
-      instructor,
+      instructor: req.user.name,
       level,
       feedbacks: [],
     });
@@ -41,7 +45,7 @@ router.post("/add", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/:id/feedback",authMiddleware, async (req, res) => {
+router.post("/:id/feedback", authMiddleware, async (req, res) => {
   try {
     const { rating, comment } = req.body;
     const course = await Course.findById(req.params.id);
@@ -69,8 +73,11 @@ router.post("/:id/feedback",authMiddleware, async (req, res) => {
 
 router.get("/courses/:id", authMiddleware, async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id).populate("feedbacks.user", "name");
-    
+    const course = await Course.findById(req.params.id).populate(
+      "feedbacks.user",
+      "name"
+    );
+
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
@@ -81,7 +88,7 @@ router.get("/courses/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/courses",authMiddleware,  async (req, res) => {
+router.get("/courses", authMiddleware, async (req, res) => {
   // try {
   //   const course = await Course.findById(req.params.id).populate("feedbacks.user", "name");;
 
@@ -113,6 +120,42 @@ router.get("/courses",authMiddleware,  async (req, res) => {
   }
 });
 
+router.get("/category", authMiddleware, async (req, res) => {
+  const { courseType } = req.query;
+  if (!courseType) {
+    return res.status(400).json({ message: "Course name is required" });
+  }
+  try {
+    const course = await Course.findOne({ courseType: new RegExp(`^${courseType}$`, "i") });
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    console.log(course);
+    res.json(course);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+  // try {
+  //   const { name } = req.query; // Get course name from query params
+
+  //   if (!name) {
+  //     return res.status(400).json({ message: "Course name is required" });
+  //   }
+
+  //   // Find a course with the given name (case-insensitive)
+  //   const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
+
+  //   if (!course) {
+  //     return res.status(404).json({ message: "Course not found" });
+  //   }
+  //   console.log(course);
+  //   res.json(course); // Send the full course object, frontend will extract `_id`
+  // } catch (error) {
+  //   res.status(500).json({ error: error.message });
+  // }
+});
 
 router.get("/categories", async (req, res) => {
   try {

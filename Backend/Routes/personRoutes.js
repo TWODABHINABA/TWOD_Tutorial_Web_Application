@@ -67,8 +67,22 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post("/register", upload.single("profilePicture"), async (req, res) => {
-  const { name, phone, birthday, email, password } = req.body;
+  const { name, phone, birthday, email, password, role} = req.body;
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
+
+  const existingUser = await Person.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ message: "Email already exists" });
+  }
+
+
+  if (role === "admin") {
+    const adminExists = await Person.findOne({ role: "admin" });
+    if (adminExists) {
+      return res.status(400).json({ message: "An admin already exists!" });
+    }
+  }
+
   try {
     const newUser = new Person({
       name,
@@ -77,11 +91,21 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
       email,
       password,
       profilePicture,
+      role: role || "user",
     });
     await newUser.save();
     res.status(200).json({ newUser });
   } catch (error) {
     res.status(400).json(error, "Internal Server Error");
+  }
+});
+
+router.get("/check-admin", async (req, res) => {
+  try {
+    const admin = await Person.findOne({ role: "admin" });
+    res.json({ adminExists: !!admin });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -97,7 +121,7 @@ router.post("/login", async (req, res) => {
     } else if (!isPasswordMatch) {
       return res.status(400).json("Invalid Password");
     }
-    const token = jwt.sign({ id: loginUser._id }, JWT_SECRET, {
+    const token = jwt.sign({ id: loginUser._id ,role: loginUser.role }, JWT_SECRET, {
       expiresIn: "1h",
     });
     res.json({ token });
