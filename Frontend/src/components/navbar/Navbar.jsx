@@ -3,9 +3,15 @@ import { MdLogin } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { TbSquareRoot } from "react-icons/tb";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Navbar, NavbarBrand, NavbarCollapse, NavbarToggle } from "flowbite-react";
-import Modal from "../../pages/login_signup/Modal"; 
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarCollapse,
+  NavbarToggle,
+} from "flowbite-react";
+import Modal from "../../pages/login_signup/Modal";
 import ExploreDropdown from "../exploredropdown/ExploreDropdown";
+
 const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
   const location = useLocation();
   const isActive = !ignoreActive && location.pathname === to;
@@ -16,7 +22,9 @@ const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
       to={to}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`relative block md:inline-block text-black text-base ${isActive ? "font-bold" : ""} transition-colors duration-300`}
+      className={`relative block md:inline-block text-black text-base ${
+        isActive ? "font-bold" : ""
+      } transition-colors duration-300`}
     >
       {children}
       <span
@@ -26,15 +34,17 @@ const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
     </Link>
   );
 };
-
-const isAuthenticated=localStorage.getItem("token");
+// const token = localStorage.getItem("token");
 
 const CustomNavbar = () => {
   const navigate = useNavigate();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-
+  // const token=localStorage.getItem("token");
+  // const role=localStorage.getItem("role");
+  const isAuthenticated = localStorage.getItem("token");
+  const isRoleAdmin = localStorage.getItem("role");
   return (
     <>
       <div className="m-3 mt-4 top-bar">
@@ -51,7 +61,9 @@ const CustomNavbar = () => {
               </span>
               <span className="text-sm mr-3 flex items-center cursor-default">
                 <span className="icon-envelope mr-2"></span>
-                <span className="hidden lg:inline-block">info@mydomain.com</span>
+                <span className="hidden lg:inline-block">
+                  info@mydomain.com
+                </span>
               </span>
             </div>
             <div className="w-full md:w-1/4 text-right mt-2 md:mt-0">
@@ -67,7 +79,7 @@ const CustomNavbar = () => {
               </button>
               <button
                 onClick={() => setShowRegisterModal(true)}
-                className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0"
+                className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 mr-6"
                 type="button"
               >
                 <span className="icon-person mr-1">
@@ -75,6 +87,13 @@ const CustomNavbar = () => {
                 </span>
                 Register
               </button>
+              {isRoleAdmin  === "admin" && (
+                <AnimatedNavbarLink to="/add-course">
+                  <button className="bg-green-500 text-white p-2 rounded cursor-pointer">
+                    Add Course
+                  </button>
+                </AnimatedNavbarLink>
+              )}
             </div>
           </div>
         </div>
@@ -106,13 +125,20 @@ const CustomNavbar = () => {
             <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
-            {!isAuthenticated?(<></>):(<AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>)}
+            {!isAuthenticated ? (
+              <></>
+            ) : (
+              <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
+            )}
           </NavbarCollapse>
         </Navbar>
       </div>
 
       {showRegisterModal && (
-        <Modal initialAction="Sign Up" onClose={() => setShowRegisterModal(false)} />
+        <Modal
+          initialAction="Sign Up"
+          onClose={() => setShowRegisterModal(false)}
+        />
       )}
       {showLoginModal && (
         <Modal initialAction="Login" onClose={() => setShowLoginModal(false)} />

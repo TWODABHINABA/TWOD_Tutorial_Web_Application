@@ -13,6 +13,7 @@ import UserInfo from './pages/Person/UserInfo'
 import CategoryCoursesPage from "./pages/course/CategoryCoursesPage";
 import CourseDetailsPage from "./pages/course/CourseDetailsPage";
 import { Resource } from './pages/resource/Resource'
+import AddCourse from './pages/addCourse/AddCourse'
 function App() {
   return (
     <Router>
@@ -27,6 +28,7 @@ function App() {
         <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
         {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
         <Route path="/courses/:courseId" element={<CourseDetailsPage />} />
+        <Route path="/add-course" element={<AddCourse />} />
       </Routes>
     </Router>
   )

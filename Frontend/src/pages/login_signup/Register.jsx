@@ -56,10 +56,14 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     e.preventDefault();
     try {
       const userData = await api.post("/login", { email, password });
-      const t = localStorage.setItem("token", userData.data.token);
+      console.log(userData);
+      if (userData.data.token && userData.data.role) {
+        localStorage.setItem("role", userData.data.role);
+        localStorage.setItem("token", userData.data.token); // Save role
+      }
       alert("Login Successful");
       navigate("/user");
-      // console.log(t);
+      
     } catch (error) {
       alert("Error");
     }

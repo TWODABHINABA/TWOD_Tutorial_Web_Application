@@ -85,7 +85,8 @@ const CategoryCoursesPage = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            {categories.map((cat) => cat.name)} Courses
+            {/* {categories.map((cat) => cat.name)}  */}
+            Courses
           </h1>
           <div className="mt-2 h-1 w-20 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"></div>
         </div>
@@ -95,7 +96,7 @@ const CategoryCoursesPage = () => {
             <div
               key={idx}
               className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${
-                cat ? "opacity-100" : "opacity-0"
+                cat? "opacity-100" : "opacity-0"
               } transition-opacity duration-500`}
               style={{ transitionDelay: `${idx * 50}ms` }}
             >
@@ -124,9 +125,9 @@ const CategoryCoursesPage = () => {
                       ></path>
                     </svg>
                   </div>
-                  <h3 className="ml-4 text-lg font-semibold text-gray-800">
-                    {categories.map((cat) => cat.name)}
-                  </h3>
+                  {/* {categories.map((cat,idx) =>(<div className="ml-4 text-lg font-semibold text-gray-800" key={idx} > */}
+                     <h3 className="ml-4 text-lg font-semibold text-gray-800">{cat.name}</h3>
+                  {/* </div>))} */}
                 </div>
               </Link>
             </div>

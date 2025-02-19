@@ -2,8 +2,16 @@ const express = require("express");
 const router = express.Router();
 const Course = require("../Models/course");
 const authMiddleware = require("../Auth/Authentication");
+// const adminAuth=require("../Admin/AdminAuth");
 
 router.post("/add", authMiddleware, async (req, res) => {
+
+  console.log("Role",req.user.role);
+  if (req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({ message: "Only the admin can add courses!" });
+  }
   try {
     const {
       courseType,
@@ -17,11 +25,6 @@ router.post("/add", authMiddleware, async (req, res) => {
       level,
     } = req.body;
 
-    if (req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Only the admin can add courses!" });
-    }
     const newCourse = new Course({
       courseType,
       name,
@@ -40,10 +43,12 @@ router.post("/add", authMiddleware, async (req, res) => {
     res
       .status(201)
       .json({ message: "Course added successfully", course: newCourse });
+    console.log(newCourse);  
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 router.post("/:id/feedback", authMiddleware, async (req, res) => {
   try {
@@ -120,23 +125,23 @@ router.get("/courses", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/category", authMiddleware, async (req, res) => {
-  const { courseType } = req.query;
-  if (!courseType) {
-    return res.status(400).json({ message: "Course name is required" });
-  }
-  try {
-    const course = await Course.findOne({ courseType: new RegExp(`^${courseType}$`, "i") });
+// router.get("/category", authMiddleware, async (req, res) => {
+//   const { courseType } = req.query;
+//   if (!courseType) {
+//     return res.status(400).json({ message: "Course name is required" });
+//   }
+//   try {
+//     const course = await Course.findOne({ courseType: new RegExp(`^${courseType}$`, "i") });
 
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
+//     if (!course) {
+//       return res.status(404).json({ message: "Course not found" });
+//     }
 
-    console.log(course);
-    res.json(course);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+//     console.log(course);
+//     res.json(course);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
   // try {
   //   const { name } = req.query; // Get course name from query params
 
@@ -155,7 +160,7 @@ router.get("/category", authMiddleware, async (req, res) => {
   // } catch (error) {
   //   res.status(500).json({ error: error.message });
   // }
-});
+// });
 
 router.get("/categories", async (req, res) => {
   try {

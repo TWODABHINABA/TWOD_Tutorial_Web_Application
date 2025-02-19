@@ -23,16 +23,16 @@ const CurriculumSchema = new mongoose.Schema({
 });
 
 const courseSchema = new mongoose.Schema({
-  courseType: { type: String, required: true, unique: true },
-  name: { type: String, required: true, unique: true },
+  courseType: { type: String, required: true },
+  name: { type: String, required: true},
   overview: { type: String, required: true },
   description:{type: String},
-  curriculum: [CurriculumSchema], // Array of curriculum sections
+  curriculum: [CurriculumSchema], 
   price: { type: String, required: true },
   discountPrice: { type: String, },
-  duration: String, // e.g., "15 hours"
+  duration: String, 
   instructor: String,
-  level: String, // Beginner, Intermediate, Advanced
+  level: String, 
   feedbacks: [FeedbackSchema],
   createdAt: { type: Date, default: Date.now },
 });
