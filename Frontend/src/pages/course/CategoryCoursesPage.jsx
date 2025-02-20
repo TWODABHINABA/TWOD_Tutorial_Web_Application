@@ -7,6 +7,7 @@ const CategoryCoursesPage = () => {
   // const { categoryName } = useParams();
   const [course, setCourse] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [expandedCategory, setExpandedCategory] = useState(null);
 
   // const [loading, setLoading] = useState(true);
   // const [error, setError] = useState(null);
@@ -31,6 +32,10 @@ const CategoryCoursesPage = () => {
     fetchCategories().then(setCategories);
   }, []);
 
+  const toggleCategory = (category) => {
+    setExpandedCategory(expandedCategory === category ? null : category);
+  };
+
   const fetchCourseId = async (course) => {
     try {
       const response = await api.get(`/courses?name=${course}`);
@@ -39,27 +44,6 @@ const CategoryCoursesPage = () => {
       console.error("Error fetching course ID:", error);
     }
   };
-  // useEffect(() => {
-  //   const fetchCourse = async () => {
-  //     try {
-  //       const response = await api.get(`/category/${categoryName}`);
-  //       setCourse(response.data);
-  //       console.log(response.data);
-  //     } catch (err) {
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   if (categoryName) {
-  //     fetchCourse();
-  //   }
-  // }, [categoryName]);
-
-  // useEffect(() => {
-  //   setIsMounted(true);
-  // }, []);
 
   if (!categories) {
     return (
@@ -96,17 +80,13 @@ const CategoryCoursesPage = () => {
             <div
               key={idx}
               className={`bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${
-                cat? "opacity-100" : "opacity-0"
+                cat ? "opacity-100" : "opacity-0"
               } transition-opacity duration-500`}
               style={{ transitionDelay: `${idx * 50}ms` }}
             >
               <Link
                 // to={`/courses/${encodeURIComponent(cat.courses)}`}
-                onClick={async (e) => {
-                  e.preventDefault();
-                  const id = await fetchCourseId(cat.courses);
-                  if (id) window.location.href = `/courses/${id}`;
-                }}
+
                 className="block p-6"
               >
                 <div className="flex items-center">
@@ -126,8 +106,33 @@ const CategoryCoursesPage = () => {
                     </svg>
                   </div>
                   {/* {categories.map((cat,idx) =>(<div className="ml-4 text-lg font-semibold text-gray-800" key={idx} > */}
-                     <h3 className="ml-4 text-lg font-semibold text-gray-800">{cat.name}</h3>
+                  <h3
+                    className="ml-4 text-lg font-semibold text-gray-800"
+                    onClick={() => toggleCategory(cat.category)}
+                  >
+                    {cat.category}
+                    <span className="ml-2">
+                      {expandedCategory === cat.category ? "▲" : "▼"}
+                    </span>
+                  </h3>
                   {/* </div>))} */}
+                  {expandedCategory === cat.category && (
+                    <ul className="ml-8 mt-2 list-disc">
+                      {cat.courses.map((course, i) => (
+                        <li
+                          key={i}
+                          className="text-gray-1000 "
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            const id = await fetchCourseId(course);
+                            if (id) window.location.href = `/courses/${id}`;
+                          }}
+                        >
+                          {course}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </Link>
             </div>

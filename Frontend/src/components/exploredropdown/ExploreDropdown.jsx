@@ -4,41 +4,11 @@ import { useLocation, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import api from "../User-management/api";
 
-// ----- Dynamic Data -----
-// const categoriesData = [
-//   {
-//     name: "High School",
-//     courses: ["English", "Maths", "Science", "Biology", "Social"],
-//   },
-//   {
-//     name: "Senior Secondary",
-//     courses: ["MPC", "BiPC"],
-//   },
-//   {
-//     name: "Undergraduate",
-//     courses: [
-//       "Bachelor of Technology (B.Tech)",
-//       "Bachelor of Science (BSc)",
-//       "Bachelor of Commerce (BCom)",
-//     ],
-//   },
-//   {
-//     name: "AI & ML",
-//     courses: ["Artificial Intelligence", "Machine Learning", "Deep Learning"],
-//   },
-//   {
-//     name: "Web Development",
-//     courses: ["HTML", "CSS", "JavaScript", "React", "NodeJs", "MongoDB"],
-//   },
-//   {
-//     name: "Programming",
-//     courses: ["C", "C++", "JAVA", "Python", "PHP", "Rust"],
-//   },
-// ];
+
 const fetchCategories = async () => {
   try {
     const response = await api.get("/categories");
-    // console.log(response.data);  // API call to backend
+    console.log(response.data);  // API call to backend
     return response.data; // Expected format: [{ name: "Web Development", courses: ["React", "NodeJs"] }]
     
   } catch (error) {
@@ -195,12 +165,12 @@ const PricingContent = () => {
       {categories.length > 0 ? (
         categories.map((cat) => (
           <FlyoutLink
-            key={cat.name}
-            href={`/category/${encodeURIComponent(cat.name)}`}
+            key={cat.category}
+            href={`/category/${encodeURIComponent(cat.category)}`}
             FlyoutContent={() => <DynamicCategoryFlyout category={cat} />}
             direction="right"
           >
-            {cat.name}
+            {cat.category}
           </FlyoutLink>
         ))
       ) : (

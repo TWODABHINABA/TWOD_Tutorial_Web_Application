@@ -5,25 +5,19 @@ const authMiddleware = require("../Auth/Authentication");
 // const adminAuth=require("../Admin/AdminAuth");
 
 router.post("/add", authMiddleware, async (req, res) => {
-
-  console.log("Role",req.user.role);
+  console.log("Role", req.user.role);
   if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ message: "Only the admin can add courses!" });
+    return res.status(403).json({ message: "Only the admin can add courses!" });
   }
+
   try {
-    const {
-      courseType,
-      name,
-      overview,
-      description,
-      curriculum,
-      price,
-      discountPrice,
-      duration,
-      level,
-    } = req.body;
+    const { courseType, name, overview, description, curriculum, price, discountPrice, duration, level } = req.body;
+
+  
+    // const existingCourse = await Course.findOne({ name, courseType });
+    // if (existingCourse) {
+    //   return res.status(400).json({ message: "Course with this name already exists in this category!" });
+    // }
 
     const newCourse = new Course({
       courseType,
@@ -40,15 +34,12 @@ router.post("/add", authMiddleware, async (req, res) => {
     });
 
     await newCourse.save();
-    res
-      .status(201)
-      .json({ message: "Course added successfully", course: newCourse });
-    console.log(newCourse);  
+    res.status(201).json({ message: "Course added successfully", course: newCourse });
+    console.log(newCourse);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 router.post("/:id/feedback", authMiddleware, async (req, res) => {
   try {
@@ -142,34 +133,32 @@ router.get("/courses", authMiddleware, async (req, res) => {
 //   } catch (error) {
 //     res.status(500).json({ error: error.message });
 //   }
-  // try {
-  //   const { name } = req.query; // Get course name from query params
+// try {
+//   const { name } = req.query; // Get course name from query params
 
-  //   if (!name) {
-  //     return res.status(400).json({ message: "Course name is required" });
-  //   }
+//   if (!name) {
+//     return res.status(400).json({ message: "Course name is required" });
+//   }
 
-  //   // Find a course with the given name (case-insensitive)
-  //   const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
+//   // Find a course with the given name (case-insensitive)
+//   const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
 
-  //   if (!course) {
-  //     return res.status(404).json({ message: "Course not found" });
-  //   }
-  //   console.log(course);
-  //   res.json(course); // Send the full course object, frontend will extract `_id`
-  // } catch (error) {
-  //   res.status(500).json({ error: error.message });
-  // }
+//   if (!course) {
+//     return res.status(404).json({ message: "Course not found" });
+//   }
+//   console.log(course);
+//   res.json(course); // Send the full course object, frontend will extract `_id`
+// } catch (error) {
+//   res.status(500).json({ error: error.message });
+// }
 // });
 
 router.get("/categories", async (req, res) => {
   try {
-    // Aggregate courses by courseType (category)
     const categories = await Course.aggregate([
       {
         $group: {
-          _id: "$courseType",
-          // type: "$courseType",
+          _id: "$courseType", // Group by courseType
           courses: { $push: "$name" }, // Collect course names
         },
       },
@@ -177,9 +166,8 @@ router.get("/categories", async (req, res) => {
 
     // Format response
     const formattedCategories = categories.map((cat) => ({
-      name: cat._id,
-      // category: cat.type, // courseType as category name
-      courses: cat.courses, // List of courses under the category
+      category: cat._id, // courseType as category name
+      courses: cat.courses, // List of courses under this category
     }));
 
     res.json(formattedCategories);
@@ -187,5 +175,4 @@ router.get("/categories", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
-
 module.exports = router;
