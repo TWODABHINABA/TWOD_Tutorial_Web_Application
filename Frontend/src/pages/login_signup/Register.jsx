@@ -66,6 +66,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
       
     } catch (error) {
       alert("Error");
+      navigate("/");
     }
   };
 
