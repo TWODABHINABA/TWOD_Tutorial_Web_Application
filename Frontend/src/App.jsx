@@ -14,6 +14,7 @@ import CategoryCoursesPage from "./pages/course/CategoryCoursesPage";
 import CourseDetailsPage from "./pages/course/CourseDetailsPage";
 import { Resource } from './pages/resource/Resource'
 import AddCourse from './pages/addCourse/AddCourse'
+import Pricing from "./pages/Pricing/Pricing";
 function App() {
   return (
     <Router>
@@ -25,6 +26,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/user" element={<UserInfo />} />
         <Route path="/resources" element={<Resource/>}/>
+        <Route path="/pricing" element={<Pricing/>}/>
         <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
         {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
         <Route path="/courses/:courseId" element={<CourseDetailsPage />} />

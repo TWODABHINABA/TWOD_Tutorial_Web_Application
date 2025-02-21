@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Pricing = () => {
   // Inline styles
@@ -71,6 +72,7 @@ const Pricing = () => {
     backgroundColor: '#0056b3',
   };
 
+  const navigate=useNavigate();
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Course Pricing</h1>
@@ -88,6 +90,7 @@ const Pricing = () => {
             <li style={planFeatureStyle}>Email support</li>
           </ul>
           <button
+            onClick={()=>navigate("/")}
             style={buttonStyle}
             onMouseEnter={e => (e.target.style.backgroundColor = buttonHoverStyle.backgroundColor)}
             onMouseLeave={e => (e.target.style.backgroundColor = '#007bff')}
