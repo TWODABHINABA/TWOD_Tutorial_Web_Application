@@ -1,10 +1,11 @@
 import React from 'react';
 import CustomNavbar from '../../components/navbar/Navbar';
-import Footer from '../../components/footer/Footer';
+import Foote from '../../components/footer/Footer';
 import "./explore.css";
 import course from '../../assets/course.jpg';
 import ShuffleHero from '../../components/SuffleComp';
 import CategorySection from '../../components/categories/CategorySection';
+import CourseCard from '../../components/exploreComponents/CourseCard';
 //Explore
 const Explore = () => {
     return (
@@ -22,18 +23,21 @@ const Explore = () => {
                         </h1>
                     </div>
                 </div>
-                <div className="">
-                    <div className=''>
 
                         <CategorySection />
+                <div className="bg-gray-100 mt-9 pt-5">
+                    <div className='mx-9'>
+
+
                         <h1 className="text-xl md:text-3xl md:ml-2 font-serif">
                             All the skills you need in one place
                         </h1>
-                        <p className='text-gray-600 ml-2'>From mastering essential soft skills to diving into advanced technical subjects, Tutor empowers your career growth.</p>
+                        <p className='text-gray-600 md:ml-2'>From mastering essential soft skills to diving into advanced technical subjects, Tutor empowers your career growth.</p>
+                    <CourseCard />
                     </div>
                 </div>
             </div>
-            <Footer />
+            <Foote />
         </div>
     );
 };
