@@ -1,4 +1,3 @@
-// src/Explore.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -159,6 +158,7 @@ const PricingContent = () => {
   useEffect(() => {
     fetchCategories().then(setCategories);
   }, []);
+
   return (
     <div className="w-64 bg-white p-6 shadow-xl">
       {categories.length > 0 ? (
