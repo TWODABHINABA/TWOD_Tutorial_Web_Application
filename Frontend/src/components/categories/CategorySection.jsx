@@ -1,8 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import api from "../../components/User-management/api"; 
 import './CategorySec.css';
+import { Link } from 'react-router-dom';
+const categories = [
+  { title: "AI & ML", courses: "1,391 courses", icon: "uil uil-atom",slug:"ai-ml" },
+  { title: "ReactJs", courses: "3,234 courses", icon: "uil uil-briefcase",slug:"react-js" },
+  { title: "HTML", courses: "2,391 courses", icon: "uil uil-chart-pie",slug:"html" },
+  { title: "Python", courses: "6,491 courses", icon: "uil uil-circle-layer",slug:"python" },
+  { title: "English", courses: "7,991 courses", icon: "uil uil-camera",slug:"english" },
+  { title: "Maths", courses: "7,291 courses", icon: "uil uil-pen",slug:"maths" },
+  { title: "Science", courses: "931 courses", icon: "uil uil-calculator",slug:"science" },
+  { title: "Social", courses: "9,114 courses", icon: "uil uil-music",slug:"social" },
+];
 
 const containerVariants = {
   hidden: {},
@@ -27,27 +36,6 @@ const cardVariants = {
 };
 
 const CategorySection = () => {
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get("/categories"); 
-        const formattedData = response.data.map((cat) => ({
-          title: cat.category, 
-          courses: `${cat.courses.length} courses`, 
-          slug: cat.category.toLowerCase().replace(/\s+/g, "-"), 
-          icon: "uil uil-folder" 
-        }));
-        setCategories(formattedData);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
   return (
     <section className="untree_co-section">
       <div className="container">
@@ -69,6 +57,7 @@ const CategorySection = () => {
           {categories.map((cat, index) => (
             <motion.div
               key={index}
+              // href="#"
               className="category grid-item"
               variants={cardVariants}
             >
@@ -76,7 +65,7 @@ const CategorySection = () => {
                 to={`/category/${cat.slug}`} 
                 className="category-link"
               >
-                <div className="icon">
+                  <div className="icon">
                   <i className={cat.icon}></i>
                 </div>
                 <div className="content">
@@ -84,6 +73,7 @@ const CategorySection = () => {
                   <span>{cat.courses}</span>
                 </div>
               </Link>
+
             </motion.div>
           ))}
         </motion.div>
