@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import api from "../../components/User-management/api"; 
+import api from "../../components/User-management/api"; // Adjust path as needed
 import './CategorySec.css';
 
 const containerVariants = {
@@ -32,12 +32,12 @@ const CategorySection = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await api.get("/categories"); 
+        const response = await api.get("/categories"); // Fetch from backend
         const formattedData = response.data.map((cat) => ({
           title: cat.category, 
           courses: `${cat.courses.length} courses`, 
           slug: cat.category.toLowerCase().replace(/\s+/g, "-"), 
-          icon: "uil uil-folder" 
+          icon: "uil uil-folder" // Default icon (change as needed)
         }));
         setCategories(formattedData);
       } catch (error) {
