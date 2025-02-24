@@ -160,6 +160,7 @@ const PricingContent = () => {
     fetchCategories().then(setCategories);
   }, []);
 
+  console.log(categories)
   return (
     <div className="w-64 bg-white p-6 shadow-xl">
       {categories.length > 0 ? (

@@ -1,6 +1,6 @@
 import React from 'react';
 import CustomNavbar from '../../components/navbar/Navbar';
-import Foote from '../../components/footer/Footer';
+import Footer from '../../components/footer/Footer';
 import "./explore.css";
 import course from '../../assets/course.jpg';
 import ShuffleHero from '../../components/SuffleComp';
@@ -33,7 +33,7 @@ const Explore = () => {
                     </div>
                 </div>
             </div>
-            <Foote />
+            <Footer />
         </div>
     );
 };
