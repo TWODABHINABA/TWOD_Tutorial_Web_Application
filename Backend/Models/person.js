@@ -12,7 +12,7 @@ const personSchema = new mongoose.Schema({
   },
   birthday: {
     type: Date,
-    unique:true
+    unique: true,
     // required:true
   },
   email: {
@@ -24,8 +24,8 @@ const personSchema = new mongoose.Schema({
     type: String,
     // required:true
   },
-  profilePicture: { 
-    type: String 
+  profilePicture: {
+    type: String,
   },
 
   role: {
@@ -33,6 +33,7 @@ const personSchema = new mongoose.Schema({
     enum: ["admin", "user"],
     default: "user",
   },
+  purchasedCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "course" }],
 });
 
 personSchema.pre("save", async function (next) {
@@ -50,18 +51,21 @@ personSchema.pre("save", async function (next) {
   }
 });
 
-
 personSchema.pre("save", async function (next) {
   const person = this;
   if (person.role === "admin") {
-    const existingAdmin = await mongoose.model("person").findOne({ role: "admin" });
-    if (existingAdmin && existingAdmin._id.toString() !== person._id.toString()) {
+    const existingAdmin = await mongoose
+      .model("person")
+      .findOne({ role: "admin" });
+    if (
+      existingAdmin &&
+      existingAdmin._id.toString() !== person._id.toString()
+    ) {
       return next(new Error("An admin already exists!"));
     }
   }
   next();
 });
-
 
 personSchema.methods.comparePassword = async function (candidatePassword) {
   try {

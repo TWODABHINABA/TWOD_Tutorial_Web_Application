@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../components/User-management/api";
@@ -16,7 +15,7 @@ const CourseDetailsPage = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await api.get(`/courses/${courseId}`); 
+        const response = await api.get(`/courses/${courseId}`);
         setCourse(response.data);
         console.log(response.data);
       } catch (err) {
@@ -46,11 +45,14 @@ const CourseDetailsPage = () => {
     }
   };
 
+ 
+
+  
 
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen">
-        <ClipLoader size={80} color="#3498db"/>
+        <ClipLoader size={80} color="#3498db" />
       </div>
     );
   if (error) return <p>Error: {error}</p>;
@@ -77,7 +79,6 @@ const CourseDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans animate-fade-in">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
-       
         <header className="mb-12">
           <div className="space-y-4">
             <Link
@@ -108,11 +109,8 @@ const CourseDetailsPage = () => {
           </div>
         </header>
 
-        
         <div className="grid lg:grid-cols-3 gap-8">
-          
           <div className="lg:col-span-2 space-y-12">
-           
             <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
               <h3 className="text-2xl font-bold mb-4 text-gray-800">
                 Course Overview
@@ -122,7 +120,6 @@ const CourseDetailsPage = () => {
               </p>
             </section>
 
-            
             <section className="space-y-6">
               <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
               <div className="space-y-4">
@@ -183,7 +180,6 @@ const CourseDetailsPage = () => {
               </div>
             </section>
 
-            
             {course.feedbacks && (
               <section className="space-y-6">
                 <h3 className="text-3xl font-bold text-gray-800">
@@ -196,13 +192,12 @@ const CourseDetailsPage = () => {
                       className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
                     >
                       <div className="flex items-start space-x-4">
-                        
                         <img
                           src={`http://localhost:6001${feedback.profilePicture}`}
                           alt="Profile"
                           className="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center"
                         />
-                        
+
                         <div>
                           <p className="mt-3 font-medium text-gray-800">
                             {feedback.name}
@@ -233,9 +228,7 @@ const CourseDetailsPage = () => {
             )}
           </div>
 
-          
           <div className="space-y-8">
-            
             <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
               <div className="space-y-6">
                 <div className="text-center">
@@ -256,6 +249,7 @@ const CourseDetailsPage = () => {
                   >
                     Enroll Now
                   </button>
+
                   <button
                     onClick={() => alert("Previewing course...")}
                     className="w-full py-4 border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-colors duration-200"
@@ -264,7 +258,6 @@ const CourseDetailsPage = () => {
                   </button>
                 </div>
 
-                
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <svg
@@ -318,14 +311,12 @@ const CourseDetailsPage = () => {
               </div>
             </div>
 
-            
             <form
               onSubmit={handleFeedbackSubmit}
               className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
             >
               <h3 className="text-xl font-bold">Leave Your Feedback</h3>
 
-             
               <div className="flex space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -343,7 +334,6 @@ const CourseDetailsPage = () => {
                 ))}
               </div>
 
-   
               <textarea
                 value={feedback.comment}
                 onChange={(e) =>
@@ -353,7 +343,6 @@ const CourseDetailsPage = () => {
                 className="w-full p-2 border rounded-lg"
                 required
               ></textarea>
-
 
               <button
                 type="submit"
