@@ -84,18 +84,16 @@ router.get("/courses/:id", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/allCourses", authMiddleware, async (req, res) => {
+  try {
+    const courses = await Course.find(); // Fetch all courses from MongoDB
+    res.json(courses); // Send all courses as JSON
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch courses" });
+  }
+});
+
 router.get("/courses", authMiddleware, async (req, res) => {
-  // try {
-  //   const course = await Course.findById(req.params.id).populate("feedbacks.user", "name");;
-
-  //   if (!course) {
-  //     return res.status(404).json({ message: "Course not found" });
-  //   }
-
-  //   res.json(course);
-  // } catch (error) {
-  //   res.status(500).json({ error: error.message });
-  // }
   try {
     const { name } = req.query; // Get course name from query params
 

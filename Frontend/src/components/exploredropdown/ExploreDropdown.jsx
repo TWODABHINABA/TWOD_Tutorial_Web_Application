@@ -151,7 +151,7 @@ const DynamicCategoryFlyout = ({ category }) => {
   );
 };
 
-// ----- Main Dropdown (Displays Categories) -----
+
 const PricingContent = () => {
   const [categories, setCategories] = useState([]);
 

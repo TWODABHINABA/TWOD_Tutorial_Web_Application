@@ -1,54 +1,15 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import api from "../../components/User-management/api"; 
 
-// Static data based on your course schema
-const coursesData = [
-  {
-    courseType: "Pro",
-    name: "React Basics",
-    overview: "Learn the fundamentals of React with hands-on examples.",
-    description: "This course covers component structure, state management, and hooks.",
-    price: "$299",
-    discountPrice: "$249",
-    duration: "4 weeks",
-    instructor: "John Doe",
-    level: "Beginner",
-  },
-  {
-    courseType: "Pro",
-    name: "Node.js Mastery",
-    overview: "Deep dive into server-side development with Node.js.",
-    description: "Understand asynchronous programming, Express, and MongoDB integration.",
-    price: "$399",
-    discountPrice: "$349",
-    duration: "6 weeks",
-    instructor: "Jane Smith",
-    level: "Intermediate",
-  },
-  {
-    courseType: "Basic",
-    name: "JavaScript Essentials",
-    overview: "Master the basics of JavaScript to build dynamic websites.",
-    description: "Covers variables, functions, and DOM manipulation.",
-    price: "$199",
-    discountPrice: "$179",
-    duration: "3 weeks",
-    instructor: "Emily Johnson",
-    level: "Beginner",
-  },
-  {
-    courseType: "Basic",
-    name: "JavaScript Essentials",
-    overview: "Master the basics of JavaScript to build dynamic websites.",
-    description: "Covers variables, functions, and DOM manipulation.",
-    price: "$199",
-    discountPrice: "$179",
-    duration: "3 weeks",
-    instructor: "Emily Johnson",
-    level: "Beginner",
-  },
-  // Add more course objects as needed
-];
+const fetchCourseId = async (courseName) => {
+  try {
+    const response = await api.get(`/courses?name=${encodeURIComponent(courseName)}`);
+    return response.data._id;
+  } catch (error) {
+    console.error("Error fetching course ID:", error);
+  }
+};
 
 const Card = ({ course }) => {
   return (
@@ -56,7 +17,12 @@ const Card = ({ course }) => {
       whileHover="hover"
       transition={{ duration: 0.5, ease: "easeInOut" }}
       variants={{ hover: { scale: 1.03 } }}
-      className="relative h-96 w-80 shrink-0 overflow-hidden rounded-xl bg-white shadow-lg p-8 mr-4"
+      className="relative h-96 w-80 shrink-0 overflow-hidden rounded-xl bg-white shadow-lg p-8 mr-4 cursor-pointer"
+      onClick={async (e) => {
+        e.preventDefault();
+        const id = await fetchCourseId(course.name);
+        if (id) window.location.href = `/courses/${id}`;
+      }}
     >
       <div className="relative z-10 text-[#6366F1]">
         <span className="mb-3 block w-fit rounded-full bg-blue-100 px-3 py-0.5 text-sm font-light text-blue-600">
@@ -71,7 +37,6 @@ const Card = ({ course }) => {
           {course.name}
         </motion.span>
         <p className="text-sm text-gray-700">{course.overview}</p>
-        {/* Pricing Section */}
         <div className="mt-4">
           <span className="text-xl font-bold text-red-500">
             {course.discountPrice}
@@ -80,15 +45,21 @@ const Card = ({ course }) => {
             {course.price}
           </span>
         </div>
-        {/* Duration Section */}
         <p className="mt-2 text-xs text-gray-500">
           Duration: {course.duration}
         </p>
       </div>
-      <button className="absolute bottom-4 left-4 right-4 z-20 rounded bg-[#6366F1] hover:bg-indigo-700 py-2 text-center font-sans font-semibold uppercase text-white transition-colors">
-        Get it now
+      <button
+        onClick={async (e) => {
+          e.preventDefault();
+          const id = await fetchCourseId(course.name);
+          if (id) window.location.href = `/courses/${id}`;
+        }}
+        className="absolute bottom-4 left-4 right-4 z-20 rounded bg-[#6366F1] hover:bg-indigo-700 py-2 text-center font-sans font-semibold uppercase text-white transition-colors"
+      >
+        View Course
       </button>
-      <Background />
+      <Background/>
     </motion.div>
   );
 };
@@ -128,6 +99,22 @@ const Background = () => {
 
 const CardCarousel = () => {
   const carouselRef = useRef(null);
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await api.get("/allCourses", {
+          withCredentials: true,
+        });
+        setCourses(response.data);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   const scrollLeft = () => {
     if (carouselRef.current) {
@@ -143,7 +130,6 @@ const CardCarousel = () => {
 
   return (
     <section className="relative px-4 py-12 bg-gray-100">
-      {/* Left Arrow */}
       <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30">
         <button
           onClick={scrollLeft}
@@ -152,7 +138,6 @@ const CardCarousel = () => {
           &larr;
         </button>
       </div>
-      {/* Right Arrow */}
       <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30">
         <button
           onClick={scrollRight}
@@ -161,17 +146,19 @@ const CardCarousel = () => {
           &rarr;
         </button>
       </div>
-      {/* Cards Container */}
       <div
         ref={carouselRef}
         className="flex overflow-x-auto space-x-4"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {coursesData.map((course, index) => (
-          <Card key={index} course={course} />
-        ))}
+        {courses.length > 0 ? (
+          courses.map((course, index) => <Card key={index} course={course} />)
+        ) : (
+          <p className="text-center text-gray-700 w-full">
+            No courses available
+          </p>
+        )}
       </div>
-      {/* Global CSS to hide scrollbar for WebKit browsers */}
       <style jsx global>{`
         .flex::-webkit-scrollbar {
           display: none;

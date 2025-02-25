@@ -32,12 +32,12 @@ const CategorySection = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await api.get("/categories"); // Fetch from backend
+        const response = await api.get("/categories"); 
         const formattedData = response.data.map((cat) => ({
           title: cat.category, 
           courses: `${cat.courses.length} courses`, 
           slug: cat.category.toLowerCase().replace(/\s+/g, "-"), 
-          icon: "uil uil-folder" // Default icon (change as needed)
+          icon: "uil uil-folder" 
         }));
         setCategories(formattedData);
       } catch (error) {
