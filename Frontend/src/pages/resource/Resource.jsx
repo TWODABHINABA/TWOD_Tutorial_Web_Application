@@ -1,105 +1,110 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FaMoon, FaSun } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import CustomNavbar from '../../components/navbar/Navbar';
+import Footer from '../../components/footer/Footer';
+import { color, motion } from 'framer-motion';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 export const Resource = () => {
-  const [darkMode, setDarkMode] = useState(false);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
+  
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => {
-      document.body.style.overflow = 'auto';
-    }, 1000);
+    AOS.init({ duration: 1000, easing: 'ease-in-out' });
   }, []);
 
-  const resources = [
-    { title: 'React Documentation', description: 'Official React documentation.', link: 'https://reactjs.org/docs/getting-started.html' },
-    { title: 'JavaScript Info', description: 'A modern JavaScript tutorial.', link: 'https://javascript.info/' },
-    { title: 'CSS Tricks', description: 'A website about all things CSS.', link: 'https://css-tricks.com/' },
-    { title: 'FreeCodeCamp', description: 'Learn to code for free.', link: 'https://www.freecodecamp.org/' },
-    { title: 'MDN Web Docs', description: 'Resources for developers, by developers.', link: 'https://developer.mozilla.org/' },
-    { title: 'Python for Beginners', description: 'Comprehensive Python tutorials for all levels.', link: 'https://www.python.org/doc/' },
-    { title: 'Full Stack Open', description: 'Learn full-stack development with modern technologies.', link: 'https://fullstackopen.com/en/' },
-    { title: 'Khan Academy - Math', description: 'Free online courses on mathematics.', link: 'https://www.khanacademy.org/math' },
-    { title: 'Science Daily', description: 'Stay updated with the latest scientific discoveries.', link: 'https://www.sciencedaily.com/' },
-    { title: 'Spring Boot Guide', description: 'Learn Spring Boot for building Java applications.', link: 'https://spring.io/projects/spring-boot' },
-    { title: 'Linux Fundamentals', description: 'Comprehensive guide to Linux operating systems.', link: 'https://linuxfoundation.org/' },
-    { title: 'Java Programming', description: 'Comprehensive Java tutorials and resources.', link: 'https://www.oracle.com/java/' }
+
+  const containerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+    maxWidth: '1200px',
+    margin: 'auto',
+  };
+
+  const contentStyle = { flex: 1, textAlign: 'center', padding: '30px 20px' };
+  const sectionStyle = { marginBottom: '40px' };
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gap: '20px',
+    marginTop: '10px'
+  };
+  const cardStyle = {
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    transition: '0.3s'
+  };
+  const cardHoverStyle = {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)',
+  };
+
+  const courses = [
+    { title: 'Web Development', description: 'Learn HTML, CSS, JavaScript, and React to build modern, responsive web applications. Gain hands-on experience with real-world projects and industry best practices.' },
+    { title: 'Database Management', description: 'Master MongoDB and SQL for handling large-scale data storage, indexing, and retrieval efficiently. Understand database design principles and query optimization.' },
+    { title: 'Backend Development', description: 'Explore Node.js, Express, and Spring Boot for building scalable backend solutions with RESTful APIs, authentication, and microservices architecture.' }
+  ];
+
+  const tutors = [
+    { name: 'John Doe', expertise: 'Web Development', bio: 'John is an experienced frontend developer with 8+ years in React. He has worked with top tech companies and has a deep understanding of modern web frameworks and UI/UX best practices.' },
+    { name: 'Jane Smith', expertise: 'Database Management', bio: 'Jane specializes in database architecture, security, and optimization. She has designed complex database systems for fintech and healthcare industries.' },
+    { name: 'Michael Brown', expertise: 'Backend Development', bio: 'Michael is a backend engineer skilled in APIs, server-side logic, and cloud computing. He has contributed to scalable applications used by millions of users.' }
+  ];
+
+  const plans = [
+    { title: 'Free Plan', price: '$0', features: ['Access to basic courses', '1 course per month', 'Community support', 'Limited course materials'] },
+    { title: 'Basic Plan', price: '$9/month', features: ['Access to all courses', '5 courses per month', 'Email support', 'Downloadable course materials', 'Certificate of completion'] },
+    { title: 'Premium Plan', price: '$99/month', features: ['Unlimited courses', '24/7 priority support', 'Exclusive content', 'Live mentor sessions', 'Advanced projects and certification'] }
   ];
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.9 }} 
-      animate={{ opacity: 1, scale: 1 }} 
-      transition={{ duration: 1 }} 
-      className={`container ${darkMode ? 'dark' : ''}`}
-    >
-      <nav className="navbar">
-        <h1>Resources</h1>
-        <div className="nav-links">
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-          <Link to="/resources">Resources</Link>
-          <Link to="/blog">Blog</Link>
-          <Link to="/contact">Contact</Link>
-          <Link to="/faq">FAQ</Link>
-          <Link to="/support">Support</Link>
-        </div>
-        <button className="dark-mode-toggle" onClick={toggleDarkMode}>
-          {darkMode ? <FaSun /> : <FaMoon />}
-        </button>
-      </nav>
+    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: 'easeOut' }} style={containerStyle}>
+      <CustomNavbar />
+      <div style={contentStyle}>
+        <section style={sectionStyle} data-aos="fade-down">
+          <h2 className="text-5xl font-extrabold text-blue-600">Explore Our Courses</h2>
+          <div style={gridStyle}>
+            {courses.map((course, index) => (
+              <motion.div key={index} style={{ ...cardStyle, ':hover': cardHoverStyle }} data-aos="fade-right">
+                <h3>{course.title}</h3>
+                <p>{course.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
 
-      <div className="content">
-        <h2>Top Learning Resources</h2>
-        <p>Explore high-quality learning materials.</p>
-        <div className="resource-list">
-          {resources.map((resource, index) => (
-            <div key={index} className="resource-item">
-              <h3>{resource.title}</h3>
-              <p>{resource.description}</p>
-              <a href={resource.link} target="_blank" rel="noopener noreferrer">Visit →</a>
-            </div>
-          ))}
-        </div>
+        <section style={sectionStyle} data-aos="fade-down">
+          <h2 className="text-5xl font-extrabold text-blue-600">Meet Our Tutors</h2>
+          <div style={gridStyle}>
+            {tutors.map((tutor, index) => (
+              <motion.div key={index} style={{ ...cardStyle, ':hover': cardHoverStyle }} data-aos="fade-left">
+                <h3>{tutor.name}</h3>
+                <h4>{tutor.expertise}</h4>
+                <p>{tutor.bio}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        <section style={sectionStyle} data-aos="fade-down">
+          <h2 className="text-5xl font-extrabold text-blue-600">Pricing Plans</h2>
+          <div style={gridStyle}>
+            {plans.map((plan, index) => (
+              <motion.div key={index} style={{ ...cardStyle, ':hover': cardHoverStyle }} data-aos="zoom-in">
+                <h3>{plan.title}</h3>
+                <h4>{plan.price}</h4>
+                <ul>
+                  {plan.features.map((feature, i) => (
+                    <li key={i}>{feature}</li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </section>
       </div>
-
-      <footer className="footer">
-        <p>&copy; {new Date().getFullYear()} Learning Resources. All rights reserved.</p>
-        <p>Summary: This page provides a curated list of high-quality learning resources to help individuals enhance their knowledge in various fields.</p>
-        <p><strong>Access Policy:</strong> All resources listed are freely accessible and belong to their respective owners. We do not claim ownership or responsibility for the content provided by third-party links.</p>
-      </footer>
-
-      <style>
-        {`
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: Arial, sans-serif; }
-          .container { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; max-width: 1200px; margin: auto; }
-          .dark { background: #121212; color: #ffffff; }
-          .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #0ea5e9; color: white; width: 100%; border-radius: 8px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
-          .nav-links { display: flex; gap: 15px; }
-          .nav-links a { text-decoration: none; color: white; padding: 5px 10px; }
-          .nav-links a:hover { background: rgba(255, 255, 255, 0.2); border-radius: 5px; }
-          .dark-mode-toggle { background: none; border: none; cursor: pointer; color: white; font-size: 20px; }
-          .content { text-align: center; padding: 100px 20px 40px; width: 100%; }
-          .resource-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; }
-          .resource-item { border: 1px solid #ddd; padding: 20px; border-radius: 10px; background: white; transition: transform 0.3s, box-shadow 0.3s; text-align: left; }
-          .dark .resource-item { background: #1e1e1e; }
-          .resource-item:hover { transform: scale(1.05); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }
-          .footer { text-align: center; padding: 15px; background: #0ea5e9; color: white; width: 100%; border-radius: 8px; margin-top: auto; }
-          @media (max-width: 768px) { 
-            .nav-links { flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: #0ea5e9; padding: 10px; display: none; }
-            .nav-links.active { display: flex; }
-            .navbar { flex-direction: column; }
-            .content { padding-top: 120px; }
-          }
-        `}
-      </style>
+      <Footer />
     </motion.div>
   );
 };
