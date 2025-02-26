@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MdLogin } from "react-icons/md";
+import { MdLogin, MdLogout } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { TbSquareRoot } from "react-icons/tb";
 import { useNavigate, Link, useLocation } from "react-router-dom";
@@ -11,7 +11,11 @@ import {
 } from "flowbite-react";
 import Modal from "../../pages/login_signup/Modal";
 import ExploreDropdown from "../exploredropdown/ExploreDropdown";
-
+const handleLogout = async (e) => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  window.location.href = "/";
+};
 const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
   const location = useLocation();
   const isActive = !ignoreActive && location.pathname === to;
@@ -67,29 +71,42 @@ const CustomNavbar = () => {
               </span>
             </div>
             <div className="w-full md:w-1/4 text-right mt-2 md:mt-0">
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="text-sm mr-6 inline-flex items-center cursor-pointer bg-transparent border-none p-0"
-                type="button"
-              >
-                <span className="icon-lock mr-1">
-                  <MdLogin />
-                </span>
-                Log In
-              </button>
-              <button
-                onClick={() => setShowRegisterModal(true)}
-                className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 mr-6"
-                type="button"
-              >
-                <span className="icon-person mr-1">
-                  <FaUser />
-                </span>
-                Register
-              </button>
-              {isRoleAdmin  === "admin" && (
+              {!isAuthenticated ? (
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-sm mr-6 inline-flex items-center cursor-pointer bg-transparent border-none p-0"
+                  type="button"
+                >
+                  <span className="icon-lock mr-1">
+                    <MdLogin />
+                  </span>
+                  Log In
+                </button>
+              ) : (
+                <button onClick={handleLogout}>
+                  <span className="border-2 border-red-500 text-red-500 px-3 py-2 rounded-md hover:bg-red-500 hover:text-white transition-all flex icon-lock  gap-2 mr-5 mt-4">
+                    <MdLogout className="mt-1"/>
+                    Log Out
+                  </span>
+                </button>
+              )}
+              {!isAuthenticated ? (
+                <button
+                  onClick={() => setShowRegisterModal(true)}
+                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 mr-6"
+                  type="button"
+                >
+                  <span className="icon-person mr-1">
+                    <FaUser />
+                  </span>
+                  Register
+                </button>
+              ) : (
+                <button></button>
+              )}
+              {isRoleAdmin === "admin" && (
                 <AnimatedNavbarLink to="/add-course">
-                  <button className="bg-green-500 text-white p-2 rounded cursor-pointer">
+                  <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
                     Add Course
                   </button>
                 </AnimatedNavbarLink>
