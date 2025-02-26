@@ -15,6 +15,7 @@ const UserInfo = () => {
   // console.log(id);
   useEffect(() => {
     const token = localStorage.getItem("token");
+    console.log("Token in localStorage:", token);
     if (!token) {
       navigate("/");
       return;
@@ -24,15 +25,16 @@ const UserInfo = () => {
       try {
         const response = await api.get("/me");
         setUser(response.data);
+        console.log("User data:", response.data); 
         setUpdatedUser({
           name: response.data.name,
           email: response.data.email,
-          phone: response.data.phone,
-          birthday: response.data.birthday.split("T")[0],
+          phone: response.data.phone || "",
+          birthday: response.data.birthday ? response.data.birthday.split("T")[0] : "",
           profilePicture: response.data.profilePicture,
         });
       } catch (err) {
-        setError("data not come",err.message);
+        setError(`Error fetching user: ${err.message}`);
       }
     };
 
@@ -153,7 +155,7 @@ const UserInfo = () => {
                   <p><strong>Name:</strong>  {user.name}</p>
                   <p><strong>Email:</strong>  {user.email}</p>
                   <p><strong>Phone Number:</strong>  {user.phone}</p>
-                  <p><strong>Date Of Birth:</strong>  {user.birthday.split("T")[0]}</p>
+                  <p><strong>Date Of Birth:</strong> {user.birthday ? user.birthday.split("T")[0] : "Not provided"}</p>
                   <button onClick={() => setIsEditing(true)} className="edit-btn">Edit</button>
                 </>
               )}

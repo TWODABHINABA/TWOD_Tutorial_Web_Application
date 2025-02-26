@@ -15,6 +15,9 @@ import CourseDetailsPage from "./pages/course/CourseDetailsPage";
 import { Resource } from './pages/resource/Resource'
 import AddCourse from './pages/addCourse/AddCourse'
 import Pricing from "./pages/Pricing/Pricing";
+import AuthSuccess from './pages/AuthSuccess'
+import SetPassword from './pages/login_signup/SetPassword'
+import SetPasswordWrapper from './pages/login_signup/SetPasswordWrapper'
 function App() {
   return (
     <Router>
@@ -31,7 +34,11 @@ function App() {
         {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
         <Route path="/courses/:courseId" element={<CourseDetailsPage />} />
         <Route path="/add-course" element={<AddCourse />} />
+        <Route path="/auth-success" element={<AuthSuccess />} />
+        <Route path="/set-password" element={<SetPasswordWrapper />} />
+        
       </Routes>
+      
     </Router>
   )
 }

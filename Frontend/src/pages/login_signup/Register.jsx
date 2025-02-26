@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 
@@ -19,12 +19,36 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     setProfilePicture(e.target.files[0]); // Set selected file
   };
 
-
   useEffect(() => {
-    api.get("/check-admin")
-      .then(response => setAdminExists(response.data.adminExists))
-      .catch(error => console.error("Error checking admin existence", error));
+    api
+      .get("/check-admin")
+      .then((response) => setAdminExists(response.data.adminExists))
+      .catch((error) => console.error("Error checking admin existence", error));
   }, []);
+
+  const handleGoogleLogin = () => {
+    // const password = prompt("Set a password for future logins:");
+    // if (!password) 
+    //   return alert("Password is required!");
+
+    // localStorage.setItem("googlePassword", password); 
+    window.open("http://localhost:6001/auth", "_self");
+  };
+
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     try {
+  //       const response = await api.get("/auth/check");
+  //       if (response.data.authenticated) {
+  //         localStorage.setItem("token", response.data.token);
+  //         navigate("/user");
+  //       }
+  //     } catch (error) {
+  //       console.error("Google authentication check failed", error);
+  //     }
+  //   };
+  //   checkAuth();
+  // }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -63,7 +87,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
       }
       alert("Login Successful");
       navigate("/user");
-      
     } catch (error) {
       alert("Error");
       navigate("/");
@@ -115,6 +138,12 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 Login
               </button>
             </div>
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold transition-colors mb-4"
+            >
+              Login with Google
+            </button>
           </div>
         </form>
       ) : (
@@ -170,7 +199,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   <select
                     name="role"
                     value={role}
-                    onChange={(e)=>setRole(e.target.value)}
+                    onChange={(e) => setRole(e.target.value)}
                     className="w-full p-2 border rounded"
                     required
                   >
@@ -202,6 +231,12 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 Register
               </button>
             </div>
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold transition-colors mb-4"
+            >
+              Sign Up with Google
+            </button>
           </div>
         </form>
       )}

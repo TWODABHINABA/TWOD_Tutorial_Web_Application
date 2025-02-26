@@ -43,12 +43,74 @@ router.get(
   })
 );
 
+
+
+// router.get("/auth/callback/success", async (req, res) => {
+//   if (!req.user) return res.redirect("/auth/callback/failure");
+
+//   const user = req.user;
+//   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+
+//   if (!user.password) {
+//     const userPassword = req.query.password || null;
+
+//     if (userPassword) {
+//       const hashedPassword = await bcrypt.hash(userPassword, 10);
+//       user.password = hashedPassword;
+//       await user.save();
+//     }
+//   }
+
+//   res.redirect(
+//     `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
+//       user.name
+//     )}&email=${encodeURIComponent(user.email)}`
+//   );
+// });
+
+
 router.get("/auth/callback/success", async (req, res) => {
-  if (!req.user) res.redirect("/auth/callback/failure");
-  const a = await req.user;
-  console.log(a);
-  res.send("successfully Logged in");
-  // res.send(a.emails.value);
+  if (!req.user) return res.redirect("/auth/callback/failure");
+
+  const user = req.user;
+  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+
+  if (!user.password) {
+
+    return res.redirect(
+      `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
+    );
+  }
+
+  return res.redirect(
+    `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
+      user.name
+    )}&email=${encodeURIComponent(user.email)}`
+  );
+});
+
+router.post("/set-password", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await Person.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.password = password;
+
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.json({ token, role: user.role });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 router.get("/auth/callback/failure", (req, res) => {
@@ -67,14 +129,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post("/register", upload.single("profilePicture"), async (req, res) => {
-  const { name, phone, birthday, email, password, role} = req.body;
+  const { name, phone, birthday, email, password, role } = req.body;
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
 
   const existingUser = await Person.findOne({ email });
   if (existingUser) {
     return res.status(400).json({ message: "Email already exists" });
   }
-
 
   if (role === "admin") {
     const adminExists = await Person.findOne({ role: "admin" });
@@ -121,10 +182,14 @@ router.post("/login", async (req, res) => {
     } else if (!isPasswordMatch) {
       return res.status(400).json("Invalid Password");
     }
-    const token = jwt.sign({ id: loginUser._id ,role: loginUser.role }, JWT_SECRET, {
-      expiresIn: "1h",
-    });
-    res.json({ token, role:loginUser.role});
+    const token = jwt.sign(
+      { id: loginUser._id, role: loginUser.role },
+      JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.json({ token, role: loginUser.role });
   } catch (error) {
     res.status(500).json({ message: "Error logging in" });
   }
@@ -136,6 +201,10 @@ router.get("/me", authMiddleware, async (req, res) => {
     try {
       const id = req.user.id;
       const user = await Person.findById(id).select("-password");
+      if (!user) {
+        console.log("EROOOOOOOOOOOOOOOOOORORORORORORORORO");
+        return res.status(404).json({ message: "User not found" });
+      }
       console.log(user);
       res.json(user);
     } catch (error) {
