@@ -67,7 +67,7 @@ router.post("/:id/feedback", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/courses/:id", authMiddleware, async (req, res) => {
+router.get("/courses/:id",  async (req, res) => {
   try {
     const course = await Course.findById(req.params.id).populate(
       "feedbacks.user",
@@ -84,7 +84,7 @@ router.get("/courses/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/allCourses", authMiddleware, async (req, res) => {
+router.get("/allCourses",  async (req, res) => {
   try {
     const courses = await Course.find(); // Fetch all courses from MongoDB
     res.json(courses); // Send all courses as JSON
@@ -93,7 +93,7 @@ router.get("/allCourses", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/courses", authMiddleware, async (req, res) => {
+router.get("/courses",  async (req, res) => {
   try {
     const { name } = req.query; // Get course name from query params
 

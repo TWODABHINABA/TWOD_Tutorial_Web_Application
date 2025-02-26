@@ -11,6 +11,7 @@ const CourseDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const token=localStorage.getItem("token");
   console.log(courseId);
   useEffect(() => {
     const fetchCourse = async () => {
@@ -32,6 +33,9 @@ const CourseDetailsPage = () => {
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
+    if(!token){
+      window.location.href("/register");
+    }
     try {
       const response = await api.post(`/${courseId}/feedback`, feedback, {
         headers: {
@@ -242,7 +246,7 @@ const CourseDetailsPage = () => {
                   )}
                 </div>
 
-                <div className="space-y-4">
+                {!token ? (<div></div>):(<div className="space-y-4">
                   <button
                     onClick={() => alert("Enrolling now...")}
                     className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02]"
@@ -256,7 +260,7 @@ const CourseDetailsPage = () => {
                   >
                     Preview Course
                   </button>
-                </div>
+                </div>)}
 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
