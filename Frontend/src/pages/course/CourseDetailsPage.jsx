@@ -48,10 +48,37 @@ const CourseDetailsPage = () => {
       console.error("Error submitting feedback:", err);
     }
   };
-
- 
-
+  const handleEnrollNow = async () => {
+    // const token = localStorage.getItem("token");
+    // if (!token) {
+    //   window.location.href = "/register";
+    //   return;
+    // }
   
+    try {
+      // POST to the enrollment endpoint using the course's _id
+      const response = await api.post(
+        `/${course._id}/enroll`,
+        { price: course.discountPrice || course.price },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const { approval_url } = response.data;
+      if (approval_url) {
+        // Redirect the user to PayPal for payment approval
+        window.location.href = approval_url;
+      } else {
+        alert("Error: No approval URL received from payment gateway.");
+      }
+    } catch (error) {
+      console.error("Error enrolling and redirecting to PayPal:", error);
+      alert("Enrollment failed. Please try again later.");
+    }
+  };
 
   if (loading)
     return (
@@ -60,8 +87,6 @@ const CourseDetailsPage = () => {
       </div>
     );
   if (error) return <p>Error: {error}</p>;
-  if (!course) return <p>Course not found</p>;
-
   if (!course) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
@@ -237,18 +262,18 @@ const CourseDetailsPage = () => {
               <div className="space-y-6">
                 <div className="text-center">
                   <span className="text-4xl font-bold text-gray-800">
-                    {course.price}
+                    ${course.discountPrice}
                   </span>
                   {course.discountPrice && (
-                    <p className="mt-1 text-sm text-green-600">
-                      {course.discountPrice}
+                    <p className="mt-1 text-sm text-red-600 line-through">
+                      ${course.price}
                     </p>
                   )}
                 </div>
 
                 {!token ? (<div></div>):(<div className="space-y-4">
                   <button
-                    onClick={() => alert("Enrolling now...")}
+                    onClick={handleEnrollNow}
                     className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02]"
                   >
                     Enroll Now
