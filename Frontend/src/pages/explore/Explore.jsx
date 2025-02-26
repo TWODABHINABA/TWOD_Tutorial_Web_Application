@@ -6,6 +6,7 @@ import course from '../../assets/course.jpg';
 import ShuffleHero from '../../components/SuffleComp';
 import CategorySection from '../../components/categories/CategorySection';
 import CourseCard from '../../components/exploreComponents/CourseCard';
+import { TextParallaxContents } from '../../components/exploreComponents/TextParallaxContents';
 //Explore
 const Explore = () => {
     return (
@@ -36,6 +37,10 @@ const Explore = () => {
                     <CourseCard />
                     </div>
                 </div>
+                <div className='mt-9'>
+                <TextParallaxContents/>
+                </div>
+                    
             </div>
             <Foote />
         </div>

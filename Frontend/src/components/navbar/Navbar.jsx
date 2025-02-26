@@ -121,7 +121,6 @@ const CustomNavbar = () => {
               <ExploreDropdown />
             </AnimatedNavbarLink>
             <AnimatedNavbarLink to="/resources">Resources</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/services">Services</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
