@@ -18,7 +18,11 @@ import Pricing from "./pages/Pricing/Pricing";
 import AuthSuccess from './pages/AuthSuccess'
 import SetPassword from './pages/login_signup/SetPassword'
 import SetPasswordWrapper from './pages/login_signup/SetPasswordWrapper'
+import SuccessPage from './pages/sucessPage/SuccessPage'
+import CancelPage from './pages/cancelPage/CancelPage'
+import AddTutor from './pages/addTutor/AddTutor'
 function App() {
+  // const isAdmin=localStorage.getItem("role");
   return (
     <Router>
       <Routes>
@@ -36,6 +40,9 @@ function App() {
         <Route path="/add-course" element={<AddCourse />} />
         <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/set-password" element={<SetPasswordWrapper />} />
+        <Route path="/success" element={<SuccessPage />} />
+        <Route path="/cancel" element={<CancelPage />} />
+        <Route path="/add-tutor" element={<AddTutor />} />
         
       </Routes>
       

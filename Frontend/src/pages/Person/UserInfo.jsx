@@ -10,6 +10,7 @@ const UserInfo = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [updatedUser, setUpdatedUser] = useState({});
+  const [purchasedCourses, setPurchasedCourses] = useState([]);
   const navigate = useNavigate();
 
   // console.log(id);
@@ -25,12 +26,14 @@ const UserInfo = () => {
       try {
         const response = await api.get("/me");
         setUser(response.data);
-        console.log("User data:", response.data); 
+        console.log("User data:", response.data);
         setUpdatedUser({
           name: response.data.name,
           email: response.data.email,
           phone: response.data.phone || "",
-          birthday: response.data.birthday ? response.data.birthday.split("T")[0] : "",
+          birthday: response.data.birthday
+            ? response.data.birthday.split("T")[0]
+            : "",
           profilePicture: response.data.profilePicture,
         });
       } catch (err) {
@@ -38,13 +41,24 @@ const UserInfo = () => {
       }
     };
 
+    const fetchPurchasedCourses = async () => {
+      try {
+        const response = await api.get("/user/courses");
+        setPurchasedCourses(response.data);
+      } catch (err) {
+        console.error("Error fetching purchased courses:", err);
+      }
+    };
+
+    fetchPurchasedCourses();
+
     fetchUser();
   }, [navigate]);
 
   // useEffect(() => {
   //   const fetchUser = async () => {
   //     try {
-  //       const token = localStorage.getItem("token"); 
+  //       const token = localStorage.getItem("token");
   //       const response = await api.get(`/${id}`, {
   //         headers: { Authorization: `Bearer ${token}` },
   //       });
@@ -58,6 +72,8 @@ const UserInfo = () => {
   //   };
   //   fetchUser();
   // }, [id]);
+
+  // }, [navigate]);
 
   const handleInputChange = (e) => {
     setUpdatedUser((prev) => ({
@@ -103,12 +119,11 @@ const UserInfo = () => {
 
   if (error) return <p className="error-message">Error: {error}</p>;
 
-
-  const handleLogout=async(e)=>{
+  const handleLogout = async (e) => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     window.location.href = "/";
-  }
+  };
   return (
     <>
       <Navbar />
@@ -127,36 +142,94 @@ const UserInfo = () => {
                   alt="Profile"
                   className="profile-image"
                 />
-                
               ) : (
                 <div className="placeholder">No Image</div>
               )}
               <div className="content">
                 <p>Account Settings</p>
                 <p>All Courses</p>
-                <p onClick={handleLogout} className="cursor-pointer text-red-500">Logout</p>
+                <p
+                  onClick={handleLogout}
+                  className="cursor-pointer text-red-500"
+                >
+                  Logout
+                </p>
               </div>
             </div>
-            <div class= "vertical"></div>
+            <div class="vertical"></div>
             <div className="right">
               {isEditing ? (
                 <form onSubmit={handleUpdate} className="edit-form">
-                  <input type="file" accept="image/*" onChange={handleFileChange} />
-                  <input type="text" name="name" value={updatedUser.name} onChange={handleInputChange} placeholder="Enter your name" />
-                  <input type="email" name="email" value={updatedUser.email} onChange={handleInputChange} placeholder="Enter your email" />
-                  <input type="tel" name="phone" value={updatedUser.phone} onChange={handleInputChange} placeholder="Enter your phone number" />
-                  <input type="text" name="birthday" value={updatedUser.birthday} onChange={handleInputChange} placeholder="Enter the Date Of Birth (YYYY-MMM-DD)"/>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                  <input
+                    type="text"
+                    name="name"
+                    value={updatedUser.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter your name"
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    value={updatedUser.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email"
+                  />
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={updatedUser.phone}
+                    onChange={handleInputChange}
+                    placeholder="Enter your phone number"
+                  />
+                  <input
+                    type="text"
+                    name="birthday"
+                    value={updatedUser.birthday}
+                    onChange={handleInputChange}
+                    placeholder="Enter the Date Of Birth (YYYY-MMM-DD)"
+                  />
 
-                  {isEditing && <button type="submit" className="update-btn">Update</button>}
-                  <button type="button" className="cancel-btn" onClick={() => setIsEditing(false)}>Cancel</button>
+                  {isEditing && (
+                    <button type="submit" className="update-btn">
+                      Update
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="cancel-btn"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </button>
                 </form>
               ) : (
                 <>
-                  <p><strong>Name:</strong>  {user.name}</p>
-                  <p><strong>Email:</strong>  {user.email}</p>
-                  <p><strong>Phone Number:</strong>  {user.phone}</p>
-                  <p><strong>Date Of Birth:</strong> {user.birthday ? user.birthday.split("T")[0] : "Not provided"}</p>
-                  <button onClick={() => setIsEditing(true)} className="edit-btn">Edit</button>
+                  <p>
+                    <strong>Name:</strong> {user.name}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {user.email}
+                  </p>
+                  <p>
+                    <strong>Phone Number:</strong> {user.phone}
+                  </p>
+                  <p>
+                    <strong>Date Of Birth:</strong>{" "}
+                    {user.birthday
+                      ? user.birthday.split("T")[0]
+                      : "Not provided"}
+                  </p>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="edit-btn"
+                  >
+                    Edit
+                  </button>
                 </>
               )}
             </div>
@@ -164,8 +237,28 @@ const UserInfo = () => {
         )}
       </div>
 
-      <div className="course-details">
-        <h2>Course Details</h2>
+      <div className="bg-gray-100 p-6 rounded-lg shadow-md max-w-3xl mx-auto mt-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          Purchased Courses
+        </h2>
+        {purchasedCourses.length > 0 ? (
+          <ul className="space-y-4">
+            {purchasedCourses.map((course) => (
+              <li
+                key={course._id}
+                className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition duration-300 cursor-pointer"
+              >
+                <h3 className="text-lg font-semibold text-gray-700">
+                  {course.name}
+                </h3>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-600 text-center">
+            No purchased courses found.
+          </p>
+        )}
       </div>
     </>
   );

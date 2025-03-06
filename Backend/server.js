@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cors=require("cors");
 const personRoutes = require("./Routes/personRoutes");
 const courseRoutes=require("./Routes/courseRoutes");
+const tutorRoutes=require("./Routes/tutorRoutes");
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
 
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //   }
 // ));
 
+app.use("/",tutorRoutes);
 app.use("/", personRoutes);
 app.use("/",courseRoutes);
 app.listen(process.env.PORT, () =>

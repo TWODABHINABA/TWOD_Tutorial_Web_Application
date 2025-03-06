@@ -3,7 +3,8 @@ const router = express.Router();
 const Course = require("../Models/course");
 const authMiddleware = require("../Auth/Authentication");
 const paypal = require("../config/paypal");
-const Transaction = require("../Models/transaction")
+const Transaction=require("../Models/transaction");
+
 // const adminAuth=require("../Admin/AdminAuth");
 
 router.post("/add", authMiddleware, async (req, res) => {
@@ -166,8 +167,8 @@ router.get("/categories", async (req, res) => {
 
     // Format response
     const formattedCategories = categories.map((cat) => ({
-      category: cat._id, // courseType as category name
-      courses: cat.courses, // List of courses under this category
+      category: cat._id, 
+      courses: cat.courses, 
     }));
 
     res.json(formattedCategories);
@@ -176,41 +177,52 @@ router.get("/categories", async (req, res) => {
   }
 });
 
+// router.get("/courses/:courseId/tutors", async (req, res) => {
+//   try {
+//     const { courseId } = req.params;
+
+//     // Find the course and populate the tutor details
+//     const course = await Course.findById(courseId).populate("tutors", "name email profilePicture");
+
+//     if (!course) {
+//       return res.status(404).json({ message: "Course not found" });
+//     }
+
+//     res.json(course.tutors);
+//   } catch (error) {
+//     console.error("Error fetching tutors:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
+
+
 router.post("/:id/enroll", authMiddleware, async (req, res) => {
   try {
-    // Find the course by its ID
     const course = await Course.findById(req.params.id);
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
-    // const formattedPrice = "25.00";
 
-    // Determine the price: use discountPrice if available, otherwise course.price
     const price = course.discountPrice || course.price;
-    console.log("Raw price:", price);
-    // // Format the price as a string with two decimal places
     const formattedPrice = Number(price).toFixed(2);
 
-    // Log the formatted price for debugging
-    console.log("Formatted Price:", formattedPrice);
-
-    // Create a new transaction record in the database for tracking
+    
     const transaction = new Transaction({
       courseId: course._id,
       user: req.user.id,
       amount: formattedPrice,
-      status: "pending"
+      status: "pending",  
     });
     await transaction.save();
 
-    // Build the PayPal payment object
+    
     const paymentJson = {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        // Use your frontend's URL for redirects
         return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
-        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`
+        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -221,35 +233,27 @@ router.post("/:id/enroll", authMiddleware, async (req, res) => {
                 sku: course._id.toString(),
                 price: formattedPrice,
                 currency: "USD",
-                quantity: 1
-              }
-            ]
+                quantity: 1,
+              },
+            ],
           },
           amount: {
             currency: "USD",
-            total: formattedPrice
+            total: formattedPrice,
           },
-          description: `Enrollment for course ${course.name}.`
-        }
-      ]
+          description: `Enrollment for course ${course.name}.`,
+        },
+      ],
     };
 
-    // Log the complete paymentJson for debugging
     console.log("Payment JSON:", paymentJson);
 
-    // Create the PayPal payment
+    
     paypal.payment.create(paymentJson, (error, payment) => {
       if (error) {
         console.error("Error creating payment:", error);
-        if (error.response && error.response.details) {
-          console.error("Validation details:", error.response.details);
-        }
-        return res.status(500).json({
-          error: "Payment creation failed",
-          details: error.response
-        });
+        return res.status(500).json({ error: "Payment creation failed" });
       } else {
-        // Extract the approval URL from the payment response
         const approvalUrl = payment.links.find(link => link.rel === "approval_url");
         if (approvalUrl) {
           return res.json({ approval_url: approvalUrl.href });
@@ -263,5 +267,144 @@ router.post("/:id/enroll", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+router.get("/success", authMiddleware, async (req, res) => {
+  try {
+    const { paymentId, PayerID, transactionId } = req.query;
+
+    if (!paymentId || !PayerID || !transactionId) {
+      return res.status(400).json({ message: "Missing payment details" });
+    }
+
+    const execute_payment_json = { payer_id: PayerID };
+
+    
+    paypal.payment.execute(paymentId, execute_payment_json, async (error, payment) => {
+      if (error) {
+        console.error("Error executing PayPal payment:", error);
+        return res.status(500).json({ error: "Payment execution failed" });
+      } else {
+        console.log("✅ Payment successful:", payment);
+
+        
+        const transaction = await Transaction.findById(transactionId);
+        if (!transaction) {
+          return res.status(404).json({ message: "Transaction not found" });
+        }
+
+       
+        transaction.status = "completed";
+        await transaction.save();
+
+        const course = await Course.findById(transaction.courseId);
+        if (!course) {
+          return res.status(404).json({ message: "Course not found" });
+        }
+
+        if (!course.students) {
+          course.students = []; 
+        }
+
+  
+        if (!course.students.includes(req.user.id)) {
+          course.students.push(req.user.id);
+          await course.save();
+        }
+
+        
+        return res.json({
+          success: true,
+          message: "Payment verified successfully",
+          transactionId: transaction._id,
+          status: "completed",
+        });
+      }
+    });
+  } catch (err) {
+    console.error("Error processing PayPal success:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.get("/cancel", authMiddleware, async (req, res) => {
+  try {
+    const { transactionId } = req.query;
+
+    if (!transactionId) {
+      return res.status(400).json({ message: "Missing transaction ID" });
+    }
+
+    const transaction = await Transaction.findById(transactionId);
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+
+    transaction.status = "failed";
+    await transaction.save();
+
+
+    return res.redirect(`http://localhost:5173/cancel?transactionId=${transaction._id}`);
+  } catch (err) {
+    console.error("Error processing PayPal cancel:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.get("/status/:transactionId", authMiddleware, async (req, res) => {
+  // try {
+  //   const transaction = await Transaction.findById(req.params.transactionId);
+  //   if (!transaction) {
+  //     return res.status(404).json({ message: "Transaction not found" });
+  //   }
+  //   res.json({ status: transaction.status });
+  // } catch (err) {
+  //   console.error("Error fetching transaction status:", err);
+  //   res.status(500).json({ error: err.message });
+  // }
+  try {
+    const { transactionId } = req.params;
+
+    const transaction = await Transaction.findById(transactionId);
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    res.json({
+      transactionId: transaction._id,
+      status: transaction.status,
+      courseId: transaction.courseId,
+    });
+  } catch (err) {
+    console.error("Error fetching transaction details:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/user/courses", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+
+    const transactions = await Transaction.find({ user: userId, status: "completed" });
+
+    if (!transactions.length) {
+      return res.status(404).json({ message: "No purchased courses found" });
+    }
+
+    
+    const courseIds = transactions.map((t) => t.courseId);
+    const courses = await Course.find({ _id: { $in: courseIds } });
+
+    res.json(courses);
+  } catch (err) {
+    console.error("Error fetching purchased courses:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 module.exports = router;

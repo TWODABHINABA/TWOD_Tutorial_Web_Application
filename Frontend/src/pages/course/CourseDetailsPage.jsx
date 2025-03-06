@@ -10,8 +10,15 @@ const CourseDetailsPage = () => {
   const [feedback, setFeedback] = useState({ rating: "", comment: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const token=localStorage.getItem("token");
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [tutors, setTutors] = useState([]);
+  const [selectedTutor, setSelectedTutor] = useState("");
+  const [availableDates, setAvailableDates] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
+  const [selectedDuration, setSelectedDuration] = useState("1 hr");
+  const token = localStorage.getItem("token");
   console.log(courseId);
   useEffect(() => {
     const fetchCourse = async () => {
@@ -33,7 +40,7 @@ const CourseDetailsPage = () => {
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
-    if(!token){
+    if (!token) {
       window.location.href("/register");
     }
     try {
@@ -48,37 +55,121 @@ const CourseDetailsPage = () => {
       console.error("Error submitting feedback:", err);
     }
   };
-  const handleEnrollNow = async () => {
-    // const token = localStorage.getItem("token");
-    // if (!token) {
-    //   window.location.href = "/register";
-    //   return;
-    // }
-  
+
+
+  const handleEnrollClick = async () => {
     try {
-      // POST to the enrollment endpoint using the course's _id
+      const response = await api.get(`/courses/${courseId}/tutors`);
+      setTutors(response.data);
+      setShowEnrollModal(true);
+    } catch (error) {
+      console.error("Error fetching tutors:", error);
+    }
+  };
+
+  const handleTutorSelection = async (tutorId) => {
+    setSelectedTutor(tutorId);
+    setSelectedDate("");
+    setAvailableDates([]);
+    setSelectedTimeSlot("");
+    setAvailableTimeSlots([]);
+
+    try {
+      const response = await api.get(`/tutors/${tutorId}/available-dates`);
+      setAvailableDates(response.data);
+    } catch (error) {
+      console.error("Error fetching available dates:", error);
+    }
+  };
+
+  const handleDateSelection = async (date) => {
+    setSelectedDate(date);
+    setSelectedTimeSlot("");
+    setAvailableTimeSlots([]);
+
+    try {
+      const response = await api.get(`/tutors/${selectedTutor}/available-slots?date=${date}`);
+      setAvailableTimeSlots(response.data);
+    } catch (error) {
+      console.error("Error fetching time slots:", error);
+    }
+  };
+
+  const handleEnrollNow = async () => {
+    if (!selectedTutor || !selectedDate || !selectedTimeSlot || !selectedDuration) {
+      alert("Please select all options before enrolling.");
+      return;
+    }
+
+    try {
       const response = await api.post(
         `/${course._id}/enroll`,
-        { price: course.discountPrice || course.price },
+        { 
+          tutorId: selectedTutor, 
+          date: selectedDate, 
+          timeSlot: selectedTimeSlot, 
+          duration: selectedDuration,
+          price: course.discountPrice || course.price 
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-  
+
       const { approval_url } = response.data;
       if (approval_url) {
-        // Redirect the user to PayPal for payment approval
         window.location.href = approval_url;
       } else {
-        alert("Error: No approval URL received from payment gateway.");
+        alert("Error: No approval URL received.");
       }
     } catch (error) {
-      console.error("Error enrolling and redirecting to PayPal:", error);
-      alert("Enrollment failed. Please try again later.");
+      console.error("Error enrolling:", error);
+      alert("Enrollment failed. Try again later.");
     }
   };
+  // const handleEnrollClick = async () => {
+  //   try {
+  //     const response = await api.get(`/courses/${courseId}/tutors`);
+  //     setTutors(response.data);
+  //     setShowTutorModal(true);
+  //   } catch (error) {
+  //     console.error("Error fetching tutors:", error);
+  //   }
+  // };
+
+  // const handleEnrollNow = async () => {
+  //   // const token = localStorage.getItem("token");
+  //   // if (!token) {
+  //   //   window.location.href = "/register";
+  //   //   return;
+  //   // }
+
+  //   try {
+  //     // POST to the enrollment endpoint using the course's _id
+  //     const response = await api.post(
+  //       `/${course._id}/enroll`,
+  //       { price: course.discountPrice || course.price },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     const { approval_url } = response.data;
+  //     if (approval_url) {
+  //       // Redirect the user to PayPal for payment approval
+  //       window.location.href = approval_url;
+  //     } else {
+  //       alert("Error: No approval URL received from payment gateway.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error enrolling and redirecting to PayPal:", error);
+  //     alert("Enrollment failed. Please try again later.");
+  //   }
+  // };
 
   if (loading)
     return (
@@ -271,24 +362,28 @@ const CourseDetailsPage = () => {
                   )}
                 </div>
 
-                {!token ? (<div></div>):(<div className="space-y-4">
-                  <button
-                    onClick={handleEnrollNow}
-                    className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02]"
-                  >
-                    Enroll Now
-                  </button>
+                {!token ? (
+                  <div></div>
+                ) : (
+                  <div className="space-y-4">
+                    <button
+                      onClick={handleEnrollClick}
+                      className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02]"
+                    >
+                      Enroll Now
+                    </button>
 
-                  <button
-                    onClick={() => alert("Previewing course...")}
-                    className="w-full py-4 border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-colors duration-200"
-                  >
-                    Preview Course
-                  </button>
-                </div>)}
+                    <button
+                      onClick={() => alert("Previewing course...")}
+                      className="w-full py-4 border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-colors duration-200"
+                    >
+                      Preview Course
+                    </button>
+                  </div>
+                )}
 
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
+                  {/* <div className="flex items-center space-x-3">
                     <svg
                       className="w-5 h-5 text-indigo-600"
                       fill="none"
@@ -303,8 +398,8 @@ const CourseDetailsPage = () => {
                       />
                     </svg>
                     <span className="text-gray-600">{course.duration}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
+                  </div> */}
+                  {/* <div className="flex items-center space-x-3">
                     <svg
                       className="w-5 h-5 text-indigo-600"
                       fill="none"
@@ -319,7 +414,7 @@ const CourseDetailsPage = () => {
                       />
                     </svg>
                     <span className="text-gray-600">{course.instructor}</span>
-                  </div>
+                  </div> */}
                   <div className="flex items-center space-x-3">
                     <svg
                       className="w-5 h-5 text-indigo-600"
@@ -337,6 +432,99 @@ const CourseDetailsPage = () => {
                     <span className="text-gray-600">{course.level}</span>
                   </div>
                 </div>
+
+                {showEnrollModal && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                      <h2 className="text-xl font-bold mb-4">
+                        Enroll in {course.name}
+                      </h2>
+
+                   
+                      <label className="block mb-2">Select Tutor:</label>
+                      <select
+                        className="w-full p-2 border rounded mb-4"
+                        onChange={(e) => handleTutorSelection(e.target.value)}
+                      >
+                        <option value="">No Preference (Auto-Select)</option>
+                        {tutors.map((tutor) => (
+                          <option key={tutor._id} value={tutor._id}>
+                            {tutor.name}
+                          </option>
+                        ))}
+                      </select>
+
+                    
+                      {availableDates.length > 0 && (
+                        <>
+                          <label className="block mb-2">Select Date:</label>
+                          <select
+                            className="w-full p-2 border rounded mb-4"
+                            onChange={(e) =>
+                              handleDateSelection(e.target.value)
+                            }
+                          >
+                            <option value="">Choose a Date</option>
+                            {availableDates.map((date) => (
+                              <option key={date} value={date}>
+                                {date}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      )}
+
+                      {availableTimeSlots.length > 0 && (
+                        <>
+                          <label className="block mb-2">
+                            Select Time Slot:
+                          </label>
+                          <select
+                            className="w-full p-2 border rounded mb-4"
+                            onChange={(e) =>
+                              setSelectedTimeSlot(e.target.value)
+                            }
+                          >
+                            <option value="">Choose a Time Slot</option>
+                            {availableTimeSlots.map((slot) => (
+                              <option key={slot} value={slot}>
+                                {slot}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      )}
+
+                      
+                      <label className="block mb-2">Select Duration:</label>
+                      <select
+                        className="w-full p-2 border rounded mb-4"
+                        value={selectedDuration}
+                        onChange={(e) => setSelectedDuration(e.target.value)}
+                      >
+                        <option value="30 mins">30 mins</option>
+                        <option value="1 hr">1 hr</option>
+                        <option value="2 hrs">2 hrs</option>
+                        <option value="3 hrs">3 hrs</option>
+                      </select>
+
+                      <button
+                        onClick={handleEnrollNow}
+                        className="w-full py-2 bg-green-500 text-white rounded mt-4"
+                      >
+                        Confirm & Pay
+                      </button>
+
+                    
+                      <button
+                        onClick={() => setShowEnrollModal(false)}
+                        className="w-full py-2 mt-2 border border-gray-400 text-gray-600 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
