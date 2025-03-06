@@ -3,6 +3,11 @@ import { Link, useParams } from "react-router-dom";
 import api from "../../components/User-management/api";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import EnrollmentCalendar from "./EnrollmentCalendar";
+import Navbar from '../../components/navbar/Navbar';
+import Footer from '../../components/footer/Footer';
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -197,6 +202,8 @@ const CourseDetailsPage = () => {
   }
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gray-50 font-sans animate-fade-in">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
         <header className="mb-12">
@@ -348,7 +355,7 @@ const CourseDetailsPage = () => {
             )}
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-8 ">
             <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
               <div className="space-y-6">
                 <div className="text-center">
@@ -434,97 +441,92 @@ const CourseDetailsPage = () => {
                 </div>
 
                 {showEnrollModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                      <h2 className="text-xl font-bold mb-4">
-                        Enroll in {course.name}
-                      </h2>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
+      {/* Course Name at the Top */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Course Name
+        </label>
+        <input
+          type="text"
+          value={course.name}
+          disabled
+          className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+        />
+      </div>
 
-                   
-                      <label className="block mb-2">Select Tutor:</label>
-                      <select
-                        className="w-full p-2 border rounded mb-4"
-                        onChange={(e) => handleTutorSelection(e.target.value)}
-                      >
-                        <option value="">No Preference (Auto-Select)</option>
-                        {tutors.map((tutor) => (
-                          <option key={tutor._id} value={tutor._id}>
-                            {tutor.name}
-                          </option>
-                        ))}
-                      </select>
+      <div className="flex">
+        {/* Left Column – Enrollment Options */}
+        <div className="w-1/2 pr-4">
+          <label className="block mb-2">Select Tutor:</label>
+          <select
+            className="w-full p-2 border rounded mb-4"
+            onChange={(e) => handleTutorSelection(e.target.value)}
+          >
+            <option value="">No Preference (Auto-Select)</option>
+            {tutors.map((tutor) => (
+              <option key={tutor._id} value={tutor._id}>
+                {tutor.name}
+              </option>
+            ))}
+          </select>
 
-                    
-                      {availableDates.length > 0 && (
-                        <>
-                          <label className="block mb-2">Select Date:</label>
-                          <select
-                            className="w-full p-2 border rounded mb-4"
-                            onChange={(e) =>
-                              handleDateSelection(e.target.value)
-                            }
-                          >
-                            <option value="">Choose a Date</option>
-                            {availableDates.map((date) => (
-                              <option key={date} value={date}>
-                                {date}
-                              </option>
-                            ))}
-                          </select>
-                        </>
-                      )}
+          {availableTimeSlots.length > 0 && (
+            <>
+              <label className="block mb-2">Select Time Slot:</label>
+              <select
+                className="w-full p-2 border rounded mb-4"
+                onChange={(e) => setSelectedTimeSlot(e.target.value)}
+              >
+                <option value="">Choose a Time Slot</option>
+                {availableTimeSlots.map((slot) => (
+                  <option key={slot} value={slot}>
+                    {slot}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
 
-                      {availableTimeSlots.length > 0 && (
-                        <>
-                          <label className="block mb-2">
-                            Select Time Slot:
-                          </label>
-                          <select
-                            className="w-full p-2 border rounded mb-4"
-                            onChange={(e) =>
-                              setSelectedTimeSlot(e.target.value)
-                            }
-                          >
-                            <option value="">Choose a Time Slot</option>
-                            {availableTimeSlots.map((slot) => (
-                              <option key={slot} value={slot}>
-                                {slot}
-                              </option>
-                            ))}
-                          </select>
-                        </>
-                      )}
+          <label className="block mb-2">Select Duration:</label>
+          <select
+            className="w-full p-2 border rounded mb-4"
+            value={selectedDuration}
+            onChange={(e) => setSelectedDuration(e.target.value)}
+          >
+            <option value="30 mins">30 mins</option>
+            <option value="1 hr">1 hr</option>
+            <option value="2 hrs">2 hrs</option>
+            <option value="3 hrs">3 hrs</option>
+          </select>
 
-                      
-                      <label className="block mb-2">Select Duration:</label>
-                      <select
-                        className="w-full p-2 border rounded mb-4"
-                        value={selectedDuration}
-                        onChange={(e) => setSelectedDuration(e.target.value)}
-                      >
-                        <option value="30 mins">30 mins</option>
-                        <option value="1 hr">1 hr</option>
-                        <option value="2 hrs">2 hrs</option>
-                        <option value="3 hrs">3 hrs</option>
-                      </select>
+          <button
+            onClick={handleEnrollNow}
+            className="w-full py-2 bg-green-500 text-white rounded mt-4"
+          >
+            Confirm &amp; Pay
+          </button>
+          <button
+            onClick={() => setShowEnrollModal(false)}
+            className="w-full py-2 mt-2 border border-gray-400 text-gray-600 rounded"
+          >
+            Cancel
+          </button>
+        </div>
 
-                      <button
-                        onClick={handleEnrollNow}
-                        className="w-full py-2 bg-green-500 text-white rounded mt-4"
-                      >
-                        Confirm & Pay
-                      </button>
-
-                    
-                      <button
-                        onClick={() => setShowEnrollModal(false)}
-                        className="w-full py-2 mt-2 border border-gray-400 text-gray-600 rounded"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
+        {/* Right Column – Big Calendar */}
+        <div className="w-1/2 pl-4 border-l">
+          <EnrollmentCalendar
+            availableDates={availableDates}
+            selectedDate={selectedDate}
+            onChange={(dateString) => handleDateSelection(dateString)}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+)}
               </div>
             </div>
 
@@ -572,6 +574,8 @@ const CourseDetailsPage = () => {
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 
