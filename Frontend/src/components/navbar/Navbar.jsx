@@ -112,13 +112,13 @@ const CustomNavbar = () => {
                 </AnimatedNavbarLink>
                 
               )}
-              {isRoleAdmin === "admin" && (
+              {/* {isRoleAdmin === "admin" && (
                 <AnimatedNavbarLink to="/add-tutor">
                   <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
                     Add Tutor
                   </button>
                 </AnimatedNavbarLink>
-              )}
+              )} */}
             </div>
           </div>
         </div>
@@ -154,6 +154,9 @@ const CustomNavbar = () => {
             ) : (
               <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
             )}
+           {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>):(<></>)}
+
+           {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>):(<></>)}
           </NavbarCollapse>
         </Navbar>
       </div>

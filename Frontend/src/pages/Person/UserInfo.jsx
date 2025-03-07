@@ -5,7 +5,6 @@ import api from "../../components/User-management/api";
 import "./UserInfo.css";
 
 const UserInfo = () => {
-  // const { id } = useParams();
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -13,7 +12,8 @@ const UserInfo = () => {
   const [purchasedCourses, setPurchasedCourses] = useState([]);
   const navigate = useNavigate();
 
-  // console.log(id);
+  const isAdmin=localStorage.getItem("role");
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     console.log("Token in localStorage:", token);
@@ -42,6 +42,9 @@ const UserInfo = () => {
     };
 
     const fetchPurchasedCourses = async () => {
+      if(isAdmin==="admin"){
+        setPurchasedCourses("");
+      }
       try {
         const response = await api.get("/user/courses");
         setPurchasedCourses(response.data);
@@ -55,25 +58,7 @@ const UserInfo = () => {
     fetchUser();
   }, [navigate]);
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       const token = localStorage.getItem("token");
-  //       const response = await api.get(`/${id}`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //       setUser(response.data);
-  //       console.log(response.data);
-  //     } catch (err) {
-  //       setError("User not found or unauthorized");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchUser();
-  // }, [id]);
 
-  // }, [navigate]);
 
   const handleInputChange = (e) => {
     setUpdatedUser((prev) => ({
@@ -237,7 +222,7 @@ const UserInfo = () => {
         )}
       </div>
 
-      <div className="bg-gray-100 p-6 rounded-lg shadow-md max-w-3xl mx-auto mt-6">
+      {isAdmin==="admin" ?(<div></div>):(<div className="bg-gray-100 p-6 rounded-lg shadow-md max-w-3xl mx-auto mt-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
           Purchased Courses
         </h2>
@@ -259,7 +244,7 @@ const UserInfo = () => {
             No purchased courses found.
           </p>
         )}
-      </div>
+      </div>)}
     </>
   );
 };

@@ -5,9 +5,9 @@ const multer = require("multer");
 const authMiddleware = require("../Auth/Authentication");
 
 const storage = multer.diskStorage({
-  destination: "uploads/", 
+  destination: "uploads/",
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); 
+    cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
@@ -40,12 +40,11 @@ router.post(
   }
 );
 
-
 router.use("/uploads", express.static("uploads"));
 
 router.get("/courses/:courseId/tutors", async (req, res) => {
   try {
-    const tutors = await Tutor.find(); 
+    const tutors = await Tutor.find();
     res.json(tutors);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch tutors" });
@@ -54,58 +53,94 @@ router.get("/courses/:courseId/tutors", async (req, res) => {
 
 router.get("/tutors", async (req, res) => {
   try {
-    const tutors = await Tutor.find(); 
+    const tutors = await Tutor.find();
     res.json(tutors);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch tutors" });
   }
 });
 
-router.post(
-  "/tutors/:tutorId/availability",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const { tutorId } = req.params;
-      const { date, timeSlots } = req.body;
+router.post("/tutors/:tutorId/availability", async (req, res) => {
+  try {
+    const { availability } = req.body;
 
-      if (!date || !timeSlots || !Array.isArray(timeSlots)) {
-        return res
-          .status(400)
-          .json({ error: "Date and valid time slots are required" });
-      }
+    if (!Array.isArray(availability) || availability.length === 0) {
+      return res.status(400).json({ error: "Availability must be a non-empty array" });
+    }
 
-    //   const tutor = await Tutor.findById(tutorId);
-    //   if (!tutor) {
-    //     return res.status(404).json({ error: "Tutor not found" });
-    //   }
-    
-        const tutor = await Tutor.findById(tutorId);
-        if (!tutor) {
-          return res.status(404).json({ error: "Tutor not found" });
-        }
-    
-        res.json(tutor.availability);
+    const tutor = await Tutor.findById(req.params.tutorId);
+    if (!tutor) {
+      return res.status(404).json({ error: "Tutor not found" });
+    }
 
-      const existingDate = tutor.availability.find((d) => d.date === date);
+    console.log("📥 Incoming Availability Data:", availability);
+
+    availability.forEach(({ date, timeSlots }) => {
+      const existingDate = tutor.availability.find((entry) => entry.date === date);
       if (existingDate) {
         existingDate.timeSlots = timeSlots; 
       } else {
         tutor.availability.push({ date, timeSlots });
       }
+    });
 
-      await tutor.save();
-      res
-        .status(200)
-        .json({ message: "Availability updated successfully", tutor });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update availability" });
-    }
+    await tutor.save();
+
+
+    return res.json({ message: "Availability updated successfully", availability: tutor.availability });
+
+  } catch (error) {
+    console.error("❌ Error updating availability:", error);
+    return res.status(500).json({ error: "Failed to update availability" });
   }
-);
-router.get("/tutors/:tutorId/availability", async (req, res) => {
-  
 });
+// router.post("/tutors/:tutorId/availability", async (req, res) => {
+//   try {
+//     const { dates, timeSlots } = req.body;
+
+//     if (!Array.isArray(dates) || !Array.isArray(timeSlots) || dates.length === 0 || timeSlots.length === 0) {
+//       return res.status(400).json({ error: "Dates and time slots must be arrays and cannot be empty" });
+//     }
+
+//     const tutor = await Tutor.findById(req.params.tutorId);
+//     if (!tutor) {
+//       console.error("Tutor not found:", req.params.tutorId);
+//       return res.status(404).json({ error: "Tutor not found" });
+//     }
+
+//     if (!tutor.availability) {
+//       tutor.availability = [];
+//     }
+
+//     console.log("Before Update:", tutor.availability);
+
+//     // ✅ Ensure each date has its own time slots
+//     const newAvailability = dates.map(date => ({
+//       date,
+//       timeSlots
+//     }));
+
+//     // ✅ Check if a date already exists, update time slots instead of duplicating
+//     newAvailability.forEach(newDate => {
+//       const existingDate = tutor.availability.find(avail => avail.date === newDate.date);
+//       if (existingDate) {
+//         existingDate.timeSlots = [...new Set([...existingDate.timeSlots, ...newDate.timeSlots])]; // Merge and remove duplicates
+//       } else {
+//         tutor.availability.push(newDate);
+//       }
+//     });
+
+//     await tutor.save();
+
+//     console.log("After Update:", tutor.availability);
+
+//     return res.json({ message: "Availability updated successfully", availability: tutor.availability });
+
+//   } catch (error) {
+//     console.error("Error updating availability:", error.message);
+//     return res.status(500).json({ error: "Failed to update availability", details: error.message });
+//   }
+// });
 
 
 router.get("/tutors/:tutorId/available-dates", async (req, res) => {
@@ -123,7 +158,6 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch available dates" });
   }
 });
-
 
 router.get("/tutors/:tutorId/available-slots", async (req, res) => {
   try {

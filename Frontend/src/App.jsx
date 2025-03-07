@@ -21,6 +21,7 @@ import SetPasswordWrapper from './pages/login_signup/SetPasswordWrapper'
 import SuccessPage from './pages/sucessPage/SuccessPage'
 import CancelPage from './pages/cancelPage/CancelPage'
 import AddTutor from './pages/addTutor/AddTutor'
+import AddAvailability from './pages/addAvailibility/AddAvailability'
 function App() {
   // const isAdmin=localStorage.getItem("role");
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/cancel" element={<CancelPage />} />
         <Route path="/add-tutor" element={<AddTutor />} />
+        <Route path="/add-availability" element={<AddAvailability />} />
         
       </Routes>
       
