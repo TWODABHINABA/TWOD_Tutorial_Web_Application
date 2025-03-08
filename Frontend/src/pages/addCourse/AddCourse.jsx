@@ -15,6 +15,8 @@ const AddCourse = () => {
     level: "",
     curriculum: [],
   });
+  const [courseTypeImage, setCourseTypeImage] = useState(null);
+  const [nameImage, setNameImage] = useState(null);
 
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
@@ -42,6 +44,14 @@ const AddCourse = () => {
     const updatedCurriculum = [...formData.curriculum];
     updatedCurriculum[sectionIndex].lessons[lessonIndex][field] = value;
     setFormData({ ...formData, curriculum: updatedCurriculum });
+  };
+  const handleFileChange = (e, type) => {
+    if (type === "courseTypeImage") {
+      setCourseTypeImage(e.target.files[0]);
+      setFormData(...formData,courseTypeImage)
+    } else if (type === "nameImage") {
+      setNameImage(e.target.files[0]);
+    }
   };
 
   
@@ -84,6 +94,16 @@ const AddCourse = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    // const formDataToSend = new FormData();
+    // Object.keys(formData).forEach((key) => {
+    //   formDataToSend.append(key, formData[key]);
+    // });
+    // if (courseTypeImage) {
+    //   formDataToSend.append("courseTypeImage", courseTypeImage);
+    // }
+    // if (nameImage) {
+    //   formDataToSend.append("nameImage", nameImage);
+    // }
 
     try {
       const response = await api.post("/add", formData, {
@@ -122,6 +142,14 @@ const AddCourse = () => {
           required
         />
         <input
+          type="file"
+          placeholder="Enter the CourseTypeImage"
+          accept="image/*"
+          onChange={(e) => handleFileChange(e, "courseTypeImage")}
+          className="w-full p-3 border rounded-lg"
+        />
+
+        <input
           type="text"
           name="name"
           placeholder="Course Name"
@@ -130,6 +158,14 @@ const AddCourse = () => {
           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
           required
         />
+        <input
+          type="file"
+          accept="image/*"
+          placeholder="Enter the CourseNameImage"
+          onChange={(e) => handleFileChange(e, "nameImage")}
+          className="w-full p-3 border rounded-lg"
+        />
+
         <textarea
           name="overview"
           placeholder="Overview"
@@ -281,141 +317,6 @@ const AddCourse = () => {
         </button>
       </form>
     </div>
-    // <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-    //   <h2 className="text-2xl font-bold mb-4">Add New Course</h2>
-
-    //   {error && <p className="text-red-500">{error}</p>}
-
-    //   <form onSubmit={handleSubmit}>
-    //     <input
-    //       type="text"
-    //       name="courseType"
-    //       placeholder="Course Type"
-    //       value={formData.courseType}
-    //       onChange={handleChange}
-    //       className="w-full p-2 border mb-2"
-    //       required
-    //     />
-    //     <input
-    //       type="text"
-    //       name="name"
-    //       placeholder="Course Name"
-    //       value={formData.name}
-    //       onChange={handleChange}
-    //       className="w-full p-2 border mb-2"
-    //       required
-    //     />
-    //     <textarea
-    //       name="overview"
-    //       placeholder="Overview"
-    //       value={formData.overview}
-    //       onChange={handleChange}
-    //       className="w-full p-2 border mb-2"
-    //       required
-    //     />
-    //     <textarea
-    //       name="description"
-    //       placeholder="Description"
-    //       value={formData.description}
-    //       onChange={handleChange}
-    //       className="w-full p-2 border mb-2"
-    //     />
-    //     <input
-    //       type="text"
-    //       name="price"
-    //       placeholder="Price"
-    //       value={formData.price}
-    //       onChange={handleChange}
-    //       className="w-full p-2 border mb-2"
-    //       required
-    //     />
-    //     <input
-    //       type="text"
-    //       name="discountPrice"
-    //       placeholder="Discount Price"
-    //       value={formData.discountPrice}
-    //       onChange={handleChange}
-    //       className="w-full p-2 border mb-2"
-    //     />
-    //     <input
-    //       type="text"
-    //       name="duration"
-    //       placeholder="Duration (e.g., 15 hours)"
-    //       value={formData.duration}
-    //       onChange={handleChange}
-    //       className="w-full p-2 border mb-2"
-    //     />
-    //     <input
-    //       type="text"
-    //       name="level"
-    //       placeholder="Level (Beginner, Intermediate, Advanced)"
-    //       value={formData.level}
-    //       onChange={handleChange}
-    //       className="w-full p-2 border mb-2"
-    //     />
-
-    //     {/* Curriculum Sections */}
-    //     <h3 className="text-lg font-semibold mt-4">Curriculum</h3>
-    //     {formData.curriculum.map((section, sectionIndex) => (
-    //       <div key={sectionIndex} className="mb-4 p-3 border rounded">
-    //         <input
-    //           type="text"
-    //           placeholder="Section Title"
-    //           value={section.sectionTitle}
-    //           onChange={(e) => handleCurriculumChange(sectionIndex, "sectionTitle", e.target.value)}
-    //           className="w-full p-2 border mb-2"
-    //         />
-
-    //         {/* Lessons */}
-    //         {section.lessons.map((lesson, lessonIndex) => (
-    //           <div key={lessonIndex} className="p-2 border rounded mt-2">
-    //             <input
-    //               type="text"
-    //               placeholder="Lesson Title"
-    //               value={lesson.title}
-    //               onChange={(e) =>
-    //                 handleLessonChange(sectionIndex, lessonIndex, "title", e.target.value)
-    //               }
-    //               className="w-full p-2 border mb-2"
-    //             />
-    //             <input
-    //               type="text"
-    //               placeholder="Lesson Duration (e.g., 10 mins)"
-    //               value={lesson.duration}
-    //               onChange={(e) =>
-    //                 handleLessonChange(sectionIndex, lessonIndex, "duration", e.target.value)
-    //               }
-    //               className="w-full p-2 border mb-2"
-    //             />
-    //           </div>
-    //         ))}
-
-    //         <button
-    //           type="button"
-    //           onClick={() => addLesson(sectionIndex)}
-    //           className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
-    //         >
-    //           + Add Lesson
-    //         </button>
-    //       </div>
-    //     ))}
-
-    //     <button
-    //       type="button"
-    //       onClick={addCurriculumSection}
-    //       className="bg-gray-500 text-white px-4 py-2 rounded mt-4 block"
-    //     >
-    //       + Add Section
-    //     </button>
-
-    //     <button
-    //       type="submit"
-    //       className="bg-green-600 text-white px-6 py-2 rounded mt-4 block"
-    //     >
-    //       Add Course
-    //     </button>
-    //   </form>
-    // </div>
   );
 };
 

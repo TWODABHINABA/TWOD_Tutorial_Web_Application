@@ -24,7 +24,9 @@ const CurriculumSchema = new mongoose.Schema({
 
 const courseSchema = new mongoose.Schema({
   courseType: { type: String},
+  courseTypeImage: { type: String },
   name: { type: String, required: true},
+  nameImage: { type: String },
   overview: { type: String, required: true },
   description:{type: String},
   curriculum: [CurriculumSchema], 

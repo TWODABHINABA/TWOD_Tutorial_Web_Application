@@ -242,17 +242,13 @@ const AddTutor = () => {
       const response = await api.post("/tutors", formData);
       setMessage(response.data.message);
       setMessageType("success");
-      // setNewTutorId(response.data.tutorId);
-      setShowPopup(true); // Show the popup after adding tutor
+      navigate("/add-availability");
     } catch (error) {
       setMessage(error.response?.data?.error || "Failed to add tutor");
       setMessageType("error");
     }
   };
 
-  const handleGoToAvailability = () => {
-    navigate("/add-availability");
-  };
 
   return (
     <>
@@ -304,26 +300,29 @@ const AddTutor = () => {
           <button
             type="submit"
             className="bg-blue-500 text-white p-2 rounded w-full"
+            onClick={()=>{if(messageType==="success")
+              navigate("/add-availability");
+            }}
           >
             Add Tutor
           </button>
         </form>
       </div>
 
-      {showPopup && (
+      {/* {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm">
             <h2 className="text-xl font-bold mb-4">Tutor Added Successfully!</h2>
             <p className="mb-4">Now, set availability for this tutor.</p>
             <button
               className="bg-green-500 text-white p-2 rounded w-full"
-              onClick={handleGoToAvailability}
+              // onClick={handleGoToAvailability}
             >
               Set Availability
             </button>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };
