@@ -7,14 +7,11 @@ const Transaction = require("../Models/transaction");
 const multer = require("multer");
 const path = require("path");
 
-// const adminAuth=require("../Admin/AdminAuth");
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Store files in the 'uploads' folder
-  },
+  destination: "uploads/",
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+    cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
@@ -28,7 +25,10 @@ router.post(
     { name: "nameImage", maxCount: 1 },
   ]),
   async (req, res) => {
-    console.log("Role", req.user.role);
+    console.log("Role:", req.user.role);
+    console.log("Request Body:", req.body);
+    console.log("Files:", req.files);
+
     if (req.user.role !== "admin") {
       return res
         .status(403)
@@ -41,12 +41,14 @@ router.post(
         name,
         overview,
         description,
-        curriculum,
         price,
         discountPrice,
         duration,
         level,
       } = req.body;
+
+      const curriculumData = JSON.parse(req.body.curriculum || "[]");
+
       const courseTypeImage = req.files["courseTypeImage"]
         ? `/uploads/${req.files["courseTypeImage"][0].filename}`
         : "";
@@ -59,9 +61,9 @@ router.post(
         name,
         overview,
         description,
-        curriculum,
-        price,
-        discountPrice,
+        curriculum: curriculumData,
+        price: Number(price) || 0,
+        discountPrice: Number(discountPrice) || 0,
         duration,
         instructor: req.user.name,
         level,
@@ -74,12 +76,34 @@ router.post(
       res
         .status(201)
         .json({ message: "Course added successfully", course: newCourse });
-      console.log(newCourse);
+      console.log("New Course Added:", newCourse);
     } catch (error) {
+      console.error("Error:", error);
       res.status(500).json({ error: error.message });
     }
   }
 );
+
+router.put("/courses/update/:courseId", async (req, res) => {
+  const { courseId } = req.params;
+  const updatedData = req.body;
+
+  try {
+    const course = await Course.findByIdAndUpdate(courseId, updatedData, {
+      new: true, 
+      runValidators: true, 
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    res.status(200).json(course);
+  } catch (error) {
+    console.error("Error updating course:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
 
 router.post("/:id/feedback", authMiddleware, async (req, res) => {
   try {
@@ -126,8 +150,8 @@ router.get("/courses/:id", async (req, res) => {
 
 router.get("/allCourses", async (req, res) => {
   try {
-    const courses = await Course.find(); // Fetch all courses from MongoDB
-    res.json(courses); // Send all courses as JSON
+    const courses = await Course.find(); 
+    res.json(courses); 
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch courses" });
   }
@@ -135,20 +159,20 @@ router.get("/allCourses", async (req, res) => {
 
 router.get("/courses", async (req, res) => {
   try {
-    const { name } = req.query; // Get course name from query params
+    const { name } = req.query; 
 
     if (!name) {
       return res.status(400).json({ message: "Course name is required" });
     }
 
-    // Find a course with the given name (case-insensitive)
+    
     const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
 
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
     console.log(course);
-    res.json(course); // Send the full course object, frontend will extract `_id`
+    res.json(course); 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -159,16 +183,31 @@ router.get("/categories", async (req, res) => {
     const categories = await Course.aggregate([
       {
         $group: {
-          _id: "$courseType", // Group by courseType
-          courses: { $push: "$name" }, // Collect course names
+          _id: "$courseType",
+          courses: {
+            $push: {
+              name: "$name",
+              courseTypeImage: "$courseTypeImage",
+              nameImage: "$nameImage",
+            },
+          }, 
         },
       },
     ]);
 
-    // Format response
+   
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
-      courses: cat.courses,
+      // courses: cat.courses,
+      courses: cat.courses.map((course) => ({
+        name: course.name,
+        courseTypeImage: course.courseTypeImage
+          ? `http://localhost:6001${course.courseTypeImage}`
+          : null,
+        nameImage: course.nameImage
+          ? `http://localhost:6001${course.nameImage}`
+          : null,
+      })),
     }));
 
     res.json(formattedCategories);
@@ -176,6 +215,8 @@ router.get("/categories", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
+
+
 
 router.post("/:id/enroll", authMiddleware, async (req, res) => {
   try {

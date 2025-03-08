@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //     credentials: true
 //   }
 // ));
+app.use("/uploads", express.static("uploads"));
 
 app.use("/",tutorRoutes);
 app.use("/", personRoutes);

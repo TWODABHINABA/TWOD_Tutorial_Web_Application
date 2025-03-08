@@ -24,6 +24,9 @@ const CourseDetailsPage = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("1 hr");
   const token = localStorage.getItem("token");
+  const [isEditing, setIsEditing] = useState(false);
+  const [updatedCourse, setUpdatedCourse] = useState({});
+  const isRoleAdmin = localStorage.getItem("role");
   console.log(courseId);
   useEffect(() => {
     const fetchCourse = async () => {
@@ -31,6 +34,14 @@ const CourseDetailsPage = () => {
         const response = await api.get(`/courses/${courseId}`);
         setCourse(response.data);
         console.log(response.data);
+        setUpdatedCourse({
+          name: response.data.name,
+          overview: response.data.overview,
+          description: response.data.description,
+          price: response.data.price,
+          discountPrice: response.data.discountPrice,
+          curriculum: response.data.curriculum || [],
+        });
       } catch (err) {
         setError(err.message);
       } finally {
@@ -42,6 +53,34 @@ const CourseDetailsPage = () => {
       fetchCourse();
     }
   }, [courseId]);
+
+  const handleInputChange = (e) => {
+    setUpdatedCourse((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+    setIsEditing(true);
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    if (Object.keys(updatedCourse).length === 0) {
+      alert("No changes made!");
+      return;
+    }
+
+    try {
+      const response = await api.put(`/courses/update/${courseId}`, {
+        ...updatedCourse,
+        curriculum: updatedCourse.curriculum || [],
+      });
+      setCourse(response.data);
+      setIsEditing(false);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
@@ -140,47 +179,6 @@ const CourseDetailsPage = () => {
       alert("Enrollment failed. Try again later.");
     }
   };
-  // const handleEnrollClick = async () => {
-  //   try {
-  //     const response = await api.get(`/courses/${courseId}/tutors`);
-  //     setTutors(response.data);
-  //     setShowTutorModal(true);
-  //   } catch (error) {
-  //     console.error("Error fetching tutors:", error);
-  //   }
-  // };
-
-  // const handleEnrollNow = async () => {
-  //   // const token = localStorage.getItem("token");
-  //   // if (!token) {
-  //   //   window.location.href = "/register";
-  //   //   return;
-  //   // }
-
-  //   try {
-  //     // POST to the enrollment endpoint using the course's _id
-  //     const response = await api.post(
-  //       `/${course._id}/enroll`,
-  //       { price: course.discountPrice || course.price },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     const { approval_url } = response.data;
-  //     if (approval_url) {
-  //       // Redirect the user to PayPal for payment approval
-  //       window.location.href = approval_url;
-  //     } else {
-  //       alert("Error: No approval URL received from payment gateway.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error enrolling and redirecting to PayPal:", error);
-  //     alert("Enrollment failed. Please try again later.");
-  //   }
-  // };
 
   if (loading)
     return (
@@ -233,30 +231,79 @@ const CourseDetailsPage = () => {
                 </svg>
                 Back to {course.category}
               </Link>
-              <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                {course.name}
-              </h1>
-              <h2 className="text-xl text-gray-600 font-medium">
-                {course.overview}
-              </h2>
+
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="name"
+                  value={updatedCourse.name}
+                  onChange={(e) =>
+                    setUpdatedCourse((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
+                  className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent border border-indigo-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              ) : (
+                <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  {course.name}
+                </h1>
+              )}
+
+              {isEditing ? (
+                <textarea
+                  name="overview"
+                  value={updatedCourse.overview}
+                  onChange={(e) =>
+                    setUpdatedCourse((prev) => ({
+                      ...prev,
+                      overview: e.target.value,
+                    }))
+                  }
+                  className="text-xl text-gray-600 font-medium border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              ) : (
+                <h2 className="text-xl text-gray-600 font-medium">
+                  {course.overview}
+                </h2>
+              )}
             </div>
           </header>
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-12">
-              <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                  Course Overview
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
+              {isEditing ? (
+                <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                    Course Overview
+                  </h3>
+                  {/* <p className="text-gray-600 leading-relaxed">
                   {course.description}
-                </p>
-              </section>
+                </p> */}
+                  <textarea
+                    className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                    name="description"
+                    value={updatedCourse.description}
+                    onChange={handleInputChange}
+                    placeholder="Enter course description"
+                  />
+                </section>
+              ) : (
+                <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                    Course Overview
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {course.description}
+                  </p>
+                </section>
+              )}
 
               <section className="space-y-6">
                 <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
                 <div className="space-y-4">
-                  {course.curriculum?.map((module, idx) => (
+                  {course?.curriculum?.map((module, idx) => (
                     <div
                       key={idx}
                       className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
@@ -268,42 +315,166 @@ const CourseDetailsPage = () => {
                           </span>
                         </div>
                         <div className="flex-1">
-                          <h4 className="text-xl font-semibold text-gray-800">
-                            {module.sectionTitle}
-                          </h4>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              name="sectionTitle"
+                              value={
+                                updatedCourse.curriculum?.[idx]?.sectionTitle ||
+                                ""
+                              }
+                              onChange={(e) => {
+                                setUpdatedCourse((prev) => {
+                                  const newCurriculum = prev.curriculum
+                                    ? [...prev.curriculum]
+                                    : [];
+
+                                  if (!newCurriculum[idx]) {
+                                    newCurriculum[idx] = {}; // Ensure the index exists
+                                  }
+
+                                  newCurriculum[idx] = {
+                                    ...newCurriculum[idx],
+                                    sectionTitle: e.target.value,
+                                  };
+
+                                  return { ...prev, curriculum: newCurriculum };
+                                });
+                              }}
+                              className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                            />
+                          ) : (
+                            <h4 className="text-xl font-semibold text-gray-800">
+                              {module.sectionTitle}
+                            </h4>
+                          )}
+
                           <ul className="mt-2 space-y-2">
                             {module.lessons?.map((lecture, i) => (
                               <li
                                 key={i}
                                 className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors duration-200"
                               >
-                                <span className="text-gray-600">
-                                  {lecture.title}
-                                </span>
-                                <span className="text-sm text-indigo-600">
-                                  {lecture.duration}
-                                </span>
+                                {isEditing ? (
+                                  <>
+                                    {/* Lesson Title Input */}
+                                    <input
+                                      type="text"
+                                      value={
+                                        updatedCourse.curriculum?.[idx]
+                                          ?.lessons?.[i]?.title || ""
+                                      }
+                                      onChange={(e) => {
+                                        setUpdatedCourse((prev) => {
+                                          const newCurriculum = prev.curriculum
+                                            ? [...prev.curriculum]
+                                            : [];
+
+                                          if (!newCurriculum[idx])
+                                            newCurriculum[idx] = {
+                                              lessons: [],
+                                            };
+                                          if (!newCurriculum[idx].lessons)
+                                            newCurriculum[idx].lessons = [];
+                                          if (!newCurriculum[idx].lessons[i])
+                                            newCurriculum[idx].lessons[i] = {};
+
+                                          newCurriculum[idx].lessons[i] = {
+                                            ...newCurriculum[idx].lessons[i],
+                                            title: e.target.value,
+                                          };
+
+                                          return {
+                                            ...prev,
+                                            curriculum: newCurriculum,
+                                          };
+                                        });
+                                      }}
+                                      className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                    />
+
+                                    {/* Lesson Duration Input */}
+                                    <input
+                                      type="text"
+                                      value={
+                                        updatedCourse.curriculum?.[idx]
+                                          ?.lessons?.[i]?.duration || ""
+                                      }
+                                      onChange={(e) => {
+                                        setUpdatedCourse((prev) => {
+                                          const newCurriculum = prev.curriculum
+                                            ? [...prev.curriculum]
+                                            : [];
+
+                                          if (!newCurriculum[idx])
+                                            newCurriculum[idx] = {
+                                              lessons: [],
+                                            };
+                                          if (!newCurriculum[idx].lessons)
+                                            newCurriculum[idx].lessons = [];
+                                          if (!newCurriculum[idx].lessons[i])
+                                            newCurriculum[idx].lessons[i] = {};
+
+                                          newCurriculum[idx].lessons[i] = {
+                                            ...newCurriculum[idx].lessons[i],
+                                            duration: e.target.value,
+                                          };
+
+                                          return {
+                                            ...prev,
+                                            curriculum: newCurriculum,
+                                          };
+                                        });
+                                      }}
+                                      className="w-20 p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                    />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="text-gray-600">
+                                      {lecture.title}
+                                    </span>
+                                    <span className="text-sm text-indigo-600">
+                                      {lecture.duration}
+                                    </span>
+                                  </>
+                                )}
                               </li>
                             ))}
                           </ul>
                           {module.quiz && (
                             <div className="mt-4 pt-4 border-t border-gray-100">
                               <div className="flex items-center text-indigo-600">
-                                <svg
-                                  className="w-5 h-5 mr-2"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                                  />
-                                </svg>
                                 <span className="font-medium">
-                                  {module.quiz}
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      value={
+                                        updatedCourse.curriculum?.[idx]?.quiz ||
+                                        ""
+                                      }
+                                      onChange={(e) => {
+                                        setUpdatedCourse((prev) => ({
+                                          ...prev,
+                                          curriculum:
+                                            prev.curriculum?.map(
+                                              (module, modIdx) =>
+                                                modIdx === idx
+                                                  ? {
+                                                      ...module,
+                                                      quiz: e.target.value,
+                                                    }
+                                                  : module
+                                            ) || [],
+                                        }));
+                                      }}
+                                      className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                    />
+                                  ) : (
+                                    <span className="text-gray-600">
+                                      {module.quiz}
+                                    </span>
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -503,7 +674,7 @@ const CourseDetailsPage = () => {
                             </button>
                           </div>
 
-                          {/* Right Column – Big Calendar */}
+                         
                           <div className="w-1/2 pl-4 border-l">
                             <EnrollmentCalendar
                               availableDates={availableDates}
@@ -559,6 +730,30 @@ const CourseDetailsPage = () => {
                 >
                   Submit Feedback
                 </button>
+                {isRoleAdmin === "admin" && (
+                  <>
+                    {!isEditing ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                        className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700"
+                      >
+                        Edit Course
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        onClick={(e) => {
+                          setIsEditing(false);
+                          handleUpdate(e);
+                        }}
+                        className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700"
+                      >
+                        Update
+                      </button>
+                    )}
+                  </>
+                )}
               </form>
             </div>
           </div>

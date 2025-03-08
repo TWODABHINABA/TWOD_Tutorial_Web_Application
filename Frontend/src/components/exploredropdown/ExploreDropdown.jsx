@@ -7,8 +7,8 @@ import api from "../User-management/api";
 const fetchCategories = async () => {
   try {
     const response = await api.get("/categories");
-    console.log(response.data);  // API call to backend
-    return response.data; // Expected format: [{ name: "Web Development", courses: ["React", "NodeJs"] }]
+    console.log(response.data);  
+    return response.data; 
     
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -19,20 +19,19 @@ const fetchCategories = async () => {
 const fetchCourseId = async (course) => {
   try {
     const response = await api.get(`/courses?name=${course}`);
-    return response.data._id; // Ensure backend returns course._id
+    return response.data._id; 
   } catch (error) {
     console.error("Error fetching course ID:", error);
   }
 };
 
-// ----- Reusable FlyoutLink Component -----
-// Now with an optional href prop.
+
 const FlyoutLink = ({
   children,
   FlyoutContent,
   direction = "down",
   showArrow = true,
-  href, // if provided, clicking the main link navigates to this route
+  href, 
 }) => {
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -110,7 +109,7 @@ const FlyoutLink = ({
             className={`${flyoutPositionClasses} bg-white text-black z-10 p-4`}
             style={flyoutTransformStyle}
           >
-            {/* Popover arrow “nub” */}
+          
             {direction === "right" ? (
               <>
                 <div className="absolute -left-6 top-0 bottom-0 w-6 bg-transparent" />
@@ -130,23 +129,30 @@ const FlyoutLink = ({
   );
 };
 
+
 const DynamicCategoryFlyout = ({ category }) => {
+  console.log("Category Data:", category); 
+
   return (
     <div className="w-48 bg-white p-6 shadow-xl absolute">
-      {category.courses.map((course) => (
-        <Link
-          key={course}
-          to="#"
-          onClick={async (e) => {
-            e.preventDefault();
-            const id = await fetchCourseId(course);
-            if (id) window.location.href = `/courses/${id}`;
-          }}
-          className="block text-sm hover:underline p-2"
-        >
-          {course}
-        </Link>
-      ))}
+      {category.courses.length > 0 ? (
+        category.courses.map((course, index) => (
+          <Link
+            key={index}
+            to="#"
+            onClick={async (e) => {
+              e.preventDefault();
+              const id = await fetchCourseId(course.name);
+              if (id) window.location.href = `/courses/${id}`;
+            }}
+            className="block text-sm hover:underline p-2"
+          >
+            {course.name}
+          </Link>
+        ))
+      ) : (
+        <p className="text-gray-500">No courses available</p>
+      )}
     </div>
   );
 };
@@ -179,7 +185,7 @@ const PricingContent = () => {
   );
 };
 
-// ----- Explore Dropdown Component -----
+
 const Explore = () => {
   return (
     <div className="flex justify-center absolute top-1/2 transform -translate-x-[90%] -translate-y-1/2 text-base p-4">

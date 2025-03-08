@@ -48,7 +48,6 @@ const AddCourse = () => {
   const handleFileChange = (e, type) => {
     if (type === "courseTypeImage") {
       setCourseTypeImage(e.target.files[0]);
-      setFormData(...formData,courseTypeImage)
     } else if (type === "nameImage") {
       setNameImage(e.target.files[0]);
     }
@@ -94,25 +93,34 @@ const AddCourse = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    // const formDataToSend = new FormData();
-    // Object.keys(formData).forEach((key) => {
-    //   formDataToSend.append(key, formData[key]);
-    // });
-    // if (courseTypeImage) {
-    //   formDataToSend.append("courseTypeImage", courseTypeImage);
-    // }
-    // if (nameImage) {
-    //   formDataToSend.append("nameImage", nameImage);
-    // }
-
+  
+    const formDataToSend = new FormData(); 
+  
+   
+    Object.keys(formData).forEach((key) => {
+      if (key === "curriculum") {
+        formDataToSend.append(key, JSON.stringify(formData[key])); 
+      } else {
+        formDataToSend.append(key, formData[key]);
+      }
+    });
+  
+  
+    if (courseTypeImage) {
+      formDataToSend.append("courseTypeImage", courseTypeImage);
+    }
+    if (nameImage) {
+      formDataToSend.append("nameImage", nameImage);
+    }
+  
     try {
-      const response = await api.post("/add", formData, {
+      const response = await api.post("/add", formDataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data", 
         },
       });
-
+  
       console.log(response);
       alert("Course added successfully!");
       navigate("/");
