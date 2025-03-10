@@ -156,8 +156,12 @@ const CourseDetailsPage = () => {
         `/${course._id}/enroll`,
         {
           tutorId: selectedTutor,
-          date: selectedDate,
-          timeSlot: selectedTimeSlot,
+          // date: selectedDate,
+          // timeSlot: selectedTimeSlot,
+          // duration: selectedDuration,
+          // price: course.discountPrice || course.price,
+          selectedDate, // Field names fixed to match backend schema
+          selectedTime: selectedTimeSlot,
           duration: selectedDuration,
           price: course.discountPrice || course.price,
         },
@@ -674,7 +678,6 @@ const CourseDetailsPage = () => {
                             </button>
                           </div>
 
-                         
                           <div className="w-1/2 pl-4 border-l">
                             <EnrollmentCalendar
                               availableDates={availableDates}

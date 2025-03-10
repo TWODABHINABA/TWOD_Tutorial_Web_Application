@@ -7,7 +7,6 @@ const Transaction = require("../Models/transaction");
 const multer = require("multer");
 const path = require("path");
 
-
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
@@ -90,8 +89,8 @@ router.put("/courses/update/:courseId", async (req, res) => {
 
   try {
     const course = await Course.findByIdAndUpdate(courseId, updatedData, {
-      new: true, 
-      runValidators: true, 
+      new: true,
+      runValidators: true,
     });
 
     if (!course) {
@@ -150,8 +149,8 @@ router.get("/courses/:id", async (req, res) => {
 
 router.get("/allCourses", async (req, res) => {
   try {
-    const courses = await Course.find(); 
-    res.json(courses); 
+    const courses = await Course.find();
+    res.json(courses);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch courses" });
   }
@@ -159,20 +158,19 @@ router.get("/allCourses", async (req, res) => {
 
 router.get("/courses", async (req, res) => {
   try {
-    const { name } = req.query; 
+    const { name } = req.query;
 
     if (!name) {
       return res.status(400).json({ message: "Course name is required" });
     }
 
-    
     const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
 
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
     console.log(course);
-    res.json(course); 
+    res.json(course);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -190,12 +188,11 @@ router.get("/categories", async (req, res) => {
               courseTypeImage: "$courseTypeImage",
               nameImage: "$nameImage",
             },
-          }, 
+          },
         },
       },
     ]);
 
-   
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
       // courses: cat.courses,
@@ -216,10 +213,9 @@ router.get("/categories", async (req, res) => {
   }
 });
 
-
-
 router.post("/:id/enroll", authMiddleware, async (req, res) => {
   try {
+    const { tutorId, selectedDate, selectedTime, duration, amount } = req.body;
     const course = await Course.findById(req.params.id);
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
@@ -232,6 +228,10 @@ router.post("/:id/enroll", authMiddleware, async (req, res) => {
       courseId: course._id,
       user: req.user.id,
       amount: formattedPrice,
+      tutorId,
+      selectedDate,
+      selectedTime,
+      duration,
       status: "pending",
     });
     await transaction.save();
@@ -397,16 +397,34 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
     const transactions = await Transaction.find({
       user: userId,
       status: "completed",
-    });
+    })
+      .populate("courseId")
+      .populate({
+        path: "tutorId",
+        select: "name", 
+      })
+      .lean();
 
     if (!transactions.length) {
       return res.status(404).json({ message: "No purchased courses found" });
     }
 
-    const courseIds = transactions.map((t) => t.courseId);
-    const courses = await Course.find({ _id: { $in: courseIds } });
-
-    res.json(courses);
+   
+    const formattedCourses = transactions.map((transaction) => ({
+      courseId: transaction.courseId._id,
+      courseTypeTitle:transaction.courseId.courseType,
+      courseTitle: transaction.courseId.name,
+      courseDescription: transaction.courseId.description,
+      coursePrice: transaction.courseId.price,
+      amountPaid: transaction.amount,
+      tutorName: transaction.tutorId
+        ? transaction.tutorId.name
+        : "Not Selected",
+      selectedDate: transaction.selectedDate || "Not Selected",
+      selectedTime: transaction.selectedTime || "Not Selected",
+      duration: transaction.duration || "Not Selected",
+    }));
+    res.json(formattedCourses);
   } catch (err) {
     console.error("Error fetching purchased courses:", err);
     res.status(500).json({ error: err.message });
