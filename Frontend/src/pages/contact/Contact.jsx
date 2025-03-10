@@ -4,6 +4,7 @@ import 'aos/dist/aos.css';
 import './contact.css';
 import CustomNavbar from '../../components/navbar/Navbar';
 import Foote from '../../components/footer/Footer';
+
 const Contact = () => {
   useEffect(() => {
     AOS.init({

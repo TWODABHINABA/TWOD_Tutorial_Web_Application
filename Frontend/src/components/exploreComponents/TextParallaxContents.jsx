@@ -117,7 +117,7 @@ const OverlayCopy = ({ subheading, heading }) => {
 
 const Content1 = () => (
   <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 pb-24 pt-12 md:grid-cols-12 ">
-    <h2 className="col-span-1 text-3xl font-bold md:col-span-4 text-indigo-500">
+    <h2 className="col-span-1 text-3xl font-bold md:col-span-4 text-orange-400">
       Earn Industry-Recognized Certifications
     </h2>
     <div className="col-span-1 md:col-span-8">
@@ -128,7 +128,7 @@ const Content1 = () => (
       <p className="mb-8 text-xl text-neutral-600 md:text-2xl text-justify">
         Join thousands of professionals who have boosted their resumes and advanced their careers by earning these credentials.
       </p>
-      <button className="w-full rounded bg-indigo-600 px-9 py-4 text-xl text-white transition-colors hover:bg-indigo-700 md:w-fit"
+      <button className="w-full rounded  px-9 py-4 text-xl  tborder border-orange-500 text-orange-500 transition-colors duration-300 hover:bg-orange-500 hover:text-white md:w-fit"
       onClick={() => window.location.href = `/category/}`}>
         Get Certified <FiArrowUpRight className="inline" />
       </button>
@@ -138,7 +138,7 @@ const Content1 = () => (
 
 const Content2 = () => (
   <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 pb-24 pt-12 md:grid-cols-12 ">
-    <h2 className="col-span-1 text-3xl font-bold md:col-span-4 text-indigo-500">
+    <h2 className="col-span-1 text-3xl font-bold md:col-span-4 text-orange-400">
       Learn from Industry Leaders
     </h2>
     <div className="col-span-1 md:col-span-8">
@@ -149,7 +149,7 @@ const Content2 = () => (
       <p className="mb-8 text-xl text-neutral-600 md:text-2xl text-justify">
         Experience interactive lessons and projects that prepare you for success in today’s competitive market.
       </p>
-      <button className="w-full rounded bg-indigo-600 px-9 py-4 text-xl text-white transition-colors hover:bg-indigo-700 md:w-fit"
+      <button className="w-full rounded  px-9 py-4 text-xl  tborder border-orange-500 text-orange-500 transition-colors duration-300 hover:bg-orange-500 hover:text-white md:w-fit"
       onClick={() => window.location.href = `/category/}`}>
         Learn More <FiArrowUpRight className="inline" />
       </button>
@@ -159,7 +159,7 @@ const Content2 = () => (
 
 const Content3 = () => (
   <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 pb-24 pt-12 md:grid-cols-12">
-    <h2 className="col-span-1 text-3xl font-bold md:col-span-4 text-indigo-500">
+    <h2 className="col-span-1 text-3xl font-bold md:col-span-4 text-orange-400">
       Flexible Learning, Anytime
     </h2>
     <div className="col-span-1 md:col-span-8">
@@ -170,7 +170,7 @@ const Content3 = () => (
       <p className="mb-8 text-xl text-neutral-600 md:text-2xl text-justify">
         Access course materials on-demand, learn at your own pace, and join a community of learners from around the world.
       </p>
-      <button className="w-full rounded bg-indigo-600 px-9 py-4 text-xl text-white transition-colors hover:bg-indigo-700 md:w-fit"
+      <button className="w-full rounded  px-9 py-4 text-xl  tborder border-orange-500 text-orange-500 transition-colors duration-300 hover:bg-orange-500 hover:text-white md:w-fit"
       onClick={() => window.location.href = `/category/}`}>
         Start Learning <FiArrowUpRight className="inline" />
       </button>

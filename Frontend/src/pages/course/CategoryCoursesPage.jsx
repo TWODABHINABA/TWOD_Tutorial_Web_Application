@@ -47,13 +47,13 @@ const CategoryCoursesPage = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 p-6 font-sans animate__animated animate__fadeIn">
+      <div className="min-h-screen  p-6 font-sans animate__animated animate__fadeIn bg-[#FAF3E0]">
         <div className="max-w-6xl mx-auto">
          
-          <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-500 bg-clip-text text-transparent">
             Courses
           </h1>
-          <div className="mt-2 h-1 w-20 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"></div>
+          <div className="mt-2 h-1 w-20 bg-gradient-to-r from-orange-400 to-orange-400 rounded-full"></div>
 
          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
@@ -72,8 +72,8 @@ const CategoryCoursesPage = () => {
                   alt={cat.category}
                   className="w-full h-40 object-cover"
                 />
-                <div className="p-4 flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-gray-800">
+                <div className="p-4 flex justify-between items-center ">
+                  <h3 className="text-lg font-semibold text-orange-800">
                     {cat.category}
                   </h3>
                   <span
@@ -94,9 +94,9 @@ const CategoryCoursesPage = () => {
           {expandedCategory && (
             <div
               ref={coursesRef}
-              className="bg-white mt-6 p-6 rounded-xl shadow-lg transition-all duration-300"
+              className="bg-gray-50 mt-6 p-6 rounded-xl shadow-lg transition-all duration-300"
             >
-              <h3 className="text-xl font-semibold text-indigo-700 mb-4">
+              <h3 className="text-xl font-semibold text-orange-500 mb-4">
                 {expandedCategory} Courses
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -142,7 +142,7 @@ const CategoryCoursesPage = () => {
           <div className="mt-8">
             <Link
               to="/"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-transform duration-300 transform hover:scale-105"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-orange-500 border-orange-500    hover:bg-orange-500 hover:text-white transition-transform duration-300 transform hover:scale-105"
             >
               <svg
                 className="w-4 h-4 mr-2"

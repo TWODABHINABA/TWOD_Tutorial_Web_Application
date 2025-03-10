@@ -112,7 +112,8 @@ const UserInfo = () => {
   return (
     <>
       <Navbar />
-      <div className="user-info-container">
+      <div className="bg-[#FAF3E0] pt-20"> 
+      <div className="user-info-container ">
         <h2>User Information</h2>
         {user && (
           <div className="user-details">
@@ -245,6 +246,7 @@ const UserInfo = () => {
           </p>
         )}
       </div>)}
+      </div>
     </>
   );
 };

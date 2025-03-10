@@ -17,12 +17,12 @@ const Pricing = () => {
   }, []);
 
   return (
-    <div className={`${darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"} min-h-screen flex flex-col`}> 
+    <div className={`${darkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"} min-h-screen flex flex-col`}> 
       <CustomNavbar />
-
+<div className="bg-[#FAF3E0]">
       {/* Header */}
-      <header className="text-center py-20 mt-16" data-aos="fade-down">
-        <h1 className="text-5xl font-extrabold text-blue-600">Course Pricing & Plans</h1>
+      <header className="text-center py-20" data-aos="fade-down">
+        <h1 className="text-5xl font-extrabold text-orange-400">Course Pricing & Plans</h1>
         <p className="text-lg text-gray-600 dark:text-gray-300 mt-4 max-w-3xl mx-auto">
           Choose the perfect plan that suits your learning needs and career goals.
         </p>
@@ -30,10 +30,12 @@ const Pricing = () => {
 
       {/* Pricing Section */}
       <div className="flex flex-wrap justify-center gap-8 p-6">
-        {[ "Free", "Basic", "Premium", "Enterprise" ].map((plan, index) => (
+        {["Free", "Basic", "Premium", "Enterprise"].map((plan, index) => (
           <div key={index} className="w-80 h-auto min-h-[400px] p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 flex flex-col justify-between" data-aos="fade-right">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{plan} Plan</h2>
-            <p className="text-xl mt-2 text-gray-700 dark:text-gray-300">{plan === "Free" ? "₹0" : plan === "Basic" ? "₹999/month" : plan === "Premium" ? "₹1999/month" : "Custom Pricing"}</p>
+            <p className="text-xl mt-2 text-gray-700 dark:text-gray-300">
+              {plan === "Free" ? "₹0" : plan === "Basic" ? "₹999/month" : plan === "Premium" ? "₹1999/month" : "Custom Pricing"}
+            </p>
             <ul className="mt-4 space-y-2 text-gray-700 dark:text-gray-300">
               {plan === "Free" ? (
                 <>
@@ -64,7 +66,7 @@ const Pricing = () => {
               )}
             </ul>
             <button
-              className="w-full mt-4 py-2 rounded-lg font-semibold bg-blue-500 hover:bg-blue-600 text-white"
+              className="w-full mt-4 py-2 rounded-lg font-semibold border border-orange-500 text-orange-500 transition-colors duration-300 hover:bg-orange-500 hover:text-white"
               onClick={() => setShowPopup(true)}
             >
               Get Started
@@ -74,13 +76,25 @@ const Pricing = () => {
       </div>
 
       {/* More Information Section */}
-      <section className="mt-12 p-6 text-center bg-gray-200 dark:bg-gray-700" data-aos="fade-left">
-        <h2 className="text-3xl font-bold mb-4 text-blue-600">Why to choose us ?</h2>
-        <p className="text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">We offer tailored solutions for individual learners and businesses.</p>
+      <section className="mt-12 p-6 text-center bg-white dark:bg-gray-700" data-aos="fade-left">
+        <h2 className="text-3xl font-bold mb-4 text-orange-400">Why to choose us ?</h2>
+        <p className="text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
+          We offer tailored solutions for individual learners and businesses.
+        </p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-6">
-          {[{icon: FaUserTie, label: "Business Plans"}, {icon: FaChalkboardTeacher, label: "Expert Mentors"}, {icon: FaCertificate, label: "Certified Courses"}, {icon: FaBookOpen, label: "Extensive Learning Resources"}, {icon: FaClock, label: "Flexible Learning Hours"}, {icon: FaHeadset, label: "24/7 Support"}, {icon: FaGlobe, label: "Global Access"}, {icon: FaShieldAlt, label: "Secure Payments"}, {icon: FaUsers, label: "Community Networking"}].map((item, index) => (
+          {[
+            { icon: FaUserTie, label: "Business Plans" },
+            { icon: FaChalkboardTeacher, label: "Expert Mentors" },
+            { icon: FaCertificate, label: "Certified Courses" },
+            { icon: FaBookOpen, label: "Extensive Learning Resources" },
+            { icon: FaClock, label: "Flexible Learning Hours" },
+            { icon: FaHeadset, label: "24/7 Support" },
+            { icon: FaGlobe, label: "Global Access" },
+            { icon: FaShieldAlt, label: "Secure Payments" },
+            { icon: FaUsers, label: "Community Networking" }
+          ].map((item, index) => (
             <div key={index} className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-              <item.icon className="text-4xl text-blue-500" />
+              <item.icon className="text-4xl text-orange-500" />
               <p className="mt-2 text-gray-700 dark:text-gray-300">{item.label}</p>
             </div>
           ))}
@@ -92,7 +106,9 @@ const Pricing = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" data-aos="zoom-in">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-lg text-center">
             <h2 className="text-2xl font-semibold text-red-500">Terms & Conditions 📜</h2>
-            <p className="text-gray-700 dark:text-gray-300 mt-2">By subscribing to a plan, you agree to our terms:</p>
+            <p className="text-gray-700 dark:text-gray-300 mt-2">
+              By subscribing to a plan, you agree to our terms:
+            </p>
             <ul className="text-gray-600 dark:text-gray-300 list-disc list-inside mt-4 text-left">
               <li>📌 Access to courses based on your plan.</li>
               <li>📌 Subscription fees are non-refundable.</li>
@@ -104,13 +120,18 @@ const Pricing = () => {
               <span className="text-gray-700 dark:text-gray-300">I accept the terms & conditions</span>
             </label>
             <div className="mt-4 flex justify-between">
-              <button className="px-4 py-2 bg-gray-500 text-white rounded-lg" onClick={() => setShowPopup(false)}>Cancel</button>
-              <button className={`px-4 py-2 rounded-lg font-semibold ${policyAccepted ? "bg-blue-500 hover:bg-blue-600 text-white" : "bg-gray-300 cursor-not-allowed"}`} disabled={!policyAccepted} onClick={() => { policyAccepted && navigate("/dashboard"); }}>Proceed</button>
+              <button className="px-4 py-2 bg-gray-500 text-white rounded-lg" onClick={() => setShowPopup(false)}>
+                Cancel
+              </button>
+              <button className={`px-4 py-2 rounded-lg font-semibold ${policyAccepted ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-gray-300 cursor-not-allowed"}`} disabled={!policyAccepted} onClick={() => { policyAccepted && navigate("/dashboard"); }}>
+                Proceed
+              </button>
             </div>
           </div>
         </div>
       )}
       <Footer />
+    </div>
     </div>
   );
 };

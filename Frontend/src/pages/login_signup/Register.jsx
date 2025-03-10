@@ -97,7 +97,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     <div className="relative bg-white p-6 rounded-lg shadow-lg z-10 max-w-lg w-full">
       <div className="flex flex-col items-center gap-2 w-full mb-8">
         <h1 className="text-3xl font-bold text-gray-800">{action}</h1>
-        <div className="w-10 h-1 bg-blue-600 rounded-full"></div>
+        <div className="w-10 h-1 bg-orange-500 rounded-full"></div>
       </div>
 
       {action === "Login" ? (
@@ -110,7 +110,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 value={email}
                 placeholder="Enter your email"
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none"
                 required
               />
               <input
@@ -119,7 +119,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 value={password}
                 placeholder="Enter your password"
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none"
                 required
               />
             </div>
@@ -127,20 +127,20 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
               <button
                 type="button"
                 onClick={() => setAction("Sign Up")}
-                className="text-gray-600 hover:text-blue-600 transition-colors"
+                className="text-gray-600 hover:text-orange-500 transition-colors"
               >
                 Don't have an account? Sign Up
               </button>
               <button
                 type="submit"
-                className="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold transition-colors"
+                className="w-full md:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-semibold transition-colors"
               >
                 Login
               </button>
             </div>
             <button
               onClick={handleGoogleLogin}
-              className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold transition-colors mb-4"
+              className="w-full px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-colors mb-4"
             >
               Login with Google
             </button>
@@ -155,7 +155,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 value={name}
                 placeholder="Enter your name"
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 "
                 required
               />
 
@@ -164,7 +164,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 value={phone}
                 placeholder="Enter your Phone Number"
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 "
                 required
               />
 
@@ -173,7 +173,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 value={birthday}
                 placeholder="Enter your Date of Birth (YYYY-MMM-DD)"
                 onChange={(e) => setBirthday(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 "
                 required
               />
               <input
@@ -181,7 +181,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 value={email}
                 placeholder="Enter your email"
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 "
                 required
               />
               <input
@@ -189,7 +189,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 value={password}
                 placeholder="Enter your password"
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 "
                 required
               />
 
@@ -213,27 +213,27 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 name="profilePicture"
                 onChange={handleFileChange}
                 accept="image/*"
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
               <button
                 type="button"
                 onClick={() => setAction("Login")}
-                className="text-gray-600 hover:text-blue-600 transition-colors"
+                className="text-gray-600 hover:text-orange-500 transition-colors"
               >
                 Already have an account? Login
               </button>
               <button
                 type="submit"
-                className="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold transition-colors"
+                className="w-full md:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors"
               >
                 Register
               </button>
             </div>
             <button
               onClick={handleGoogleLogin}
-              className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold transition-colors mb-4"
+              className="w-full px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-colors mb-4"
             >
               Sign Up with Google
             </button>

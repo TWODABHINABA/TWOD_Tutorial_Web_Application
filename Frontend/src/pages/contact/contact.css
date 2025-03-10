@@ -1,132 +1,130 @@
-
 body, html {
-    margin: 0;
-    padding: 0;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  }
-  
-  .contact-section {
-    padding: 50px 20px;
-    background: #f9f9f9;
-  }
-  
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-  
-  .contact-header {
-    text-align: center;
-    margin-bottom: 50px;
-  }
-  
-  .contact-header h1 {
-    font-size: 2.5rem;
-    color: #2c3e50;
-    margin-bottom: 10px;
-  }
-  
-  .contact-header p {
-    font-size: 1.2rem;
-    color: #7f8c8d;
-  }
-  
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.contact-section {
+  padding: 50px 20px;
+  background: #FAF3E0; /* Updated background to match the orange palette */
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.contact-header h1 {
+  font-size: 2.5rem;
+  color: #fb923c; /* Orange-400 */
+  margin-bottom: 10px;
+}
+
+.contact-header p {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+}
+
+.contact-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.contact-info {
+  flex: 1;
+  min-width: 300px;
+}
+
+.contact-info h2 {
+  font-size: 2rem;
+  color: #f97316; /* Orange-500 */
+  margin-bottom: 15px;
+}
+
+.contact-info p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.contact-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.contact-info li {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.contact-form-container {
+  flex: 1;
+  min-width: 300px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #fb923c; /* Orange-400 */
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #f97316; /* Orange-500 */
+}
+
+.submit-btn {
+  padding: 12px;
+  background: #f97316; /* Orange-500 */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: #ea580c; /* Orange-600 */
+}
+
+@media (max-width: 768px) {
   .contact-content {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 40px;
-    align-items: flex-start;
-  }
-  
-  .contact-info {
-    flex: 1;
-    min-width: 300px;
-  }
-  
-  .contact-info h2 {
-    font-size: 2rem;
-    color: #6366F1;
-    margin-bottom: 15px;
-  }
-  
-  .contact-info p {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #555;
-    margin-bottom: 15px;
-  }
-  
-  .contact-info ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .contact-info li {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 8px;
-  }
-  
-  .contact-form-container {
-    flex: 1;
-    min-width: 300px;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
-  }
-  
-  .contact-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .form-group {
-    display: flex;
     flex-direction: column;
   }
-  
-  .form-group label {
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-    color: #2c3e50;
-  }
-  
-  .form-group input,
-  .form-group textarea {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-  }
-  
-  .form-group input:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: #3498db;
-  }
-  
-  .submit-btn {
-    padding: 12px;
-    background: #6366F1;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.3s ease;
-  }
-  
-  .submit-btn:hover {
-    background:  #4F46E5;
-  }
-  
-  @media (max-width: 768px) {
-    .contact-content {
-      flex-direction: column;
-    }
-  }
-  
+}
