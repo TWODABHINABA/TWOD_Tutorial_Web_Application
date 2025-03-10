@@ -85,6 +85,14 @@ const CustomNavbar = () => {
                   </span>
                 </button>
               )}
+              {isRoleAdmin === "admin" && (
+                <AnimatedNavbarLink to="/add-course">
+                  <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
+                    Add Course
+                  </button>
+                </AnimatedNavbarLink>
+                
+              )}
               {!isAuthenticated ? (
                 <button
                   onClick={() => setShowRegisterModal(true)}

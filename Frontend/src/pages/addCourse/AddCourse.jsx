@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
+import Navbar from "../../components/navbar/Navbar";
 
 const AddCourse = () => {
   const navigate = useNavigate();
@@ -130,7 +131,10 @@ const AddCourse = () => {
   };
 
   return (
+    <>
+    <Navbar/>
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg border">
+      
       <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
         Add New Course
       </h2>
@@ -325,6 +329,7 @@ const AddCourse = () => {
         </button>
       </form>
     </div>
+    </>
   );
 };
 
