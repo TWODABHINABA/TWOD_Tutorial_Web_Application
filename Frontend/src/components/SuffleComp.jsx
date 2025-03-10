@@ -5,16 +5,17 @@ const ShuffleHero = () => {
   return (
     <section className="w-full px-8 py-12 grid grid-cols-1 md:grid-cols-2 items-center gap-8 max-w-6xl mx-auto">
       <div>
-        <span className="block mb-4 text-xs md:text-sm text-indigo-500 font-medium">
+        <span className="block mb-4 text-xs md:text-sm text-gray-700 font-medium">
           Better every day
         </span>
-        <h3 className="text-4xl md:text-6xl font-semibold">
-        Learn Without Limits
+        <h3 className="text-4xl md:text-6xl font-semibold text-orange-400">
+          Learn Without Limits
         </h3>
-        <p className="text-base md:text-lg text-slate-700 my-4 md:my-6">
-        Your Journey to Infinite Possibilities Begins Here.
+        <p className="text-base md:text-lg  my-4 md:my-6">
+          Your Journey to Infinite Possibilities Begins Here.
         </p>
-        <button className="bg-indigo-500 text-white font-medium py-2 px-4 rounded transition-all hover:bg-indigo-600 active:scale-95">
+        <button className=" font-medium py-2 px-4 rounded transition-all border border-orange-500 text-orange-500  duration-300 hover:bg-orange-500 hover:text-white active:scale-95"
+        onClick={() => window.location.href = `/category/}`}>
           Find a class
         </button>
       </div>
@@ -128,13 +129,11 @@ const ShuffleGrid = () => {
 
   useEffect(() => {
     shuffleSquares();
-
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
   const shuffleSquares = () => {
     setSquares(generateSquares());
-
     timeoutRef.current = setTimeout(shuffleSquares, 8000);
   };
 

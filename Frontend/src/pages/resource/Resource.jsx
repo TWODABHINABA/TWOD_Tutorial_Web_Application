@@ -1,100 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import CustomNavbar from '../../components/navbar/Navbar';
 import Footer from '../../components/footer/Footer';
-import { color, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 export const Resource = () => {
-  
-
   useEffect(() => {
     AOS.init({ duration: 1000, easing: 'ease-in-out' });
   }, []);
 
-
-  const containerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-    maxWidth: '1200px',
-    margin: 'auto',
-  };
-
-  const contentStyle = { flex: 1, textAlign: 'center', padding: '30px 20px' };
-  const sectionStyle = { marginBottom: '40px' };
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-    gap: '20px',
-    marginTop: '10px'
-  };
-  const cardStyle = {
-    padding: '20px',
-    borderRadius: '10px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    transition: '0.3s'
-  };
-  const cardHoverStyle = {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)',
-  };
-
-  const courses = [
-    { title: 'Web Development', description: 'Learn HTML, CSS, JavaScript, and React to build modern, responsive web applications. Gain hands-on experience with real-world projects and industry best practices.' },
-    { title: 'Database Management', description: 'Master MongoDB and SQL for handling large-scale data storage, indexing, and retrieval efficiently. Understand database design principles and query optimization.' },
-    { title: 'Backend Development', description: 'Explore Node.js, Express, and Spring Boot for building scalable backend solutions with RESTful APIs, authentication, and microservices architecture.' }
-  ];
-
-  const tutors = [
-    { name: 'John Doe', expertise: 'Web Development', bio: 'John is an experienced frontend developer with 8+ years in React. He has worked with top tech companies and has a deep understanding of modern web frameworks and UI/UX best practices.' },
-    { name: 'Jane Smith', expertise: 'Database Management', bio: 'Jane specializes in database architecture, security, and optimization. She has designed complex database systems for fintech and healthcare industries.' },
-    { name: 'Michael Brown', expertise: 'Backend Development', bio: 'Michael is a backend engineer skilled in APIs, server-side logic, and cloud computing. He has contributed to scalable applications used by millions of users.' }
-  ];
-
-  const plans = [
-    { title: 'Free Plan', price: '$0', features: ['Access to basic courses', '1 course per month', 'Community support', 'Limited course materials'] },
-    { title: 'Basic Plan', price: '$9/month', features: ['Access to all courses', '5 courses per month', 'Email support', 'Downloadable course materials', 'Certificate of completion'] },
-    { title: 'Premium Plan', price: '$99/month', features: ['Unlimited courses', '24/7 priority support', 'Exclusive content', 'Live mentor sessions', 'Advanced projects and certification'] }
-  ];
-
   return (
-    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: 'easeOut' }} style={containerStyle}>
+    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: 'easeOut' }} className=" min-h-screen flex flex-col">
       <CustomNavbar />
-      <div style={contentStyle}>
-        <section style={sectionStyle} data-aos="fade-down">
-          <h2 className="text-5xl font-extrabold text-blue-600">Explore Our Courses</h2>
-          <div style={gridStyle}>
+      <div className="flex-1 text-center p-10 bg-[#FAF3E0]">
+        <section className="mb-16" data-aos="fade-down">
+          <h2 className="text-5xl font-extrabold text-orange-400">Explore Our Courses</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
             {courses.map((course, index) => (
-              <motion.div key={index} style={{ ...cardStyle, ':hover': cardHoverStyle }} data-aos="fade-right">
-                <h3>{course.title}</h3>
-                <p>{course.description}</p>
+              <motion.div key={index} className="bg-white p-6 rounded-lg shadow-md hover:-translate-y-2 hover:shadow-xl transition-transform" data-aos="fade-right">
+                <h3 className="text-lg font-semibold text-orange-600">{course.title}</h3>
+                <p className="text-gray-700 mt-2">{course.description}</p>
               </motion.div>
             ))}
           </div>
         </section>
 
-        <section style={sectionStyle} data-aos="fade-down">
-          <h2 className="text-5xl font-extrabold text-blue-600">Meet Our Tutors</h2>
-          <div style={gridStyle}>
+        <section className="mb-16" data-aos="fade-down">
+          <h2 className="text-5xl font-extrabold text-orange-400">Meet Our Tutors</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
             {tutors.map((tutor, index) => (
-              <motion.div key={index} style={{ ...cardStyle, ':hover': cardHoverStyle }} data-aos="fade-left">
-                <h3>{tutor.name}</h3>
-                <h4>{tutor.expertise}</h4>
-                <p>{tutor.bio}</p>
+              <motion.div key={index} className="bg-white p-6 rounded-lg shadow-md hover:-translate-y-2 hover:shadow-xl transition-transform" data-aos="fade-left">
+                <h3 className="text-lg font-semibold text-orange-600">{tutor.name}</h3>
+                <h4 className="text-md font-medium text-orange-500">{tutor.expertise}</h4>
+                <p className="text-gray-700 mt-2">{tutor.bio}</p>
               </motion.div>
             ))}
           </div>
         </section>
 
-        <section style={sectionStyle} data-aos="fade-down">
-          <h2 className="text-5xl font-extrabold text-blue-600">Pricing Plans</h2>
-          <div style={gridStyle}>
+        <section className="mb-16" data-aos="fade-down">
+          <h2 className="text-5xl font-extrabold text-orange-400">Pricing Plans</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
             {plans.map((plan, index) => (
-              <motion.div key={index} style={{ ...cardStyle, ':hover': cardHoverStyle }} data-aos="zoom-in">
-                <h3>{plan.title}</h3>
-                <h4>{plan.price}</h4>
-                <ul>
+              <motion.div key={index} className="bg-white p-6 rounded-lg shadow-md hover:-translate-y-2 hover:shadow-xl transition-transform" data-aos="zoom-in">
+                <h3 className="text-lg font-semibold text-orange-600">{plan.title}</h3>
+                <h4 className="text-md font-medium text-orange-500">{plan.price}</h4>
+                <ul className="text-gray-700 mt-2">
                   {plan.features.map((feature, i) => (
                     <li key={i}>{feature}</li>
                   ))}
@@ -108,3 +60,21 @@ export const Resource = () => {
     </motion.div>
   );
 };
+
+const courses = [
+  { title: 'Web Development', description: 'Learn HTML, CSS, JavaScript, and React to build modern web applications.' },
+  { title: 'Database Management', description: 'Master MongoDB and SQL for efficient database management.' },
+  { title: 'Backend Development', description: 'Explore Node.js, Express, and microservices architecture.' }
+];
+
+const tutors = [
+  { name: 'John Doe', expertise: 'Web Development', bio: 'Experienced frontend developer with 8+ years in React.' },
+  { name: 'Jane Smith', expertise: 'Database Management', bio: 'Database expert specializing in security and optimization.' },
+  { name: 'Michael Brown', expertise: 'Backend Development', bio: 'Backend engineer skilled in APIs and cloud computing.' }
+];
+
+const plans = [
+  { title: 'Free Plan', price: '$0', features: ['Basic courses', '1 course per month', 'Community support'] },
+  { title: 'Basic Plan', price: '$9/month', features: ['All courses', '5 courses per month', 'Email support'] },
+  { title: 'Premium Plan', price: '$99/month', features: ['Unlimited courses', '24/7 support', 'Live mentor sessions'] }
+];

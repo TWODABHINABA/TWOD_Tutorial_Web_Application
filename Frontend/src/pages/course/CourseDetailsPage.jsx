@@ -196,7 +196,7 @@ const CourseDetailsPage = () => {
           <p className="text-gray-600">No details available for {courseName}</p>
           <Link
             to="/"
-            className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105"
+            className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-500 transition-all duration-300 transform hover:scale-105"
           >
             Back to Categories
           </Link>
@@ -214,7 +214,7 @@ const CourseDetailsPage = () => {
             <div className="space-y-4">
               <Link
                 to={`/category/${encodeURIComponent(course.category)}`}
-                className="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition-colors duration-200"
+                className="inline-flex items-center text-orange-500 hover:text-orange-600 transition-colors duration-200"
               >
                 <svg
                   className="w-4 h-4 mr-1"
@@ -243,10 +243,10 @@ const CourseDetailsPage = () => {
                       name: e.target.value,
                     }))
                   }
-                  className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent border border-indigo-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent border border-orange-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               ) : (
-                <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
                   {course.name}
                 </h1>
               )}
@@ -261,7 +261,7 @@ const CourseDetailsPage = () => {
                       overview: e.target.value,
                     }))
                   }
-                  className="text-xl text-gray-600 font-medium border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="text-xl text-gray-600 font-medium border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               ) : (
                 <h2 className="text-xl text-gray-600 font-medium">
@@ -282,7 +282,7 @@ const CourseDetailsPage = () => {
                   {course.description}
                 </p> */}
                   <textarea
-                    className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                    className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
                     name="description"
                     value={updatedCourse.description}
                     onChange={handleInputChange}
@@ -309,8 +309,8 @@ const CourseDetailsPage = () => {
                       className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
                     >
                       <div className="flex items-start space-x-4">
-                        <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                          <span className="text-indigo-600 font-bold">
+                        <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <span className="text-orange-600 font-bold">
                             {idx + 1}
                           </span>
                         </div>
@@ -341,7 +341,7 @@ const CourseDetailsPage = () => {
                                   return { ...prev, curriculum: newCurriculum };
                                 });
                               }}
-                              className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                              className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
                             />
                           ) : (
                             <h4 className="text-xl font-semibold text-gray-800">
@@ -353,7 +353,7 @@ const CourseDetailsPage = () => {
                             {module.lessons?.map((lecture, i) => (
                               <li
                                 key={i}
-                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors duration-200"
+                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition-colors duration-200"
                               >
                                 {isEditing ? (
                                   <>
@@ -390,7 +390,7 @@ const CourseDetailsPage = () => {
                                           };
                                         });
                                       }}
-                                      className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                      className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
                                     />
 
                                     {/* Lesson Duration Input */}
@@ -426,7 +426,7 @@ const CourseDetailsPage = () => {
                                           };
                                         });
                                       }}
-                                      className="w-20 p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                      className="w-20 p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
                                     />
                                   </>
                                 ) : (
@@ -434,7 +434,7 @@ const CourseDetailsPage = () => {
                                     <span className="text-gray-600">
                                       {lecture.title}
                                     </span>
-                                    <span className="text-sm text-indigo-600">
+                                    <span className="text-sm text-orange-600">
                                       {lecture.duration}
                                     </span>
                                   </>
@@ -444,7 +444,7 @@ const CourseDetailsPage = () => {
                           </ul>
                           {module.quiz && (
                             <div className="mt-4 pt-4 border-t border-gray-100">
-                              <div className="flex items-center text-indigo-600">
+                              <div className="flex items-center text-orange-600">
                                 <span className="font-medium">
                                   {isEditing ? (
                                     <input
@@ -468,7 +468,7 @@ const CourseDetailsPage = () => {
                                             ) || [],
                                         }));
                                       }}
-                                      className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                      className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
                                     />
                                   ) : (
                                     <span className="text-gray-600">
@@ -501,7 +501,7 @@ const CourseDetailsPage = () => {
                           <img
                             src={`http://localhost:6001${feedback.profilePicture}`}
                             alt="Profile"
-                            className="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center"
+                            className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
                           />
 
                           <div>
@@ -554,14 +554,14 @@ const CourseDetailsPage = () => {
                     <div className="space-y-4">
                       <button
                         onClick={handleEnrollClick}
-                        className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02]"
+                        className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
                       >
                         Enroll Now
                       </button>
 
                       <button
                         onClick={() => alert("Previewing course...")}
-                        className="w-full py-4 border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-colors duration-200"
+                        className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
                       >
                         Preview Course
                       </button>
@@ -571,7 +571,7 @@ const CourseDetailsPage = () => {
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3">
                       <svg
-                        className="w-5 h-5 text-indigo-600"
+                        className="w-5 h-5 text-orange-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -592,7 +592,7 @@ const CourseDetailsPage = () => {
                       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
                         {/* Course Name at the Top */}
                         <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700">
+                          <label className="block text-sm font-medium text-gray-500">
                             Course Name
                           </label>
                           <input
@@ -726,7 +726,7 @@ const CourseDetailsPage = () => {
 
                 <button
                   type="submit"
-                  className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700"
+                  className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
                 >
                   Submit Feedback
                 </button>
@@ -736,7 +736,7 @@ const CourseDetailsPage = () => {
                       <button
                         type="button"
                         onClick={() => setIsEditing(true)}
-                        className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700"
+                        className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
                       >
                         Edit Course
                       </button>
@@ -747,7 +747,7 @@ const CourseDetailsPage = () => {
                           setIsEditing(false);
                           handleUpdate(e);
                         }}
-                        className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700"
+                        className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
                       >
                         Update
                       </button>

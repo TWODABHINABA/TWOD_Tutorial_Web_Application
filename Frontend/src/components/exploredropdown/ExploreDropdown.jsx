@@ -73,7 +73,7 @@ const FlyoutLink = ({
       )}
       <span
         style={{ transform: showFlyout ? "scaleX(1)" : "scaleX(0)" }}
-        className="absolute -bottom-2 -left-2 -right-2 h-1 origin-left rounded-full bg-indigo-300 transition-transform duration-300 ease-out"
+        className="absolute -bottom-2 -left-2 -right-2 h-1 origin-left rounded-full bg-orange-400 transition-transform duration-300 ease-out"
       />
     </div>
   );
@@ -113,7 +113,7 @@ const FlyoutLink = ({
             {direction === "right" ? (
               <>
                 <div className="absolute -left-6 top-0 bottom-0 w-6 bg-transparent" />
-                <div className="absolute top-1/2 left-0 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-white" />
+                <div className="absolute top-1/2 left-0 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-orange" />
               </>
             ) : (
               <>

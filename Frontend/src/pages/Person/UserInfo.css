@@ -1,8 +1,8 @@
 .user-info-container {
     max-width: 65%;
     max-height: 100vh;
-    margin: 40px auto;
-    background: rgba(255, 255, 255, 0.1);
+    margin:auto;
+    background: white; /* Updated to orange page background */
     backdrop-filter: blur(10px);
     padding: 20px;
     border-radius: 10px;
@@ -13,6 +13,7 @@
     font-size: 4vh;
     font-weight: bold;
     margin-bottom: 20px;
+    color: #fb923c; /* Orange-400 */
 }
 
 .user-info-container .user-details {
@@ -20,13 +21,10 @@
     align-items: center;
 }
 
-
 .user-info-container .left {
     flex: 1;
     text-align: center;
 }
-
-
 
 .user-info-container .profile-image {
     width: 29vh;
@@ -37,7 +35,7 @@
 }
 
 .vertical {
-    border-left: 2px solid black;
+    border-left: 2px solid #f97316; /* Orange-500 */
     height: 62vh;
     margin-left: 20vh;
 }
@@ -52,7 +50,6 @@
     justify-content: center;
     color: #555;
 }
-
 
 .user-info-container .right {
     flex: 2;
@@ -90,7 +87,6 @@
     border: 1px solid #ccc;
 }
 
-
 .user-info-container .edit-btn,
 .user-info-container .update-btn,
 .user-info-container .cancel-btn {
@@ -106,31 +102,31 @@
 }
 
 .user-info-container .edit-btn {
-    background: #3498db;
+    background: #f97316; /* Orange-500 */
     color: white;
     width: 40vh;
 }
 
 .user-info-container .update-btn {
-    background: #2ecc71;
+    background: #fb923c; /* Orange-400 */
     color: white;
 }
 
 .user-info-container .cancel-btn {
-    background: #e74c3c;
+    background: #fb923c; /* Orange-400 */
     color: white;
 }
 
 .user-info-container .edit-btn:hover {
-    background: #2980b9;
+    background: #ea580c; /* Orange-600 */
 }
 
 .user-info-container .update-btn:hover {
-    background: #27ae60;
+    background: #ea580c; /* Orange-600 */
 }
 
 .user-info-container .cancel-btn:hover {
-    background: #c0392b;
+    background: #ea580c; /* Orange-600 */
 }
 
 /* Responsive Design */

@@ -24,8 +24,8 @@ const Card = ({ course }) => {
         if (id) window.location.href = `/courses/${id}`;
       }}
     >
-      <div className="relative z-10 text-[#6366F1]">
-        <span className="mb-3 block w-fit rounded-full bg-blue-100 px-3 py-0.5 text-sm font-light text-blue-600">
+      <div className="relative z-10 text-orange-400">
+        <span className="mb-3 block w-fit rounded-full bg-blue-100 px-3 py-0.5 text-sm font-light text-green-500">
           {course.courseType}
         </span>
         <motion.span
@@ -38,11 +38,11 @@ const Card = ({ course }) => {
         </motion.span>
         <p className="text-sm text-gray-700">{course.overview}</p>
         <div className="mt-4">
-          <span className="text-xl font-bold text-red-500">
-            {course.discountPrice}
+          <span className="text-xl font-bold text-violet-500">
+            ${course.discountPrice}
           </span>
           <span className="text-sm text-black line-through ml-2">
-            {course.price}
+            ${course.price}
           </span>
         </div>
         <p className="mt-2 text-xs text-gray-500">
@@ -55,7 +55,7 @@ const Card = ({ course }) => {
           const id = await fetchCourseId(course.name);
           if (id) window.location.href = `/courses/${id}`;
         }}
-        className="absolute bottom-4 left-4 right-4 z-20 rounded bg-[#6366F1] hover:bg-indigo-700 py-2 text-center font-sans font-semibold uppercase text-white transition-colors"
+        className="absolute bottom-4 left-4 right-4 z-20 rounded bg-orange-400 hover:bg-orange-500 py-2 text-center font-sans font-semibold uppercase text-white transition-colors"
       >
         View Course
       </button>
@@ -129,7 +129,7 @@ const CardCarousel = () => {
   };
 
   return (
-    <section className="relative px-4 py-12 bg-gray-100">
+    <section className="relative px-4 py-12 bg-[#FAF3E0]">
       <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30">
         <button
           onClick={scrollLeft}
@@ -148,7 +148,7 @@ const CardCarousel = () => {
       </div>
       <div
         ref={carouselRef}
-        className="flex overflow-x-auto space-x-4"
+        className="flex overflow-x-auto space-x-4 "
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {courses.length > 0 ? (
