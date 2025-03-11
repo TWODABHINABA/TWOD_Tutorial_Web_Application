@@ -35,7 +35,8 @@ const AddAvailability = () => {
       if (!selectedTutor) return;
       try {
         const response = await axios.get(
-          `http://localhost:6001/tutors/${selectedTutor}/availability`
+          // `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability`
+          `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability`
         );
         setAvailability(response.data || []);
       } catch (error) {
@@ -100,7 +101,7 @@ const AddAvailability = () => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:6001/tutors/${selectedTutor}/availability/date/${formattedDate}`
+        `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability/date/${formattedDate}`
       );
 
       if (response.status === 200) {
@@ -133,7 +134,7 @@ const AddAvailability = () => {
       console.log("Formatted time being sent:", formattedTime);
 
       const response = await axios.delete(
-        `http://localhost:6001/tutors/${selectedTutor}/availability/date/${date}/time/${formattedTime}`
+        `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability/date/${date}/time/${formattedTime}`
       );
 
       if (response.status === 200) {
@@ -171,7 +172,7 @@ const AddAvailability = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:6001/tutors/${selectedTutor}/availability`,
+        `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability`,
         requestData
       );
       console.log("✅ Response:", response.data);
@@ -386,7 +387,7 @@ export default AddAvailability;
 //   useEffect(() => {
 //     const fetchTutors = async () => {
 //       try {
-//         const response = await axios.get("http://localhost:6001/tutors");
+//         const response = await axios.get("https://twod-tutorial-web-application.onrender.com/tutors");
 //         setTutors(response.data);
 //       } catch (error) {
 //         console.error("Failed to fetch tutors", error);
@@ -401,7 +402,7 @@ export default AddAvailability;
 //       if (!selectedTutor) return;
 //       try {
 //         const response = await axios.get(
-//           `http://localhost:6001/tutors/${selectedTutor}/availability`
+//           `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability`
 //         );
 //         setAvailability(response.data || []);
 //       } catch (error) {
@@ -446,7 +447,7 @@ export default AddAvailability;
 //     };
 //     try {
 //       await axios.post(
-//         `http://localhost:6001/tutors/${selectedTutor}/availability`,
+//         `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability`,
 //         requestData
 //       );
 //       navigate("/");
@@ -464,7 +465,7 @@ export default AddAvailability;
 
 //     try {
 //       const response = await axios.delete(
-//         `http://localhost:6001/tutors/${selectedTutor}/availability/date/${formattedDate}`
+//         `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability/date/${formattedDate}`
 //       );
 
 //       if (response.status === 200) {
@@ -490,7 +491,7 @@ export default AddAvailability;
 //       console.log("Formatted time being sent:", formattedTime);
 
 //       const response = await axios.delete(
-//         `http://localhost:6001/tutors/${selectedTutor}/availability/date/${date}/time/${formattedTime}`
+//         `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability/date/${date}/time/${formattedTime}`
 //       );
 
 //       if (response.status === 200) {

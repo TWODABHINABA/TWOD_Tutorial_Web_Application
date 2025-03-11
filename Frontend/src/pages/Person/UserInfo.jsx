@@ -119,7 +119,8 @@ const UserInfo = () => {
                 src={
                   updatedUser.profilePicture instanceof File
                     ? URL.createObjectURL(updatedUser.profilePicture)
-                    : `http://localhost:6001${user.profilePicture}`
+                    // : `http://localhost:6001${user.profilePicture}`
+                    : `https://twod-tutorial-web-application.onrender.com${user.profilePicture}`
                 }
                 alt="Profile"
                 className="w-36 h-36 rounded-full object-cover border-4 border-orange-300"
