@@ -15,4 +15,9 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    outDir: 'dist', // default
+  },
+  // ✅ Important: Base URL if deploying under root domain
+  base: '/',
 })
