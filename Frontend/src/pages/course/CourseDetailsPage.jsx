@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import api from "../../components/User-management/api";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import EnrollmentCalendar from "./EnrollmentCalendar";
 import Navbar from "../../components/navbar/Navbar";
