@@ -33,12 +33,13 @@ const allowedOrigins = [
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true); // ✅ Origin allowed
+      callback(null, true); // ✅ Allow if no origin (Postman) or origin is allowed
     } else {
-      callback(new Error('Not allowed by CORS')); 
+      console.log("Blocked by CORS: ", origin); // Helpful debug log
+      callback(new Error('Not allowed by CORS')); // ❌ Block otherwise
     }
   },
-  credentials: true 
+  credentials: true // ✅ If using cookies or sessions
 };
 
 app.use(cors(corsOptions))
