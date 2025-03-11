@@ -199,10 +199,10 @@ router.get("/categories", async (req, res) => {
       courses: cat.courses.map((course) => ({
         name: course.name,
         courseTypeImage: course.courseTypeImage
-          ? `http://localhost:6001${course.courseTypeImage}`
+          ? `https://twod-tutorial-web-application.onrender.com${course.courseTypeImage}`
           : null,
         nameImage: course.nameImage
-          ? `http://localhost:6001${course.nameImage}`
+          ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
           : null,
       })),
     }));
