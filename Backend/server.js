@@ -15,7 +15,7 @@ const allowedOrigins = [
   // 'https://twod-tutorial-web-application.vercel.app', // Production frontend
   // 'https://twod-tutorial-web-application-tn27xfrr3.vercel.app',
   // 'https://twod-tutorial-web-applicati-git-2ee84e-vinays-projects-73cfc7f5.vercel.app'
-  "https://twod-tutorial-web-application-frontend.onrender.com"
+  "twod-tutorial-web-application-frontend.vercel.app"
 ];
 app.use(cors({
   origin: function (origin, callback) {
