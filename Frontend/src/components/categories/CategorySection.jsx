@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import api from "../../components/User-management/api"; // Adjust path as needed
-import './CategorySec.css';
+import './categorySec.css';
 
 const containerVariants = {
   hidden: {},
