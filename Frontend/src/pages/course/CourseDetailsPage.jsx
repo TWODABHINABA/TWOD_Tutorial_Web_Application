@@ -30,7 +30,7 @@ const CourseDetailsPage = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await api.get(`/courses/${courseId}`);
+        const response = await api.fetch(`/courses/${courseId}`);
         setCourse(response.data);
         console.log(response.data);
         setUpdatedCourse({
