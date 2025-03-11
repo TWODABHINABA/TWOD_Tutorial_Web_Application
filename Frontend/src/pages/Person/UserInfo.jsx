@@ -48,6 +48,7 @@ const UserInfo = () => {
       try {
         const response = await api.get("/user/courses");
         setPurchasedCourses(response.data);
+        console.log(response.data);
       } catch (err) {
         console.error("Error fetching purchased courses:", err);
       }
