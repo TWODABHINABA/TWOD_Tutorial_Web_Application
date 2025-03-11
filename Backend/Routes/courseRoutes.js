@@ -464,8 +464,58 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
   }
 });
 
+// router.get("/user/courses", authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+
+//     const transactions = await Transaction.find({
+//       user: userId,
+//       status: "completed",
+//     })
+//       .populate("courseId")
+//       .populate({
+//         path: "tutorId",
+//         select: "name", 
+//       })
+//       .lean();
+
+//     if (!transactions.length) {
+//       return res.status(404).json({ message: "No purchased courses found" });
+//     }
+
+   
+//     const formattedCourses = transactions.map((transaction) => ({
+//       courseId: transaction.courseId._id,
+//       courseTypeTitle:transaction.courseId.courseType,
+//       courseTitle: transaction.courseId.name,
+//       courseDescription: transaction.courseId.description,
+//       coursePrice: transaction.courseId.price,
+//       amountPaid: transaction.amount,
+//       tutorName: transaction.tutorId
+//         ? transaction.tutorId.name
+//         : "Not Selected",
+//       selectedDate: transaction.selectedDate || "Not Selected",
+//       selectedTime: transaction.selectedTime || "Not Selected",
+//       duration: transaction.duration || "Not Selected",
+//     }));
+//     res.json(formattedCourses);
+//   } catch (err) {
+//     console.error("Error fetching purchased courses:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
+
+
+
 router.get("/user/courses", authMiddleware, async (req, res) => {
   try {
+    console.log("Authenticated user:", req.user); // Debugging
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized. User not authenticated." });
+    }
+
     const userId = req.user.id;
 
     const transactions = await Transaction.find({
@@ -475,7 +525,7 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
       .populate("courseId")
       .populate({
         path: "tutorId",
-        select: "name", 
+        select: "name",
       })
       .lean();
 
@@ -483,25 +533,24 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "No purchased courses found" });
     }
 
-   
+    // Handle possible nulls in courseId and tutorId
     const formattedCourses = transactions.map((transaction) => ({
-      courseId: transaction.courseId._id,
-      courseTypeTitle:transaction.courseId.courseType,
-      courseTitle: transaction.courseId.name,
-      courseDescription: transaction.courseId.description,
-      coursePrice: transaction.courseId.price,
+      courseId: transaction.courseId?._id || "Deleted",
+      courseTypeTitle: transaction.courseId?.courseType || "Deleted",
+      courseTitle: transaction.courseId?.name || "Deleted",
+      courseDescription: transaction.courseId?.description || "Deleted",
+      coursePrice: transaction.courseId?.price || "Deleted",
       amountPaid: transaction.amount,
-      tutorName: transaction.tutorId
-        ? transaction.tutorId.name
-        : "Not Selected",
+      tutorName: transaction.tutorId?.name || "Not Selected",
       selectedDate: transaction.selectedDate || "Not Selected",
       selectedTime: transaction.selectedTime || "Not Selected",
       duration: transaction.duration || "Not Selected",
     }));
+
     res.json(formattedCourses);
   } catch (err) {
     console.error("Error fetching purchased courses:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
