@@ -31,7 +31,7 @@ const CourseDetailsPage = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await fetch(`https://twod-tutorial-web-application.onrender.com/courses/${courseId}`);
+        const response = await api.get(`/courses/${courseId}`);
         setCourse(response.data);
         console.log(response.data);
         setUpdatedCourse({
@@ -503,8 +503,9 @@ const CourseDetailsPage = () => {
                       >
                         <div className="flex items-start space-x-4">
                           <img
-                            // src={`http://localhost:6001${feedback.profilePicture}`}
-                            src={`https://twod-tutorial-web-application.onrender.com${feedback.profilePicture}`}
+                            // src={`http://localhost:6001${feedback.profilePicture}`} //local 
+                            // src={`https://twod-tutorial-web-application.onrender.com${feedback.profilePicture}`} //vinay
+                            src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
                             alt="Profile"
                             className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
                           />

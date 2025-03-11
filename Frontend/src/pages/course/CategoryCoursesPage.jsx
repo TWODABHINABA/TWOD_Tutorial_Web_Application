@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
@@ -8,7 +8,6 @@ const CategoryCoursesPage = () => {
   const [categories, setCategories] = useState([]);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const coursesRef = useRef(null);
-  const navigate=useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -112,7 +111,7 @@ const CategoryCoursesPage = () => {
                         onClick={async (e) => {
                           e.preventDefault();
                           const id = await fetchCourseId(courseName);
-                          if (id) navigate(`/courses/${id}`);
+                          if (id) window.location.href = `/courses/${id}`;
                         }}
                         className="relative group cursor-pointer overflow-hidden rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105"
                       >
