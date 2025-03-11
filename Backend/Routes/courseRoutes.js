@@ -287,7 +287,7 @@ router.get("/categories", async (req, res) => {
 //   }
 // });
 
-router.post("/:id/enroll", authMiddleware, async (req, res) => {
+router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
   try {
     const { tutorId, selectedDate, selectedTime, duration, amount } = req.body;
     const course = await Course.findById(req.params.id);
