@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import EnrollmentCalendar from "./EnrollmentCalendar";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
+import axios from "axios";
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -30,7 +31,7 @@ const CourseDetailsPage = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await api.fetch(`/courses/${courseId}`);
+        const response = await fetch(`https://twod-tutorial-web-application.onrender.com/courses/${courseId}`);
         setCourse(response.data);
         console.log(response.data);
         setUpdatedCourse({
