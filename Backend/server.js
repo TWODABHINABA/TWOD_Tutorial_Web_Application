@@ -8,22 +8,24 @@ const courseRoutes=require("./Routes/courseRoutes");
 const tutorRoutes=require("./Routes/tutorRoutes");
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
-app.use(cors());
+
 // app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-// const allowedOrigins = [
-//   'http://localhost:5173', // Local dev
-//   'https://twod-tutorial-web-application.vercel.app' // Production frontend
-// ];
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   credentials: true
-// }));
+const allowedOrigins = [
+  'http://localhost:5173', // Local dev
+  'https://twod-tutorial-web-application.vercel.app', // Production frontend
+  'https://twod-tutorial-web-application-tn27xfrr3.vercel.app',
+  'https://twod-tutorial-web-applicati-git-2ee84e-vinays-projects-73cfc7f5.vercel.app'
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors(
