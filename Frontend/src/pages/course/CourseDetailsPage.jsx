@@ -84,10 +84,10 @@ const CourseDetailsPage = () => {
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!token) {
-      window.location.href("/register");
+      window.location.href="/register";
     }
     try {
-      const response = await api.post(`/${courseId}/feedback`, feedback, {
+      const response = await api.post(`/courses/${courseId}/feedback`, feedback, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -152,7 +152,7 @@ const CourseDetailsPage = () => {
 
     try {
       const response = await api.post(
-        `/${course._id}/enroll`,
+        `/courses/${course._id}/enroll`,
         {
           tutorId: selectedTutor,
           // date: selectedDate,
@@ -196,7 +196,7 @@ const CourseDetailsPage = () => {
         <div className="max-w-md text-center space-y-4">
           <div className="text-6xl">📚</div>
           <h2 className="text-3xl font-bold text-gray-800">Course not found</h2>
-          <p className="text-gray-600">No details available for {courseName}</p>
+          <p className="text-gray-600">No details available for course</p>
           <Link
             to="/"
             className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-500 transition-all duration-300 transform hover:scale-105"
