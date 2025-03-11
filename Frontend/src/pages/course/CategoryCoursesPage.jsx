@@ -14,7 +14,7 @@ const CategoryCoursesPage = () => {
       try {
         const response = await api.get("/categories");
         setCategories(response.data);
-        console.log(response.data);
+        console.log("Categories Dataaaaa",response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -34,9 +34,10 @@ const CategoryCoursesPage = () => {
   };
 
   
-  const fetchCourseId = async (courseName) => {
+  const fetchCourseId = async (courseName,courseType) => {
     try {
-      const response = await api.get(`/courses?name=${courseName}`);
+      const response = await api.get(`/courses?name=${courseName}&courseType=${courseType}`);
+      console.log("Fetched Course:", response.data); 
       return response.data._id;
     } catch (error) {
       console.error("Error fetching course ID:", error);
@@ -103,14 +104,15 @@ const CategoryCoursesPage = () => {
                 {categories
                   .find((cat) => cat.category === expandedCategory)
                   ?.courses.map((course, i) => {
-                    const courseName =
-                      typeof course === "object" ? course.name : course;
+                    const courseName = typeof course === "object" ? course.name : course;
+                    // const courseType = typeof course === "object" ? course.courseType : expandedCategory;
                     return (
                       <div
                         key={i}
                         onClick={async (e) => {
                           e.preventDefault();
-                          const id = await fetchCourseId(courseName);
+                          console.log("Clicked Course:", courseName, "Type:", course.courseType); // ✅ Now it will not be undefined
+                          const id = await fetchCourseId(courseName, course.courseType);
                           if (id) window.location.href = `/courses/${id}`;
                         }}
                         className="relative group cursor-pointer overflow-hidden rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105"

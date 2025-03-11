@@ -10,14 +10,15 @@ const tutorRoutes=require("./Routes/tutorRoutes");
 app.use(express.json());
 
 // app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-const allowedOrigins = [
-  'http://localhost:5173', // Local dev
-  // 'https://twod-tutorial-web-application.vercel.app', // Production frontend
-  // 'https://twod-tutorial-web-application-tn27xfrr3.vercel.app',
-  // 'https://twod-tutorial-web-applicati-git-2ee84e-vinays-projects-73cfc7f5.vercel.app'
-  "https://twod-tutorial-web-application-frontend.vercel.app",
-  // "https://twod-tutorial-web-application.vercel.app/"
-];
+app.use(cors({ origin: "https://twod-tutorial-web-application-frontend.vercel.app", credentials: true }));
+// const allowedOrigins = [
+//   'http://localhost:5173', // Local dev
+//   // 'https://twod-tutorial-web-application.vercel.app', // Production frontend
+//   // 'https://twod-tutorial-web-application-tn27xfrr3.vercel.app',
+//   // 'https://twod-tutorial-web-applicati-git-2ee84e-vinays-projects-73cfc7f5.vercel.app'
+//   // "https://twod-tutorial-web-application-frontend.vercel.app",
+//   // "https://twod-tutorial-web-application.vercel.app/"
+// ];
 // app.use(cors({
 //   origin: function (origin, callback) {
 //     if (!origin || allowedOrigins.includes(origin)) {
@@ -30,19 +31,19 @@ const allowedOrigins = [
 //   // methods: ['GET', 'POST', 'PUT', 'DELETE'],
 //   // allowedHeaders: ['Content-Type', 'Authorization'], 
 // }));
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true); // ✅ Allow if no origin (Postman) or origin is allowed
-    } else {
-      console.log("Blocked by CORS: ", origin); // Helpful debug log
-      callback(new Error('Not allowed by CORS')); // ❌ Block otherwise
-    }
-  },
-  credentials: true // ✅ If using cookies or sessions
-};
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true); // ✅ Allow if no origin (Postman) or origin is allowed
+//     } else {
+//       console.log("Blocked by CORS: ", origin); // Helpful debug log
+//       callback(new Error('Not allowed by CORS')); // ❌ Block otherwise
+//     }
+//   },
+//   credentials: true // ✅ If using cookies or sessions
+// };
 
-app.use(cors(corsOptions))
+// app.use(cors(corsOptions))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors(

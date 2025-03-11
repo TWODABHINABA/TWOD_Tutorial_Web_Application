@@ -147,6 +147,31 @@ router.get("/courses/:id", async (req, res) => {
   }
 });
 
+
+router.get("/courses", async (req, res) => {
+  try {
+    const { name, courseType } = req.query;
+
+    if (!name || !courseType) {
+      return res.status(400).json({ message: "Course name and type are required" });
+    }
+
+    const course = await Course.findOne({
+      name: new RegExp(`^${name}$`, "i"),
+      courseType: new RegExp(`^${courseType}$`, "i"), // make it case-insensitive if needed
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    console.log(course);
+    res.json(course);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/allCourses", async (req, res) => {
   try {
     const courses = await Course.find();
@@ -156,25 +181,35 @@ router.get("/allCourses", async (req, res) => {
   }
 });
 
-router.get("/courses", async (req, res) => {
-  try {
-    const { name } = req.query;
+// router.get("/courses", async (req, res) => {
+//   try {
+//     const { name } = req.query;
 
-    if (!name) {
-      return res.status(400).json({ message: "Course name is required" });
-    }
+//     if (!name) {
+//       return res.status(400).json({ message: "Course name is required" });
+//     }
 
-    const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
+//     const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
 
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-    console.log(course);
-    res.json(course);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+//     if (!course) {
+//       return res.status(404).json({ message: "Course not found" });
+//     }
+//     console.log(course);
+//     res.json(course);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+// router.get("/category/:categoryName", async (req, res) => {
+//   try {
+//     const { categoryName } = req.params;
+//     const courses = await Course.find({ courseType: categoryName });
+//     res.json(courses);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 router.get("/categories", async (req, res) => {
   try {
@@ -187,6 +222,7 @@ router.get("/categories", async (req, res) => {
               name: "$name",
               courseTypeImage: "$courseTypeImage",
               nameImage: "$nameImage",
+              courseType: "$courseType", // ✅ Add this!
             },
           },
         },
@@ -195,9 +231,9 @@ router.get("/categories", async (req, res) => {
 
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
-      // courses: cat.courses,
       courses: cat.courses.map((course) => ({
         name: course.name,
+        courseType: course.courseType, // ✅ Include here too
         courseTypeImage: course.courseTypeImage
           ? `https://twod-tutorial-web-application.onrender.com${course.courseTypeImage}`
           : null,
@@ -212,6 +248,44 @@ router.get("/categories", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
+
+// router.get("/categories", async (req, res) => {
+//   try {
+//     const categories = await Course.aggregate([
+//       {
+//         $group: {
+//           _id: "$courseType",
+//           courses: {
+//             $push: {
+//               name: "$name",
+//               courseTypeImage: "$courseTypeImage",
+//               nameImage: "$nameImage",
+//             },
+//           },
+//         },
+//       },
+//     ]);
+
+//     const formattedCategories = categories.map((cat) => ({
+//       category: cat._id,
+//       // courses: cat.courses,
+//       courses: cat.courses.map((course) => ({
+//         name: course.name,
+//         // courseType: course.courseType,
+//         courseTypeImage: course.courseTypeImage
+//           ? `https://twod-tutorial-web-application.onrender.com${course.courseTypeImage}`
+//           : null,
+//         nameImage: course.nameImage
+//           ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
+//           : null,
+//       })),
+//     }));
+
+//     res.json(formattedCategories);
+//   } catch (err) {
+//     res.status(500).json({ error: "Failed to fetch categories" });
+//   }
+// });
 
 router.post("/:id/enroll", authMiddleware, async (req, res) => {
   try {
