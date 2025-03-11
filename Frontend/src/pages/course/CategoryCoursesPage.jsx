@@ -111,7 +111,7 @@ const CategoryCoursesPage = () => {
                         onClick={async (e) => {
                           e.preventDefault();
                           const id = await fetchCourseId(courseName);
-                          if (id) window.location.href = `https://twod-tutorial-web-application.vercel.app/courses/${id}`;
+                          if (id) window.location.href = `/courses/${id}`;
                         }}
                         className="relative group cursor-pointer overflow-hidden rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105"
                       >
