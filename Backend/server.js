@@ -12,9 +12,10 @@ app.use(express.json());
 // app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 const allowedOrigins = [
   'http://localhost:5173', // Local dev
-  'https://twod-tutorial-web-application.vercel.app', // Production frontend
-  'https://twod-tutorial-web-application-tn27xfrr3.vercel.app',
-  'https://twod-tutorial-web-applicati-git-2ee84e-vinays-projects-73cfc7f5.vercel.app'
+  // 'https://twod-tutorial-web-application.vercel.app', // Production frontend
+  // 'https://twod-tutorial-web-application-tn27xfrr3.vercel.app',
+  // 'https://twod-tutorial-web-applicati-git-2ee84e-vinays-projects-73cfc7f5.vercel.app'
+  "https://twod-tutorial-web-application-frontend.onrender.com"
 ];
 app.use(cors({
   origin: function (origin, callback) {
