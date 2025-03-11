@@ -16,20 +16,32 @@ const allowedOrigins = [
   // 'https://twod-tutorial-web-application-tn27xfrr3.vercel.app',
   // 'https://twod-tutorial-web-applicati-git-2ee84e-vinays-projects-73cfc7f5.vercel.app'
   "https://twod-tutorial-web-application-frontend.vercel.app/",
-  "https://twod-tutorial-web-application.vercel.app/"
+  // "https://twod-tutorial-web-application.vercel.app/"
 ];
-app.use(cors({
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+//   // methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   // allowedHeaders: ['Content-Type', 'Authorization'], 
+// }));
+const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+      callback(null, true); // ✅ Origin allowed
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('Not allowed by CORS')); 
     }
   },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'], 
-}));
+  credentials: true 
+};
+
+app.use(cors(corsOptions))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors(
