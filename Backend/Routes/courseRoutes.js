@@ -217,10 +217,10 @@ router.get("/categories", async (req, res) => {
       {
         $group: {
           _id: "$courseType",
+          courseTypeImage: { $first: "$courseTypeImage" }, 
           courses: {
             $push: {
               name: "$name",
-              courseTypeImage: "$courseTypeImage",
               nameImage: "$nameImage",
               courseType: "$courseType", // ✅ Add this!
             },

@@ -93,26 +93,16 @@ const CategoryCoursesPage = () => {
                 className="bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl cursor-pointer"
                 onClick={() => toggleCategory(cat.category)}
               >
-                {/* <img
-                  src={
-                    cat.courses.length > 0 && cat.courses[0].courseTypeImage
-                      ? cat.courses[0].courseTypeImage
-                      : "https://via.placeholder.com/300x200?text=No+Image"
-                  }
-                  alt={cat.category || "Course Category"}
-                  className="w-full h-40 object-cover bg-gray-200"
-                /> */}
-
                 <img
                   src={
-                    cat.courses.length > 0 && cat.courses[0].courseTypeImage
-                      ? cat.courses[0].courseTypeImage
+                    cat.courseTypeImage
+                      ? cat.courseTypeImage
                       : "https://via.placeholder.com/300x200?text=No+Image"
                   }
                   alt={cat.category}
                   className="w-full h-40 object-cover"
                 />
-                <div className="p-4 flex justify-between items-center">
+                <div className="p-4 flex justify-between items-center ">
                   <h3 className="text-lg font-semibold text-orange-800">
                     {cat.category}
                   </h3>
