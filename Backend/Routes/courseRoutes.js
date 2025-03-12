@@ -104,7 +104,7 @@ router.put("/courses/update/:courseId", async (req, res) => {
   }
 });
 
-router.post("/:id/feedback", authMiddleware, async (req, res) => {
+router.post("/courses/:id/feedback", authMiddleware, async (req, res) => {
   try {
     const { rating, comment } = req.body;
     const course = await Course.findById(req.params.id);
