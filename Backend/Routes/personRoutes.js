@@ -78,12 +78,12 @@ router.get("/auth/callback/success", async (req, res) => {
   if (!user.password) {
 
     return res.redirect(
-      `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
+      `https://twod-tutorial-web-application-frontend.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
     );
   }
 
   return res.redirect(
-    `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
+    `https://twod-tutorial-web-application-frontend.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
       user.name
     )}&email=${encodeURIComponent(user.email)}`
   );
