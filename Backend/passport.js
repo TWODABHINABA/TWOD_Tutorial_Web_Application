@@ -10,9 +10,10 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "https://twod-tutorial-web-application-frontend.vercel.app/auth/callback",
+      callbackURL: process.env.CALLBACK_URL,
       passReqToCallback: true,
     },
+    
     async (request, accessToken, refreshToken, profile, done) => {
       try {
         let user = await Person.findOne({ googleId: profile.id }); //email: profile.emails[0].value 
