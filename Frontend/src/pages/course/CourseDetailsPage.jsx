@@ -88,11 +88,7 @@ const CourseDetailsPage = () => {
       window.location.href="/register";
     }
     try {
-      const response = await api.post(`/courses/${courseId}/feedback`, feedback, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await api.post(`/courses/${courseId}/feedback`, feedback,);
       setCourse(response.data.course);
       setFeedback({ rating: "", comment: "" });
     } catch (err) {
