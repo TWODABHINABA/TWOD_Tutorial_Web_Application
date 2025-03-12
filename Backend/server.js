@@ -6,6 +6,7 @@ const cors=require("cors");
 const personRoutes = require("./Routes/personRoutes");
 const courseRoutes=require("./Routes/courseRoutes");
 const tutorRoutes=require("./Routes/tutorRoutes");
+const path = require('path');
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
 
