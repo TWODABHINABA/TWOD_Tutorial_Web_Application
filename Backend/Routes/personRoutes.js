@@ -29,18 +29,10 @@ router.use(
   })
 );
 
-// Cookie Session
-router.use(
-  cookieSession({
-    name: "session",
-    keys: ["secret"],
-    maxAge: 24 * 60 * 60 * 1000,
-  })
-);
+
 
 // Passport initialization
 router.use(passport.initialize());
-router.use(passport.session());
 
 // Routes
 router.get("/", (req, res) => {
