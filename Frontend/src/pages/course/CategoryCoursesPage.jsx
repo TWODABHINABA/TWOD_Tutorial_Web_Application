@@ -181,17 +181,16 @@ const CategoryCoursesPage = () => {
               >
                 <img
                   src={
-                    cat.courseTypeImage
-                      ? `https://twod-tutorial-web-application.onrender.com${cat.courseTypeImage}`
-                      : "https://via.placeholder.com/300x200?text=No+Image"
+                      `https://twod-tutorial-web-application.onrender.com${cat.courseTypeImage}`
+                      // : `https://twod-tutorial-web-application.onrender.com/uploads/no-image.jpg` // <-- Backend stored placeholder
                   }
                   alt={cat.category}
                   className="w-full h-40 object-cover"
-                  onError={(e) =>
-                    (e.target.src =
-                      "https://via.placeholder.com/300x200?text=No+Image")
-                  }
+                  onError={(e) => {
+                    e.target.src = `https://twod-tutorial-web-application.onrender.com/uploads/no-image.jpg`; // fallback if broken
+                  }}
                 />
+
                 <div className="p-4 flex justify-between items-center">
                   <h3 className="text-lg font-semibold text-orange-800">
                     {cat.category}
