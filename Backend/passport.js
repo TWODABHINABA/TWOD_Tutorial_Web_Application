@@ -26,6 +26,7 @@ passport.use(
           });
           await user.save();
           console.log(user);
+          console.log("Google Strategy Callback URL:", process.env.CALLBACK_URL);
           
         }
         const token = jwt.sign({ id: user._id }, JWT_SECRET, {

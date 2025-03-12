@@ -15,18 +15,34 @@ require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+const FRONTEND_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://twod-tutorial-web-application-frontend.vercel.app"
+    : "http://localhost:5173";
 
-router.use(passport.initialize());
-
+// CORS (Optional but recommended)
+const cors = require("cors");
 router.use(
-  cookieSession({
-    resave: false,
-    saveUninitialized: true,
-    secret: "secret",
+  cors({
+    origin: [FRONTEND_URL],
+    credentials: true,
   })
 );
+
+// Cookie Session
+router.use(
+  cookieSession({
+    name: "session",
+    keys: ["secret"],
+    maxAge: 24 * 60 * 60 * 1000,
+  })
+);
+
+// Passport initialization
+router.use(passport.initialize());
 router.use(passport.session());
 
+// Routes
 router.get("/", (req, res) => {
   res.send("<button><a href='/auth'>Login With Google</a></button>");
 });
@@ -44,9 +60,6 @@ router.get(
   })
 );
 
-
-
-
 router.get("/auth/callback/success", async (req, res) => {
   if (!req.user) return res.redirect("/auth/callback/failure");
 
@@ -54,16 +67,13 @@ router.get("/auth/callback/success", async (req, res) => {
   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
 
   if (!user.password) {
-
     return res.redirect(
-      `https://twod-tutorial-web-application-frontend.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
+      `${FRONTEND_URL}/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
     );
   }
 
   return res.redirect(
-    `https://twod-tutorial-web-application-frontend.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
-      user.name
-    )}&email=${encodeURIComponent(user.email)}`
+    `${FRONTEND_URL}/auth-success?token=${token}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`
   );
 });
 
@@ -74,16 +84,15 @@ router.post("/set-password", async (req, res) => {
     const user = await Person.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    user.password = password;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
 
     await user.save();
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
       JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
+      { expiresIn: "1h" }
     );
     res.json({ token, role: user.role });
   } catch (error) {
@@ -91,10 +100,89 @@ router.post("/set-password", async (req, res) => {
   }
 });
 
-
 router.get("/auth/callback/failure", (req, res) => {
-  res.send("Error");
+  res.send("Error during Google login. Please try again.");
 });
+
+// router.use(passport.initialize());
+
+// router.use(
+//   cookieSession({
+//     resave: false,
+//     saveUninitialized: true,
+//     secret: "secret",
+//   })
+// );
+// router.use(passport.session());
+
+// router.get("/", (req, res) => {
+//   res.send("<button><a href='/auth'>Login With Google</a></button>");
+// });
+
+// router.get(
+//   "/auth",
+//   passport.authenticate("google", { scope: ["email", "profile"] })
+// );
+
+// router.get(
+//   "/auth/callback",
+//   passport.authenticate("google", {
+//     successRedirect: "/auth/callback/success",
+//     failureRedirect: "/auth/callback/failure",
+//   })
+// );
+
+
+
+
+// router.get("/auth/callback/success", async (req, res) => {
+//   if (!req.user) return res.redirect("/auth/callback/failure");
+
+//   const user = req.user;
+//   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+
+//   if (!user.password) {
+
+//     return res.redirect(
+//       `https://twod-tutorial-web-application-frontend.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
+//     );
+//   }
+
+//   return res.redirect(
+//     `https://twod-tutorial-web-application-frontend.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
+//       user.name
+//     )}&email=${encodeURIComponent(user.email)}`
+//   );
+// });
+
+// router.post("/set-password", async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//     const user = await Person.findOne({ email });
+//     if (!user) return res.status(404).json({ message: "User not found" });
+
+//     user.password = password;
+
+//     await user.save();
+
+//     const token = jwt.sign(
+//       { id: user._id, role: user.role },
+//       JWT_SECRET,
+//       {
+//         expiresIn: "1h",
+//       }
+//     );
+//     res.json({ token, role: user.role });
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
+
+// router.get("/auth/callback/failure", (req, res) => {
+//   res.send("Error");
+// });
 
 // router.get("/auth/callback/success", async (req, res) => {
 //   if (!req.user) return res.redirect("/auth/callback/failure");
