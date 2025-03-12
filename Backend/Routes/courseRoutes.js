@@ -258,14 +258,14 @@ router.get("/categories", async (req, res) => {
       {
         $group: {
           _id: "$courseType",
-          courseTypeImage: { $first: "$courseTypeImage" }, // Pick 1 image per type
           courses: {
             $push: {
               name: "$name",
+              courseType: "$courseType", // still store for later use
               nameImage: "$nameImage",
-              courseType: "$courseType",
             },
           },
+          courseTypeImage: { $first: "$courseTypeImage" }, // pick first image for category
         },
       },
     ]);
@@ -286,6 +286,7 @@ router.get("/categories", async (req, res) => {
 
     res.json(formattedCategories);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
