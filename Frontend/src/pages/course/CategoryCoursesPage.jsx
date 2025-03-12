@@ -182,11 +182,15 @@ const CategoryCoursesPage = () => {
                 <img
                   src={
                     cat.courseTypeImage
-                      ? cat.courseTypeImage
+                      ? `https://twod-tutorial-web-application.onrender.com${cat.courseTypeImage}`
                       : "https://via.placeholder.com/300x200?text=No+Image"
                   }
                   alt={cat.category}
                   className="w-full h-40 object-cover"
+                  onError={(e) =>
+                    (e.target.src =
+                      "https://via.placeholder.com/300x200?text=No+Image")
+                  }
                 />
                 <div className="p-4 flex justify-between items-center">
                   <h3 className="text-lg font-semibold text-orange-800">
