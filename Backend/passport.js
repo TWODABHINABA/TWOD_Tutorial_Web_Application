@@ -5,6 +5,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const Person = require("./Models/person");
 const JWT_SECRET=process.env.JWT_SECRET;
 
+console.log("✅ CALLBACK_URL being used by GoogleStrategy:", process.env.CALLBACK_URL);
 passport.use(
   new GoogleStrategy(
     {
@@ -26,7 +27,7 @@ passport.use(
           });
           await user.save();
           console.log(user);
-          console.log("Google Strategy Callback URL:", process.env.CALLBACK_URL);
+          // console.log("Google Strategy Callback URL:", process.env.CALLBACK_URL);
           
         }
         const token = jwt.sign({ id: user._id }, JWT_SECRET, {
