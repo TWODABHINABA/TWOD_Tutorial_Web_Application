@@ -55,35 +55,6 @@ const CategoryCoursesPage = () => {
           <div className="mt-2 h-1 w-20 bg-gradient-to-r from-orange-400 to-orange-400 rounded-full"></div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {categories.map((cat, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl cursor-pointer"
-                onClick={() => toggleCategory(cat.category)}
-              >
-       
-                <img
-                  src={cat.courses[0].courseTypeImage}
-                  alt={cat.category}
-                  className="w-full h-40 object-cover"
-                />
-                <div className="p-4 flex justify-between items-center ">
-                  <h3 className="text-lg font-semibold text-orange-800">
-                    {cat.category}
-                  </h3>
-                  <span
-                    className={`transition-transform duration-300 ${
-                      expandedCategory === cat.category
-                        ? "rotate-180"
-                        : "rotate-0"
-                    }`}
-                  >
-                    ▼
-                  </span>
-                </div>
-              </div>
-            ))}
-
             {/* {categories.map((cat, idx) => (
               <div
                 key={idx}
@@ -114,7 +85,7 @@ const CategoryCoursesPage = () => {
                   </span>
                 </div>
               </div>
-            ))} */}
+            ))}
           </div>
 
           {expandedCategory && (
@@ -169,12 +140,9 @@ const CategoryCoursesPage = () => {
                   })}
               </div>
             </div>
-          )}
-            
-            
-            
-            
-            {/* {categories.map((cat, idx) => (
+          )} */}
+
+          {categories.map((cat, idx) => (
               <div
                 key={idx}
                 className="bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl cursor-pointer"
@@ -259,7 +227,7 @@ const CategoryCoursesPage = () => {
                   ))}
               </div>
             </div>
-          )} */}
+          )}
 
           <div className="mt-8">
             <Link
