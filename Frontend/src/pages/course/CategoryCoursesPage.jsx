@@ -63,7 +63,7 @@ const CategoryCoursesPage = () => {
               >
        
                 <img
-                  src={cat.courseTypeImage}
+                  src={cat.courses[0].courseTypeImage}
                   alt={cat.category}
                   className="w-full h-40 object-cover"
                 />
