@@ -87,7 +87,7 @@ const CategoryCoursesPage = () => {
               </div>
             ))}
 
-            {categories.map((cat, idx) => (
+            {/* {categories.map((cat, idx) => (
               <div
                 key={idx}
                 className="bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl cursor-pointer"
@@ -117,7 +117,7 @@ const CategoryCoursesPage = () => {
                   </span>
                 </div>
               </div>
-            ))}
+            ))} */}
           </div>
 
           {expandedCategory && (
