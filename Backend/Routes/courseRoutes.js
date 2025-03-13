@@ -211,47 +211,6 @@ router.get("/allCourses", async (req, res) => {
 //   }
 // });
 
-// router.get("/categories", async (req, res) => {
-//   try {
-//     const categories = await Course.aggregate([
-//       {
-//         $group: {
-//           _id: "$courseType",
-//           courses: {
-//             $push: {
-//               name: "$name",
-//               courseTypeImage: "$courseTypeImage",
-//               nameImage: "$nameImage",
-//               courseType: "$courseType", // ✅ Add this!
-//             },
-//           },
-//         },
-//       },
-//     ]);
-
-//     const formattedCategories = categories.map((cat) => ({
-//       category: cat._id,
-//       courses: cat.courses.map((course) => ({
-//         name: course.name,
-//         courseType: course.courseType, // ✅ Include here too
-//         courseTypeImage: course.courseTypeImage
-//           ? `https://twod-tutorial-web-application.onrender.com${course.courseTypeImage}`
-//           : null,
-//         nameImage: course.nameImage
-//           ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
-//           : null,
-//       })),
-//     }));
-
-//     res.json(formattedCategories);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to fetch categories" });
-//   }
-// });
-
-
-
-
 router.get("/categories", async (req, res) => {
   try {
     const categories = await Course.aggregate([
@@ -261,23 +220,23 @@ router.get("/categories", async (req, res) => {
           courses: {
             $push: {
               name: "$name",
-              courseType: "$courseType", // still store for later use
+              courseTypeImage: "$courseTypeImage",
               nameImage: "$nameImage",
+              courseType: "$courseType", // ✅ Add this!
             },
           },
-          courseTypeImage: { $first: "$courseTypeImage" }, // pick first image for category
         },
       },
     ]);
 
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
-      courseTypeImage: cat.courseTypeImage
-        ? `https://twod-tutorial-web-application.onrender.com${cat.courseTypeImage}`
-        : null,
       courses: cat.courses.map((course) => ({
         name: course.name,
-        courseType: course.courseType,
+        courseType: course.courseType, // ✅ Include here too
+        courseTypeImage: course.courseTypeImage
+          ? `https://twod-tutorial-web-application.onrender.com${course.courseTypeImage}`
+          : null,
         nameImage: course.nameImage
           ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
           : null,
@@ -286,10 +245,51 @@ router.get("/categories", async (req, res) => {
 
     res.json(formattedCategories);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
+
+
+
+
+// router.get("/categories", async (req, res) => {
+//   try {
+//     const categories = await Course.aggregate([
+//       {
+//         $group: {
+//           _id: "$courseType",
+//           courses: {
+//             $push: {
+//               name: "$name",
+//               courseType: "$courseType", // still store for later use
+//               nameImage: "$nameImage",
+//             },
+//           },
+//           courseTypeImage: { $first: "$courseTypeImage" }, // pick first image for category
+//         },
+//       },
+//     ]);
+
+//     const formattedCategories = categories.map((cat) => ({
+//       category: cat._id,
+//       courseTypeImage: cat.courseTypeImage
+//         ? `https://twod-tutorial-web-application.onrender.com${cat.courseTypeImage}`
+//         : null,
+//       courses: cat.courses.map((course) => ({
+//         name: course.name,
+//         courseType: course.courseType,
+//         nameImage: course.nameImage
+//           ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
+//           : null,
+//       })),
+//     }));
+
+//     res.json(formattedCategories);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Failed to fetch categories" });
+//   }
+// });
 
 
 router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
