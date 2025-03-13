@@ -55,6 +55,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // ));
 // app.use("/uploads", express.static("uploads"));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/courseUploads', express.static(path.join(__dirname, 'courseUploads')));
 
 app.use("/",tutorRoutes);
 app.use("/", personRoutes);

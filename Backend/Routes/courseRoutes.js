@@ -8,18 +8,18 @@ const multer = require("multer");
 const path = require("path");
 
 const storage = multer.diskStorage({
-  destination: "uploads/",
+  destination: "courseUploads/",
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
-const upload = multer({ storage });
+const courseUploads = multer({ storage });
 
 router.post(
   "/add",
   authMiddleware,
-  upload.fields([
+  courseUploads.fields([
     { name: "courseTypeImage", maxCount: 1 },
     { name: "nameImage", maxCount: 1 },
   ]),
@@ -49,10 +49,10 @@ router.post(
       const curriculumData = JSON.parse(req.body.curriculum || "[]");
 
       const courseTypeImage = req.files["courseTypeImage"]
-        ? `/uploads/${req.files["courseTypeImage"][0].filename}`
+        ? `/courseUploads/${req.files["courseTypeImage"][0].filename}`
         : "";
       const nameImage = req.files["nameImage"]
-        ? `/uploads/${req.files["nameImage"][0].filename}`
+        ? `/courseUploads/${req.files["nameImage"][0].filename}`
         : "";
 
       const newCourse = new Course({
