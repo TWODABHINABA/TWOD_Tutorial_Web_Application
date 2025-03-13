@@ -273,13 +273,13 @@ router.get("/categories", async (req, res) => {
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
       courseTypeImage: cat.courseTypeImage
-        ? `https://twod-tutorial-web-application.onrender.com${cat.courseTypeImage}`
+        ? `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}`
         : null,
       courses: cat.courses.map((course) => ({
         name: course.name,
         courseType: course.courseType,
         nameImage: course.nameImage
-          ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
+          ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`
           : null,
       })),
     }));
