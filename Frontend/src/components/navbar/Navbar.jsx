@@ -223,7 +223,7 @@ const CustomNavbar = () => {
 
             {/* LEFT Links */}
             <div className="hidden md:flex gap-6 text-xl ml-20">
-              <AnimatedNavbarLink to="/categories" ignoreActive>
+              <AnimatedNavbarLink to="/category/:categoryName" ignoreActive>
                 <ExploreDropdown />
               </AnimatedNavbarLink>
               <AnimatedNavbarLink to="/resources">Resources</AnimatedNavbarLink>
