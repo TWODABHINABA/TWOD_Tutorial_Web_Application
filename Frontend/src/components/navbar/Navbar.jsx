@@ -48,10 +48,10 @@ const CustomNavbar = () => {
   const isRoleAdmin = localStorage.getItem("role");
   return (
     <>
-      <div className="m-3 mt-4 top-bar">
+      {/* <div className="m-3 mt-4 top-bar">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-left justify-between">
-            {/* <div className="w-full md:w-3/4 flex flex-wrap">
+            <div className="w-full md:w-3/4 flex flex-wrap">
               <span className="text-sm mr-3 flex items-center cursor-default text-orange-600">
                 <span className="icon-question-circle-o mr-2"></span>
                 <span className="hidden lg:inline-block">Have a question?</span>
@@ -64,8 +64,8 @@ const CustomNavbar = () => {
                 <span className="icon-envelope mr-2"></span>
                 <span className="hidden lg:inline-block">info@mydomain.com</span>
               </span>
-            </div> */}
-            {/* <div className="w-full md:w-1/4 text-right mt-2 md:mt-0">
+            </div> 
+            <div className="w-full md:w-1/4 text-right mt-2 md:mt-0">
               {!isAuthenticated ? (
                 <button
                   onClick={() => setShowLoginModal(true)}
@@ -107,91 +107,91 @@ const CustomNavbar = () => {
               ) : (
                 <button></button>
               )}
-            </div> */}
+            </div> 
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="h-[1px] bg-orange-400"></div>
-<div className="sticky top-0 z-50 bg-orange-100">
-  <Navbar fluid rounded className="flex justify-between items-center">
-    {/* Left side: Brand + Links */}
-    <div className="flex items-center space-x-6">
-      {/* Brand */}
-      <NavbarBrand as={Link} to="/" className="flex items-center">
-        <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
-          <TbSquareRoot className="text-4xl text-orange-600" />
-        </h1>
-        <span className="self-center whitespace-nowrap text-xl font-semibold text-orange-500">
-          TUTOR
-        </span>
-      </NavbarBrand>
-
-      {/* Navbar Links */}
-      <div className="flex items-center space-x-6 text-xl">
-        <AnimatedNavbarLink to="/" ignoreActive>
-          <ExploreDropdown />
-        </AnimatedNavbarLink>
-        <AnimatedNavbarLink to="/resources">Resources</AnimatedNavbarLink>
-        <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
-        <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
-        <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
-        {isAuthenticated && (
-          <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
-        )}
-        {isRoleAdmin === "admin" && (
-          <>
-            <AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/add-course">
-              <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
-                Add Course
-              </button>
+      <div className="sticky top-0 z-50 bg-orange-100 ">
+        <Navbar fluid rounded>
+          <NavbarBrand as={Link} to="/">
+            <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
+              <TbSquareRoot className="text-4xl text-orange-600" />
+            </h1>
+            <span className="self-center whitespace-nowrap text-xl font-semibold text-orange-500">
+              TUTOR
+            </span>
+          </NavbarBrand>
+          <div className="flex md:order-2 items-center">
+            <button className="mr-3 rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
+            onClick={() => window.location.href = `/category/}`}>
+              Get Started
+            </button>
+            <NavbarToggle />
+          </div>
+          <NavbarCollapse className="transition-all duration-300 ease-in-out text-xl">
+            <AnimatedNavbarLink to="/" ignoreActive>
+              <ExploreDropdown />
             </AnimatedNavbarLink>
-          </>
-        )}
+            <AnimatedNavbarLink to="/resources">Resources &nbsp;&nbsp;</AnimatedNavbarLink>
+            <AnimatedNavbarLink to="/pricing">Pricing &nbsp;&nbsp;</AnimatedNavbarLink>
+            <AnimatedNavbarLink to="/about">About&nbsp;&nbsp;</AnimatedNavbarLink>
+            <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
+            {!isAuthenticated ? (
+              <></>
+            ) : (
+              <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
+            )}
+           {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>):(<></>)}
+
+           {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>):(<></>)}
+           {/* <div className="w-full md:w-1/4 text-right mt-2 md:mt-0"> */}
+              {!isAuthenticated ? (
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-sm mr-6 inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
+                  type="button"
+                >
+                  <span className="icon-lock mr-1">
+                    <MdLogin />
+                  </span>
+                  Log In
+                </button>
+              ) : (
+                <button onClick={handleLogout}>
+                  <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex icon-lock gap-2 mr-5 mt-4">
+                    <MdLogout className="mt-1" />
+                    Log Out
+                  </span>
+                </button>
+              )}
+              {isRoleAdmin === "admin" && (
+                <AnimatedNavbarLink to="/add-course">
+                  <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
+                    Add Course
+                  </button>
+                </AnimatedNavbarLink>
+                
+              )}
+              {!isAuthenticated ? (
+                <button
+                  onClick={() => setShowRegisterModal(true)}
+                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 mr-6 text-orange-500 hover:text-orange-600"
+                  type="button"
+                >
+                  <span className="icon-person mr-1">
+                    <FaUser />
+                  </span>
+                  Register
+                </button>
+              ) : (
+                <button></button>
+              )}
+            {/* </div> */}
+          </NavbarCollapse>
+        </Navbar>
       </div>
-    </div>
-
-    {/* Right side: Get Started & Auth buttons */}
-    <div className="flex items-center space-x-4">
-      <button
-        className="rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
-        onClick={() => (window.location.href = `/category/`)}
-      >
-        Get Started
-      </button>
-      
-      {!isAuthenticated ? (
-        <>
-          <button
-            onClick={() => setShowLoginModal(true)}
-            className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
-          >
-            <MdLogin className="mr-1" />
-            Log In
-          </button>
-          <button
-            onClick={() => setShowRegisterModal(true)}
-            className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
-          >
-            <FaUser className="mr-1" />
-            Register
-          </button>
-        </>
-      ) : (
-        <button onClick={handleLogout}>
-          <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex items-center gap-2">
-            <MdLogout />
-            Log Out
-          </span>
-        </button>
-      )}
-      <NavbarToggle />
-    </div>
-  </Navbar>
-</div>
-
       {showRegisterModal && (
         <Modal
           initialAction="Sign Up"
