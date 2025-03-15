@@ -51,7 +51,7 @@ const CustomNavbar = () => {
       <div className="m-3 mt-4 top-bar">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-left justify-between">
-            <div className="w-full md:w-3/4 flex flex-wrap">
+            {/* <div className="w-full md:w-3/4 flex flex-wrap">
               <span className="text-sm mr-3 flex items-center cursor-default text-orange-600">
                 <span className="icon-question-circle-o mr-2"></span>
                 <span className="hidden lg:inline-block">Have a question?</span>
@@ -64,7 +64,7 @@ const CustomNavbar = () => {
                 <span className="icon-envelope mr-2"></span>
                 <span className="hidden lg:inline-block">info@mydomain.com</span>
               </span>
-            </div>
+            </div> */}
             {/* <div className="w-full md:w-1/4 text-right mt-2 md:mt-0">
               {!isAuthenticated ? (
                 <button
@@ -115,8 +115,9 @@ const CustomNavbar = () => {
       <div className="h-[1px] bg-orange-400"></div>
 <div className="sticky top-0 z-50 bg-orange-100">
   <Navbar fluid rounded className="flex justify-between items-center">
-    {/* Left Brand Section */}
-    <div className="flex items-center">
+    {/* Left side: Brand + Links */}
+    <div className="flex items-center space-x-6">
+      {/* Brand */}
       <NavbarBrand as={Link} to="/" className="flex items-center">
         <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
           <TbSquareRoot className="text-4xl text-orange-600" />
@@ -126,8 +127,8 @@ const CustomNavbar = () => {
         </span>
       </NavbarBrand>
 
-      {/* Navbar Links - left aligned */}
-      <NavbarCollapse className="flex items-center space-x-6 text-xl">
+      {/* Navbar Links */}
+      <div className="flex items-center space-x-6 text-xl">
         <AnimatedNavbarLink to="/" ignoreActive>
           <ExploreDropdown />
         </AnimatedNavbarLink>
@@ -142,19 +143,17 @@ const CustomNavbar = () => {
           <>
             <AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>
+            <AnimatedNavbarLink to="/add-course">
+              <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
+                Add Course
+              </button>
+            </AnimatedNavbarLink>
           </>
         )}
-        {isRoleAdmin === "admin" && (
-          <AnimatedNavbarLink to="/add-course">
-            <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
-              Add Course
-            </button>
-          </AnimatedNavbarLink>
-        )}
-      </NavbarCollapse>
+      </div>
     </div>
 
-    {/* Right side actions */}
+    {/* Right side: Get Started & Auth buttons */}
     <div className="flex items-center space-x-4">
       <button
         className="rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
@@ -162,6 +161,7 @@ const CustomNavbar = () => {
       >
         Get Started
       </button>
+      
       {!isAuthenticated ? (
         <>
           <button
