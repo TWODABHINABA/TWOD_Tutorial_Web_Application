@@ -222,7 +222,7 @@ const CustomNavbar = () => {
             </NavbarBrand>
 
             {/* LEFT Links */}
-            <div className="hidden md:flex gap-6 text-xl ml-18">
+            <div className="hidden md:flex gap-6 text-xl ml-20">
               <AnimatedNavbarLink to="/" ignoreActive>
                 <ExploreDropdown />
               </AnimatedNavbarLink>
