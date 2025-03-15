@@ -15,7 +15,7 @@ const CourseDetailsPage = () => {
   const [feedback, setFeedback] = useState({ rating: "", comment: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  // const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [tutors, setTutors] = useState([]);
   const [selectedTutor, setSelectedTutor] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
@@ -85,10 +85,13 @@ const CourseDetailsPage = () => {
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!token) {
-      window.location.href="/register";
+      window.location.href = "/register";
     }
     try {
-      const response = await api.post(`/courses/${courseId}/feedback`, feedback,);
+      const response = await api.post(
+        `/courses/${courseId}/feedback`,
+        feedback
+      );
       setCourse(response.data.course);
       setFeedback({ rating: "", comment: "" });
     } catch (err) {
@@ -100,7 +103,7 @@ const CourseDetailsPage = () => {
     try {
       const response = await api.get(`/courses/${courseId}/tutors`);
       setTutors(response.data);
-      setShowEnrollModal(true);
+      // setShowEnrollModal(true);
     } catch (error) {
       console.error("Error fetching tutors:", error);
     }
@@ -300,61 +303,60 @@ const CourseDetailsPage = () => {
                 </section>
               )}
 
-<div className="space-y-8 ">
-              <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <span className="text-4xl font-bold text-gray-800">
-                      ${course.discountPrice}
-                    </span>
-                    {course.discountPrice && (
-                      <p className="mt-1 text-sm text-red-600 line-through">
-                        ${course.price}
-                      </p>
+              <div className="space-y-8 ">
+                <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <span className="text-4xl font-bold text-gray-800">
+                        ${course.discountPrice}
+                      </span>
+                      {course.discountPrice && (
+                        <p className="mt-1 text-sm text-red-600 line-through">
+                          ${course.price}
+                        </p>
+                      )}
+                    </div>
+
+                    {!token ? (
+                      <div></div>
+                    ) : (
+                      <div className="space-y-4">
+                        <button
+                          onClick={handleEnrollClick}
+                          className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
+                        >
+                          Enroll Now
+                        </button>
+
+                        <button
+                          onClick={() => alert("Previewing course...")}
+                          className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
+                        >
+                          Preview Course
+                        </button>
+                      </div>
                     )}
-                  </div>
 
-                  {!token ? (
-                    <div></div>
-                  ) : (
                     <div className="space-y-4">
-                      <button
-                        onClick={handleEnrollClick}
-                        className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
-                      >
-                        Enroll Now
-                      </button>
-
-                      <button
-                        onClick={() => alert("Previewing course...")}
-                        className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
-                      >
-                        Preview Course
-                      </button>
+                      <div className="flex items-center space-x-3">
+                        <svg
+                          className="w-5 h-5 text-orange-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M13 7h3m0 0h3m-3 0v3m0-3V7m-3 10h3m0 0h3m-3 0v3m0-3v-3m-6 3l-3-3m0 0l-3 3m3-3V7"
+                          />
+                        </svg>
+                        <span className="text-gray-600">{course.level}</span>
+                      </div>
                     </div>
-                  )}
 
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <svg
-                        className="w-5 h-5 text-orange-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13 7h3m0 0h3m-3 0v3m0-3V7m-3 10h3m0 0h3m-3 0v3m0-3v-3m-6 3l-3-3m0 0l-3 3m3-3V7"
-                        />
-                      </svg>
-                      <span className="text-gray-600">{course.level}</span>
-                    </div>
-                  </div>
-
-                  
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                    <div className=" bg-black bg-opacity-50 flex justify-center items-center">
                       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-500">
@@ -450,74 +452,76 @@ const CourseDetailsPage = () => {
                         </div>
                       </div>
                     </div>
-                </div>
-              </div>
-
-              <form
-                onSubmit={handleFeedbackSubmit}
-                className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
-              >
-                <h3 className="text-xl font-bold">Leave Your Feedback</h3>
-
-                <div className="flex space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      type="button"
-                      key={star}
-                      onClick={() => setFeedback({ ...feedback, rating: star })}
-                      className={`w-8 h-8 ${
-                        feedback.rating >= star
-                          ? "text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    >
-                      ★
-                    </button>
-                  ))}
+                  </div>
                 </div>
 
-                <textarea
-                  value={feedback.comment}
-                  onChange={(e) =>
-                    setFeedback({ ...feedback, comment: e.target.value })
-                  }
-                  placeholder="Write your feedback..."
-                  className="w-full p-2 border rounded-lg"
-                  required
-                ></textarea>
-
-                <button
-                  type="submit"
-                  className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
+                <form
+                  onSubmit={handleFeedbackSubmit}
+                  className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
                 >
-                  Submit Feedback
-                </button>
-                {isRoleAdmin === "admin" && (
-                  <>
-                    {!isEditing ? (
+                  <h3 className="text-xl font-bold">Leave Your Feedback</h3>
+
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         type="button"
-                        onClick={() => setIsEditing(true)}
-                        className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                        key={star}
+                        onClick={() =>
+                          setFeedback({ ...feedback, rating: star })
+                        }
+                        className={`w-8 h-8 ${
+                          feedback.rating >= star
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }`}
                       >
-                        Edit Course
+                        ★
                       </button>
-                    ) : (
-                      <button
-                        type="submit"
-                        onClick={(e) => {
-                          setIsEditing(false);
-                          handleUpdate(e);
-                        }}
-                        className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
-                      >
-                        Update
-                      </button>
-                    )}
-                  </>
-                )}
-              </form>
-            </div>
+                    ))}
+                  </div>
+
+                  <textarea
+                    value={feedback.comment}
+                    onChange={(e) =>
+                      setFeedback({ ...feedback, comment: e.target.value })
+                    }
+                    placeholder="Write your feedback..."
+                    className="w-full p-2 border rounded-lg"
+                    required
+                  ></textarea>
+
+                  <button
+                    type="submit"
+                    className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
+                  >
+                    Submit Feedback
+                  </button>
+                  {isRoleAdmin === "admin" && (
+                    <>
+                      {!isEditing ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                          className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                        >
+                          Edit Course
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          onClick={(e) => {
+                            setIsEditing(false);
+                            handleUpdate(e);
+                          }}
+                          className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                        >
+                          Update
+                        </button>
+                      )}
+                    </>
+                  )}
+                </form>
+              </div>
 
               <section className="space-y-6">
                 <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
@@ -718,7 +722,7 @@ const CourseDetailsPage = () => {
                       >
                         <div className="flex items-start space-x-4">
                           <img
-                            // src={`http://localhost:6001${feedback.profilePicture}`} //local 
+                            // src={`http://localhost:6001${feedback.profilePicture}`} //local
                             // src={`https://twod-tutorial-web-application.onrender.com${feedback.profilePicture}`} //vinay
                             src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
                             alt="Profile"
