@@ -50,7 +50,7 @@ const CustomNavbar = () => {
     <>
       <div className="m-3 mt-4 top-bar">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="flex flex-col md:flex-row items-left justify-between">
             <div className="w-full md:w-3/4 flex flex-wrap">
               <span className="text-sm mr-3 flex items-center cursor-default text-orange-600">
                 <span className="icon-question-circle-o mr-2"></span>
