@@ -194,27 +194,20 @@ const CustomNavbar = () => {
       </div> */}
 
       <div className="sticky top-0 z-50 bg-orange-100">
-        <Navbar
-          fluid
-          rounded
-          className="flex items-center justify-between px-6"
-        >
-          {/* Left side: Logo + Main Links */}
-          <div className="flex items-center space-x-8">
-            <NavbarBrand
-              as={Link}
-              to="/"
-              className="flex items-center space-x-2"
-            >
-              <h1 className="transition-transform duration-300 hover:scale-110">
+        <Navbar fluid rounded>
+          {/* LEFT Side - Logo and Left Links */}
+          <div className="flex items-center gap-8">
+            <NavbarBrand as={Link} to="/">
+              <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
                 <TbSquareRoot className="text-4xl text-orange-600" />
               </h1>
-              <span className="text-xl font-semibold text-orange-500">
+              <span className="self-center whitespace-nowrap text-xl font-semibold text-orange-500">
                 TUTOR
               </span>
             </NavbarBrand>
 
-            <div className="flex items-center space-x-6 text-xl">
+            {/* LEFT Links */}
+            <div className="hidden md:flex gap-6 text-xl">
               <AnimatedNavbarLink to="/" ignoreActive>
                 <ExploreDropdown />
               </AnimatedNavbarLink>
@@ -222,12 +215,30 @@ const CustomNavbar = () => {
               <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
               <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
               <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
+              {isAuthenticated && (
+                <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
+              )}
+              {isRoleAdmin === "admin" && (
+                <>
+                  <AnimatedNavbarLink to="/add-tutor">
+                    Add Tutor
+                  </AnimatedNavbarLink>
+                  <AnimatedNavbarLink to="/add-availability">
+                    Add Availability
+                  </AnimatedNavbarLink>
+                  <AnimatedNavbarLink to="/add-course">
+                    <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
+                      Add Course
+                    </button>
+                  </AnimatedNavbarLink>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Right side: Auth Buttons + Admin + Get Started */}
-          <div className="flex items-center space-x-4">
-            {!isAuthenticated && (
+          {/* RIGHT Side - Auth Buttons */}
+          <div className="flex items-center gap-4 md:order-2">
+            {!isAuthenticated ? (
               <>
                 <button
                   onClick={() => setShowLoginModal(true)}
@@ -246,46 +257,22 @@ const CustomNavbar = () => {
                   Register
                 </button>
               </>
-            )}
-
-            {isAuthenticated && (
+            ) : (
               <button onClick={handleLogout}>
-                <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex icon-lock gap-2">
+                <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex items-center gap-2">
                   <MdLogout />
                   Log Out
                 </span>
               </button>
             )}
-
-            {isAuthenticated && (
-              <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
-            )}
-
-            {isRoleAdmin === "admin" && (
-              <>
-                <AnimatedNavbarLink to="/add-tutor">
-                  Add Tutor
-                </AnimatedNavbarLink>
-                <AnimatedNavbarLink to="/add-availability">
-                  Add Tutor Availability
-                </AnimatedNavbarLink>
-                <AnimatedNavbarLink to="/add-course">
-                  <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
-                    Add Course
-                  </button>
-                </AnimatedNavbarLink>
-              </>
-            )}
-
-            {/* Get Started Button */}
+            {/* Get Started */}
             <button
-              className="rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
+              className="rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white"
               onClick={() => (window.location.href = `/category/`)}
             >
               Get Started
             </button>
-
-            {/* Mobile toggle */}
+            {/* Mobile Toggle */}
             <NavbarToggle />
           </div>
         </Navbar>
