@@ -281,12 +281,12 @@ const CustomNavbar = () => {
               </button>
             )}
             {/* Get Started */}
-            <button
+            {/* <button
               className="rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white"
               onClick={() => (window.location.href = `/category/`)}
             >
               Get Started
-            </button>
+            </button> */}
             {/* Mobile Toggle */}
             <NavbarToggle />
           </div>
