@@ -146,7 +146,7 @@ const CustomNavbar = () => {
            {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>):(<></>)}
 
            {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>):(<></>)}
-           <div className="w-full md:w-1/4 text-right mt-2 md:mt-0">
+           {/* <div className="w-full md:w-1/4 text-right mt-2 md:mt-0"> */}
               {!isAuthenticated ? (
                 <button
                   onClick={() => setShowLoginModal(true)}
@@ -188,7 +188,7 @@ const CustomNavbar = () => {
               ) : (
                 <button></button>
               )}
-            </div>
+            {/* </div> */}
           </NavbarCollapse>
         </Navbar>
       </div>
