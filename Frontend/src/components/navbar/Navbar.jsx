@@ -22,6 +22,21 @@ const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
   const [hovered, setHovered] = useState(false);
 
   return (
+    // <Link
+    //   to={to}
+    //   onMouseEnter={() => setHovered(true)}
+    //   onMouseLeave={() => setHovered(false)}
+    //   className={`relative block md:inline-block text-black text-base ${
+    //     isActive ? "font-bold" : ""
+    //   } transition-colors duration-300`}
+    // >
+    //   {children}
+    //   <span
+    //     style={{ transform: hovered ? "scaleX(1)" : "scaleX(0)" }}
+    //     className="absolute left-0 right-0 -bottom-1 h-0.5 bg-orange-400 transition-transform duration-300 ease-out origin-left"
+    //   />
+    // </Link>
+
     <Link
       to={to}
       onMouseEnter={() => setHovered(true)}
