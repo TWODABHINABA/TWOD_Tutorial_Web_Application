@@ -124,71 +124,72 @@ const CustomNavbar = () => {
             </span>
           </NavbarBrand>
           <div className="flex md:order-2 items-center">
-            <button className="mr-3 rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
-            onClick={() => window.location.href = `/category/}`}>
+            <button
+              className="mr-3 rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
+              onClick={() => (window.location.href = `/category/}`)}
+            >
               Get Started
             </button>
             <NavbarToggle />
           </div>
-          <NavbarCollapse className="transition-all duration-300 ease-in-out text-xl">
+          <NavbarCollapse className="transition-all duration-300 ease-in-out text-xl flex items-center space-x-6 justify-start ml-6">
             <AnimatedNavbarLink to="/" ignoreActive>
               <ExploreDropdown />
             </AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/resources">Resources &nbsp;&nbsp;</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/pricing">Pricing &nbsp;&nbsp;</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/about">About&nbsp;&nbsp;</AnimatedNavbarLink>
+            <AnimatedNavbarLink to="/resources">Resources</AnimatedNavbarLink>
+            <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
+            <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
             <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
-            {!isAuthenticated ? (
-              <></>
-            ) : (
+
+            {isAuthenticated && (
               <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
             )}
-           {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>):(<></>)}
 
-           {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>):(<></>)}
-           {/* <div className="w-full md:w-1/4 text-right mt-2 md:mt-0"> */}
-              {!isAuthenticated ? (
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  className="text-sm mr-6 inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
-                  type="button"
-                >
-                  <span className="icon-lock mr-1">
-                    <MdLogin />
-                  </span>
-                  Log In
-                </button>
-              ) : (
-                <button onClick={handleLogout}>
-                  <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex icon-lock gap-2 mr-5 mt-4">
-                    <MdLogout className="mt-1" />
-                    Log Out
-                  </span>
-                </button>
-              )}
-              {isRoleAdmin === "admin" && (
+            {isRoleAdmin === "admin" && (
+              <>
+                <AnimatedNavbarLink to="/add-tutor">
+                  Add Tutor
+                </AnimatedNavbarLink>
+                <AnimatedNavbarLink to="/add-availability">
+                  Add Tutor Availability
+                </AnimatedNavbarLink>
                 <AnimatedNavbarLink to="/add-course">
                   <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
                     Add Course
                   </button>
                 </AnimatedNavbarLink>
-                
-              )}
-              {!isAuthenticated ? (
+              </>
+            )}
+
+            {!isAuthenticated && (
+              <>
                 <button
-                  onClick={() => setShowRegisterModal(true)}
-                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 mr-6 text-orange-500 hover:text-orange-600"
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
                   type="button"
                 >
-                  <span className="icon-person mr-1">
-                    <FaUser />
-                  </span>
+                  <MdLogin className="mr-1" />
+                  Log In
+                </button>
+                <button
+                  onClick={() => setShowRegisterModal(true)}
+                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
+                  type="button"
+                >
+                  <FaUser className="mr-1" />
                   Register
                 </button>
-              ) : (
-                <button></button>
-              )}
-            {/* </div> */}
+              </>
+            )}
+
+            {isAuthenticated && (
+              <button onClick={handleLogout}>
+                <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex icon-lock gap-2">
+                  <MdLogout />
+                  Log Out
+                </span>
+              </button>
+            )}
           </NavbarCollapse>
         </Navbar>
       </div>
