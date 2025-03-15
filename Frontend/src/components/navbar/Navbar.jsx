@@ -113,42 +113,51 @@ const CustomNavbar = () => {
       </div>
 
       <div className="h-[1px] bg-orange-400"></div>
-      <div className="sticky top-0 z-50 bg-orange-100">
-  <Navbar fluid rounded>
-    <NavbarBrand as={Link} to="/" className="flex items-center">
-      <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
-        <TbSquareRoot className="text-4xl text-orange-600" />
-      </h1>
-      <span className="self-center whitespace-nowrap text-xl font-semibold text-orange-500">
-        TUTOR
-      </span>
-    </NavbarBrand>
+<div className="sticky top-0 z-50 bg-orange-100">
+  <Navbar fluid rounded className="flex justify-between items-center">
+    {/* Left Brand Section */}
+    <div className="flex items-center">
+      <NavbarBrand as={Link} to="/" className="flex items-center">
+        <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
+          <TbSquareRoot className="text-4xl text-orange-600" />
+        </h1>
+        <span className="self-center whitespace-nowrap text-xl font-semibold text-orange-500">
+          TUTOR
+        </span>
+      </NavbarBrand>
 
-    {/* Navbar links aligned left */}
-    <NavbarCollapse className="flex items-center space-x-6 text-xl">
-      <AnimatedNavbarLink to="/" ignoreActive>
-        <ExploreDropdown />
-      </AnimatedNavbarLink>
-      <AnimatedNavbarLink to="/resources">Resources</AnimatedNavbarLink>
-      <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
-      <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
-      <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
-
-      {!isAuthenticated ? null : (
-        <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
-      )}
-      {isRoleAdmin === "admin" && (
-        <>
-          <AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>
-          <AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>
-        </>
-      )}
-    </NavbarCollapse>
+      {/* Navbar Links - left aligned */}
+      <NavbarCollapse className="flex items-center space-x-6 text-xl">
+        <AnimatedNavbarLink to="/" ignoreActive>
+          <ExploreDropdown />
+        </AnimatedNavbarLink>
+        <AnimatedNavbarLink to="/resources">Resources</AnimatedNavbarLink>
+        <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
+        <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
+        <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
+        {isAuthenticated && (
+          <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
+        )}
+        {isRoleAdmin === "admin" && (
+          <>
+            <AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>
+            <AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>
+          </>
+        )}
+        {isRoleAdmin === "admin" && (
+          <AnimatedNavbarLink to="/add-course">
+            <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
+              Add Course
+            </button>
+          </AnimatedNavbarLink>
+        )}
+      </NavbarCollapse>
+    </div>
 
     {/* Right side actions */}
-    <div className="flex items-center ml-auto space-x-4">
+    <div className="flex items-center space-x-4">
       <button
-        className="mr-3 rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
+        className="rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
         onClick={() => (window.location.href = `/category/`)}
       >
         Get Started
@@ -171,22 +180,12 @@ const CustomNavbar = () => {
           </button>
         </>
       ) : (
-        <>
-          <button
-            onClick={handleLogout}
-            className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex items-center gap-2"
-          >
+        <button onClick={handleLogout}>
+          <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex items-center gap-2">
             <MdLogout />
             Log Out
-          </button>
-          {isRoleAdmin === "admin" && (
-            <AnimatedNavbarLink to="/add-course">
-              <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
-                Add Course
-              </button>
-            </AnimatedNavbarLink>
-          )}
-        </>
+          </span>
+        </button>
       )}
       <NavbarToggle />
     </div>
