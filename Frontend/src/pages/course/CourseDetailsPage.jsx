@@ -306,7 +306,7 @@ const CourseDetailsPage = () => {
               <div className="space-y-8 ">
                 <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                   <div className="space-y-6">
-                    <div className="text-center">
+                    {/* <div className="text-center">
                       <span className="text-4xl font-bold text-gray-800">
                         ${course.discountPrice}
                       </span>
@@ -335,7 +335,7 @@ const CourseDetailsPage = () => {
                           Preview Course
                         </button>
                       </div>
-                    )}
+                    )} */}
 
                     <div className="space-y-4">
                       <div className="flex items-center space-x-3">
@@ -758,6 +758,36 @@ const CourseDetailsPage = () => {
                 </section>
               )}
             </div>
+            <div className="text-center">
+              <span className="text-4xl font-bold text-gray-800">
+                ${course.discountPrice}
+              </span>
+              {course.discountPrice && (
+                <p className="mt-1 text-sm text-red-600 line-through">
+                  ${course.price}
+                </p>
+              )}
+            </div>
+
+            {!token ? (
+              <div></div>
+            ) : (
+              <div className="space-y-4">
+                <button
+                  onClick={handleEnrollClick}
+                  className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
+                >
+                  Enroll Now
+                </button>
+
+                <button
+                  onClick={() => alert("Previewing course...")}
+                  className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
+                >
+                  Preview Course
+                </button>
+              </div>
+            )}
 
             {/* <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
