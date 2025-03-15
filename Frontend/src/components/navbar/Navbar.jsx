@@ -113,9 +113,10 @@ const CustomNavbar = () => {
       </div> */}
 
       <div className="h-[1px] bg-orange-400"></div>
-      <div className="sticky top-0 z-50 bg-orange-100 ">
-        <Navbar fluid rounded>
-          <NavbarBrand as={Link} to="/">
+      <div className="sticky top-0 z-50 bg-orange-100">
+        <Navbar fluid rounded className="flex items-center justify-between">
+          {/* Left Section: Logo */}
+          <NavbarBrand as={Link} to="/" className="flex items-center">
             <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
               <TbSquareRoot className="text-4xl text-orange-600" />
             </h1>
@@ -123,16 +124,9 @@ const CustomNavbar = () => {
               TUTOR
             </span>
           </NavbarBrand>
-          <div className="flex md:order-2 items-center">
-            <button
-              className="mr-3 rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
-              onClick={() => (window.location.href = `/category/}`)}
-            >
-              Get Started
-            </button>
-            <NavbarToggle />
-          </div>
-          <NavbarCollapse className="transition-all duration-300 ease-in-out text-xl flex items-center space-x-6 justify-start ml-6">
+
+          {/* Middle Section: Links */}
+          <NavbarCollapse className="flex items-center space-x-6 ml-10">
             <AnimatedNavbarLink to="/" ignoreActive>
               <ExploreDropdown />
             </AnimatedNavbarLink>
@@ -191,8 +185,20 @@ const CustomNavbar = () => {
               </button>
             )}
           </NavbarCollapse>
+
+          {/* Right Section: Get Started & Toggle */}
+          <div className="flex items-center space-x-4">
+            <button
+              className="rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
+              onClick={() => (window.location.href = `/category/`)}
+            >
+              Get Started
+            </button>
+            <NavbarToggle />
+          </div>
         </Navbar>
       </div>
+
       {showRegisterModal && (
         <Modal
           initialAction="Sign Up"
