@@ -276,6 +276,63 @@ const CourseDetailsPage = () => {
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-12">
+              <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
+                <img
+                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
+                  alt={course.nameImage}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="text-center">
+                <span className="text-4xl font-bold text-gray-800">
+                  ${course.discountPrice}
+                </span>
+                {course.discountPrice && (
+                  <p className="mt-1 text-sm text-red-600 line-through">
+                    ${course.price}
+                  </p>
+                )}
+              </div>
+
+              {!token ? (
+                <div></div>
+              ) : (
+                <div className="space-y-4">
+                  <button
+                    onClick={handleEnrollClick}
+                    className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
+                  >
+                    Enroll Now
+                  </button>
+
+                  <button
+                    onClick={() => alert("Previewing course...")}
+                    className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
+                  >
+                    Preview Course
+                  </button>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <svg
+                    className="w-5 h-5 text-orange-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 7h3m0 0h3m-3 0v3m0-3V7m-3 10h3m0 0h3m-3 0v3m0-3v-3m-6 3l-3-3m0 0l-3 3m3-3V7"
+                    />
+                  </svg>
+                  <span className="text-gray-600">{course.level}</span>
+                </div>
+              </div>
+
               {isEditing ? (
                 <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
                   <h3 className="text-2xl font-bold mb-4 text-gray-800">
@@ -302,14 +359,6 @@ const CourseDetailsPage = () => {
                   </p>
                 </section>
               )}
-
-              <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
-                <img
-                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
-                  alt={course.nameImage}
-                  className="w-full h-full object-cover"
-                />
-              </div>
 
               <section className="space-y-6">
                 <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
@@ -550,7 +599,7 @@ const CourseDetailsPage = () => {
             <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                 <div className="space-y-6">
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <span className="text-4xl font-bold text-gray-800">
                       ${course.discountPrice}
                     </span>
@@ -598,7 +647,7 @@ const CourseDetailsPage = () => {
                       </svg>
                       <span className="text-gray-600">{course.level}</span>
                     </div>
-                  </div>
+                  </div> */}
 
                   {!showEnrollModal ? (
                     <div></div>
