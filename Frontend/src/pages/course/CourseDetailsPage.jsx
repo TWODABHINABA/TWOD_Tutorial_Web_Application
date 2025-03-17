@@ -136,7 +136,6 @@ const CourseDetailsPage = () => {
     setAvailableDates([]);
     setSelectedTimeSlot("");
     setAvailableTimeSlots([]);
-    setSelectedSession("");
 
     try {
       const response = await api.get(`/tutors/${tutorId}/available-dates`);
@@ -166,7 +165,8 @@ const CourseDetailsPage = () => {
       !selectedTutor ||
       !selectedDate ||
       !selectedTimeSlot ||
-      !selectedDuration
+      !selectedDuration ||
+      !selectedSession
     ) {
       alert("Please select all options before enrolling.");
       return;
@@ -184,7 +184,8 @@ const CourseDetailsPage = () => {
           selectedDate, // Field names fixed to match backend schema
           selectedTime: selectedTimeSlot,
           duration: selectedDuration,
-          price: course.discountPrice || course.price,
+          selectedSession,
+          price: selectedSession.discountPrice || selectedSession.price,
         },
         {
           headers: {
@@ -752,6 +753,7 @@ const CourseDetailsPage = () => {
 
                         <div className="flex">
                           <div className="w-1/2 pr-4">
+                            {/* Tutor Selection */}
                             <label className="block mb-2">Select Tutor:</label>
                             <select
                               className="w-full p-2 border rounded mb-4"
@@ -769,6 +771,7 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
 
+                            {/* Time Slot Selection */}
                             {availableTimeSlots.length > 0 && (
                               <>
                                 <label className="block mb-2">
@@ -776,6 +779,7 @@ const CourseDetailsPage = () => {
                                 </label>
                                 <select
                                   className="w-full p-2 border rounded mb-4"
+                                  value={selectedTimeSlot}
                                   onChange={(e) =>
                                     setSelectedTimeSlot(e.target.value)
                                   }
@@ -790,27 +794,35 @@ const CourseDetailsPage = () => {
                               </>
                             )}
 
+                            {/* Session Duration with Price */}
                             <label className="block mb-2">
                               Select Duration:
                             </label>
                             <select
                               className="w-full p-2 border rounded mb-4"
-                              value={selectedDuration}
+                              value={selectedSession}
                               onChange={(e) =>
-                                setSelectedDuration(e.target.value)
+                                setSelectedSession(e.target.value)
                               }
                             >
-                              <option value="30 mins">30 mins</option>
-                              <option value="1 hr">1 hr</option>
-                              <option value="2 hrs">2 hrs</option>
-                              <option value="3 hrs">3 hrs</option>
+                              <option value="">Choose a Session</option>
+                              {sessions.map((session, index) => (
+                                <option
+                                  key={index}
+                                  value={JSON.stringify(session)}
+                                >
+                                  {session.duration} — Rs.{" "}
+                                  {parseInt(session.price).toLocaleString()}
+                                </option>
+                              ))}
                             </select>
 
+                            {/* Buttons */}
                             <button
                               onClick={handleEnrollNow}
                               className="w-full py-2 bg-green-500 text-white rounded mt-4"
                             >
-                              Confirm &amp; Pay
+                              Confirm & Pay
                             </button>
                             <button
                               onClick={() => setShowEnrollModal(false)}
@@ -820,6 +832,7 @@ const CourseDetailsPage = () => {
                             </button>
                           </div>
 
+                          {/* Calendar Section */}
                           <div className="w-1/2 pl-4 border-l">
                             <EnrollmentCalendar
                               availableDates={availableDates}
