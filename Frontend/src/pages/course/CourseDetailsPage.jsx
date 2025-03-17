@@ -303,7 +303,7 @@ const CourseDetailsPage = () => {
                 </section>
               )}
 
-              <div className="space-y-8 ">
+              {/* <div className="space-y-8 ">
                 <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                   <div className="space-y-6">
                     <div className="text-center">
@@ -318,7 +318,7 @@ const CourseDetailsPage = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <section className="space-y-6">
                 <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
@@ -555,7 +555,7 @@ const CourseDetailsPage = () => {
                 </section>
               )}
             </div>
-            <div className="text-center">
+            {/* <div className="text-center">
               <span className="text-4xl font-bold text-gray-800">
                 ${course.discountPrice}
               </span>
@@ -584,7 +584,7 @@ const CourseDetailsPage = () => {
                   Preview Course
                 </button>
               </div>
-            )}
+            )} */}
 
             <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
