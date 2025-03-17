@@ -298,6 +298,13 @@ const CourseDetailsPage = () => {
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-12">
+              <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
+                <img
+                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
+                  alt={course.nameImage}
+                  className="w-full h-full object-cover"
+                />
+              </div>
               {/* <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
                 <img
                   src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
@@ -760,13 +767,7 @@ const CourseDetailsPage = () => {
                   )}
                 </div>
               </div>
-              <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
-                <img
-                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
-                  alt={course.nameImage}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+
               <div className="text-center">
                 <span className="text-4xl font-bold text-gray-800">
                   ${course.discountPrice}
