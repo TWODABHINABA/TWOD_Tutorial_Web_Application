@@ -658,15 +658,11 @@ const CourseDetailsPage = () => {
                     )} */}
                     {selectedSession && (
                       <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
-                        {/* <p className="text-lg font-medium">
-                          Selected Session:{" "}
-                          <span className="font-bold">
-                            {selectedSession.duration}
-                          </span>
-                        </p> */}
                         <p className="text-xl font-semibold mt-2">
                           Price: Rs.{" "}
-                          {selectedSession.price.toLocaleString("en-IN")}
+                          {Number(selectedSession.price).toLocaleString(
+                            "en-IN"
+                          )}
                           .00
                         </p>
                       </div>
@@ -800,28 +796,27 @@ const CourseDetailsPage = () => {
                             </label>
                             <select
                               className="w-full p-2 border rounded mb-4"
-                              value={selectedSession}
+                              value={
+                                selectedSession
+                                  ? JSON.stringify(selectedSession)
+                                  : ""
+                              }
                               onChange={(e) =>
-                                setSelectedSession(e.target.value)
+                                setSelectedSession(JSON.parse(e.target.value))
                               }
                             >
                               <option value="">Choose a Session</option>
-                              {Array.isArray(sessions) &&
-                              sessions.length > 0 ? (
-                                sessions.map((session, index) => (
-                                  <option
-                                    key={index}
-                                    value={JSON.stringify(session)}
-                                  >
-                                    {session.duration} — Rs.{" "}
-                                    {(
-                                      parseInt(session.price) || 0
-                                    ).toLocaleString()}
-                                  </option>
-                                ))
-                              ) : (
-                                <option disabled>No Sessions Available</option>
-                              )}
+                              {sessions.map((session, index) => (
+                                <option
+                                  key={index}
+                                  value={JSON.stringify(session)}
+                                >
+                                  {session.duration} — Rs.{" "}
+                                  {(
+                                    parseInt(session.price) || 0
+                                  ).toLocaleString()}
+                                </option>
+                              ))}
                             </select>
 
                             {/* Buttons */}
