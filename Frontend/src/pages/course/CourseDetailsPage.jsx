@@ -553,7 +553,7 @@ const CourseDetailsPage = () => {
                                     : [];
 
                                   if (!newCurriculum[idx]) {
-                                    newCurriculum[idx] = {}; 
+                                    newCurriculum[idx] = {};
                                   }
 
                                   newCurriculum[idx] = {
@@ -788,72 +788,70 @@ const CourseDetailsPage = () => {
                 </button>
               </div>
             )}
-             <form
-                  onSubmit={handleFeedbackSubmit}
-                  className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
-                >
-                  <h3 className="text-xl font-bold">Leave Your Feedback</h3>
+            <form
+              onSubmit={handleFeedbackSubmit}
+              className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
+            >
+              <h3 className="text-xl font-bold">Leave Your Feedback</h3>
 
-                  <div className="flex space-x-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        type="button"
-                        key={star}
-                        onClick={() =>
-                          setFeedback({ ...feedback, rating: star })
-                        }
-                        className={`w-8 h-8 ${
-                          feedback.rating >= star
-                            ? "text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-
-                  <textarea
-                    value={feedback.comment}
-                    onChange={(e) =>
-                      setFeedback({ ...feedback, comment: e.target.value })
-                    }
-                    placeholder="Write your feedback..."
-                    className="w-full p-2 border rounded-lg"
-                    required
-                  ></textarea>
-
+              <div className="flex space-x-1">
+                {[1, 2, 3, 4, 5].map((star) => (
                   <button
-                    type="submit"
-                    className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
+                    type="button"
+                    key={star}
+                    onClick={() => setFeedback({ ...feedback, rating: star })}
+                    className={`w-8 h-8 ${
+                      feedback.rating >= star
+                        ? "text-yellow-400"
+                        : "text-gray-300"
+                    }`}
                   >
-                    Submit Feedback
+                    ★
                   </button>
-                  {isRoleAdmin === "admin" && (
-                    <>
-                      {!isEditing ? (
-                        <button
-                          type="button"
-                          onClick={() => setIsEditing(true)}
-                          className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
-                        >
-                          Edit Course
-                        </button>
-                      ) : (
-                        <button
-                          type="submit"
-                          onClick={(e) => {
-                            setIsEditing(false);
-                            handleUpdate(e);
-                          }}
-                          className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
-                        >
-                          Update
-                        </button>
-                      )}
-                    </>
+                ))}
+              </div>
+
+              <textarea
+                value={feedback.comment}
+                onChange={(e) =>
+                  setFeedback({ ...feedback, comment: e.target.value })
+                }
+                placeholder="Write your feedback..."
+                className="w-full p-2 border rounded-lg"
+                required
+              ></textarea>
+
+              <button
+                type="submit"
+                className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
+              >
+                Submit Feedback
+              </button>
+              {isRoleAdmin === "admin" && (
+                <>
+                  {!isEditing ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                    >
+                      Edit Course
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      onClick={(e) => {
+                        setIsEditing(false);
+                        handleUpdate(e);
+                      }}
+                      className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                    >
+                      Update
+                    </button>
                   )}
-                </form>
+                </>
+              )}
+            </form>
 
             <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
@@ -908,107 +906,104 @@ const CourseDetailsPage = () => {
                     </div>
                   </div>
 
-                  
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                      <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-500">
-                            Course Name
-                          </label>
-                          <input
-                            type="text"
-                            value={course.name}
-                            disabled
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100"
-                          />
+                  {!showEnrollModal?<div></div>:<div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-500">
+                          Course Name
+                        </label>
+                        <input
+                          type="text"
+                          value={course.name}
+                          disabled
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                        />
+                      </div>
+
+                      <div className="flex">
+                        <div className="w-1/2 pr-4">
+                          <label className="block mb-2">Select Tutor:</label>
+                          <select
+                            className="w-full p-2 border rounded mb-4"
+                            onChange={(e) =>
+                              handleTutorSelection(e.target.value)
+                            }
+                          >
+                            <option value="">
+                              No Preference (Auto-Select)
+                            </option>
+                            {tutors.map((tutor) => (
+                              <option key={tutor._id} value={tutor._id}>
+                                {tutor.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          {availableTimeSlots.length > 0 && (
+                            <>
+                              <label className="block mb-2">
+                                Select Time Slot:
+                              </label>
+                              <select
+                                className="w-full p-2 border rounded mb-4"
+                                onChange={(e) =>
+                                  setSelectedTimeSlot(e.target.value)
+                                }
+                              >
+                                <option value="">Choose a Time Slot</option>
+                                {availableTimeSlots.map((slot) => (
+                                  <option key={slot} value={slot}>
+                                    {slot}
+                                  </option>
+                                ))}
+                              </select>
+                            </>
+                          )}
+
+                          <label className="block mb-2">Select Duration:</label>
+                          <select
+                            className="w-full p-2 border rounded mb-4"
+                            value={selectedDuration}
+                            onChange={(e) =>
+                              setSelectedDuration(e.target.value)
+                            }
+                          >
+                            <option value="30 mins">30 mins</option>
+                            <option value="1 hr">1 hr</option>
+                            <option value="2 hrs">2 hrs</option>
+                            <option value="3 hrs">3 hrs</option>
+                          </select>
+
+                          <button
+                            onClick={handleEnrollNow}
+                            className="w-full py-2 bg-green-500 text-white rounded mt-4"
+                          >
+                            Confirm &amp; Pay
+                          </button>
+                          <button
+                            onClick={() => setShowEnrollModal(false)}
+                            className="w-full py-2 mt-2 border border-gray-400 text-gray-600 rounded"
+                          >
+                            Cancel
+                          </button>
                         </div>
 
-                        <div className="flex">
-                          <div className="w-1/2 pr-4">
-                            <label className="block mb-2">Select Tutor:</label>
-                            <select
-                              className="w-full p-2 border rounded mb-4"
-                              onChange={(e) =>
-                                handleTutorSelection(e.target.value)
-                              }
-                            >
-                              <option value="">
-                                No Preference (Auto-Select)
-                              </option>
-                              {tutors.map((tutor) => (
-                                <option key={tutor._id} value={tutor._id}>
-                                  {tutor.name}
-                                </option>
-                              ))}
-                            </select>
-
-                            {availableTimeSlots.length > 0 && (
-                              <>
-                                <label className="block mb-2">
-                                  Select Time Slot:
-                                </label>
-                                <select
-                                  className="w-full p-2 border rounded mb-4"
-                                  onChange={(e) =>
-                                    setSelectedTimeSlot(e.target.value)
-                                  }
-                                >
-                                  <option value="">Choose a Time Slot</option>
-                                  {availableTimeSlots.map((slot) => (
-                                    <option key={slot} value={slot}>
-                                      {slot}
-                                    </option>
-                                  ))}
-                                </select>
-                              </>
-                            )}
-
-                            <label className="block mb-2">
-                              Select Duration:
-                            </label>
-                            <select
-                              className="w-full p-2 border rounded mb-4"
-                              value={selectedDuration}
-                              onChange={(e) =>
-                                setSelectedDuration(e.target.value)
-                              }
-                            >
-                              <option value="30 mins">30 mins</option>
-                              <option value="1 hr">1 hr</option>
-                              <option value="2 hrs">2 hrs</option>
-                              <option value="3 hrs">3 hrs</option>
-                            </select>
-
-                            <button
-                              onClick={handleEnrollNow}
-                              className="w-full py-2 bg-green-500 text-white rounded mt-4"
-                            >
-                              Confirm &amp; Pay
-                            </button>
-                            <button
-                              onClick={() => setShowEnrollModal(false)}
-                              className="w-full py-2 mt-2 border border-gray-400 text-gray-600 rounded"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-
-                          <div className="w-1/2 pl-4 border-l">
-                            <EnrollmentCalendar
-                              availableDates={availableDates}
-                              selectedDate={selectedDate}
-                              onChange={(dateString) =>
-                                handleDateSelection(dateString)
-                              }
-                            />
-                          </div>
+                        <div className="w-1/2 pl-4 border-l">
+                          <EnrollmentCalendar
+                            availableDates={availableDates}
+                            selectedDate={selectedDate}
+                            onChange={(dateString) =>
+                              handleDateSelection(dateString)
+                            }
+                          />
                         </div>
                       </div>
                     </div>
+                  </div>}
                 </div>
               </div>
 
-              <form
+              {/* <form
                 onSubmit={handleFeedbackSubmit}
                 className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
               >
@@ -1071,7 +1066,7 @@ const CourseDetailsPage = () => {
                     )}
                   </>
                 )}
-              </form>
+              </form> */}
             </div>
           </div>
         </div>
