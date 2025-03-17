@@ -303,10 +303,13 @@ const CourseDetailsPage = () => {
                 </section>
               )}
 
-              <div>
-                <img src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`} alt={course.nameImage} />
+              <div className="w-full max-w-[400px] h-[250px] overflow-hidden rounded-md shadow-md">
+                <img
+                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
+                  alt={course.nameImage}
+                  className="w-full h-full object-cover"
+                />
               </div>
-
 
               <section className="space-y-6">
                 <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
