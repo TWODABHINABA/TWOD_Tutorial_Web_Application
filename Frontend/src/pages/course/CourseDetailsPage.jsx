@@ -380,25 +380,6 @@ const CourseDetailsPage = () => {
                 </div>
               )} */}
 
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <svg
-                    className="w-5 h-5 text-orange-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 7h3m0 0h3m-3 0v3m0-3V7m-3 10h3m0 0h3m-3 0v3m0-3v-3m-6 3l-3-3m0 0l-3 3m3-3V7"
-                    />
-                  </svg>
-                  <span className="text-gray-600">{course.level}</span>
-                </div>
-              </div>
-
               {isEditing ? (
                 <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
                   <h3 className="text-2xl font-bold mb-4 text-gray-800">
@@ -665,6 +646,94 @@ const CourseDetailsPage = () => {
             <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                 <div className="space-y-6">
+                  <div className="text-center">
+                    <span className="text-4xl font-bold text-gray-800">
+                      ${course.discountPrice}
+                    </span>
+                    {course.discountPrice && (
+                      <p className="mt-1 text-sm text-red-600 line-through">
+                        ${course.price}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="session-selector-container">
+                    <h2 className="text-2xl font-semibold mb-4">
+                      Choose a Session Duration
+                    </h2>
+
+                    <div className="flex gap-4 mb-6">
+                      {sessions.map((session, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSessionSelect(session)}
+                          className={`px-4 py-2 rounded-lg border ${
+                            selectedSession?.duration === session.duration
+                              ? "bg-blue-500 text-white"
+                              : "bg-white text-gray-800 border-gray-300"
+                          }`}
+                        >
+                          {session.duration}
+                        </button>
+                      ))}
+                    </div>
+
+                    {selectedSession && (
+                      <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
+                        <p className="text-lg font-medium">
+                          Selected Session:{" "}
+                          <span className="font-bold">
+                            {selectedSession.duration}
+                          </span>
+                        </p>
+                        <p className="text-xl font-semibold mt-2">
+                          Price: Rs.{" "}
+                          {selectedSession.price.toLocaleString("en-IN")}
+                          .00
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {!token ? (
+                    <div></div>
+                  ) : (
+                    <div className="space-y-4">
+                      <button
+                        onClick={handleEnrollClick}
+                        className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
+                      >
+                        Enroll Now
+                      </button>
+
+                      <button
+                        onClick={() => alert("Previewing course...")}
+                        className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
+                      >
+                        Preview Course
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <svg
+                        className="w-5 h-5 text-orange-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M13 7h3m0 0h3m-3 0v3m0-3V7m-3 10h3m0 0h3m-3 0v3m0-3v-3m-6 3l-3-3m0 0l-3 3m3-3V7"
+                        />
+                      </svg>
+                      <span className="text-gray-600">{course.level}</span>
+                    </div>
+                  </div>
+
                   {!showEnrollModal ? (
                     <div></div>
                   ) : (
@@ -767,74 +836,6 @@ const CourseDetailsPage = () => {
                   )}
                 </div>
               </div>
-
-              <div className="text-center">
-                <span className="text-4xl font-bold text-gray-800">
-                  ${course.discountPrice}
-                </span>
-                {course.discountPrice && (
-                  <p className="mt-1 text-sm text-red-600 line-through">
-                    ${course.price}
-                  </p>
-                )}
-              </div>
-
-              <div className="session-selector-container">
-                <h2 className="text-2xl font-semibold mb-4">
-                  Choose a Session Duration
-                </h2>
-
-                <div className="flex gap-4 mb-6">
-                  {sessions.map((session, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSessionSelect(session)}
-                      className={`px-4 py-2 rounded-lg border ${
-                        selectedSession?.duration === session.duration
-                          ? "bg-blue-500 text-white"
-                          : "bg-white text-gray-800 border-gray-300"
-                      }`}
-                    >
-                      {session.duration}
-                    </button>
-                  ))}
-                </div>
-
-                {selectedSession && (
-                  <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
-                    <p className="text-lg font-medium">
-                      Selected Session:{" "}
-                      <span className="font-bold">
-                        {selectedSession.duration}
-                      </span>
-                    </p>
-                    <p className="text-xl font-semibold mt-2">
-                      Price: Rs. {selectedSession.price.toLocaleString("en-IN")}
-                      .00
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {!token ? (
-                <div></div>
-              ) : (
-                <div className="space-y-4">
-                  <button
-                    onClick={handleEnrollClick}
-                    className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
-                  >
-                    Enroll Now
-                  </button>
-
-                  <button
-                    onClick={() => alert("Previewing course...")}
-                    className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
-                  >
-                    Preview Course
-                  </button>
-                </div>
-              )}
 
               <form
                 onSubmit={handleFeedbackSubmit}
