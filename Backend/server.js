@@ -6,6 +6,7 @@ const cors=require("cors");
 const personRoutes = require("./Routes/personRoutes");
 const courseRoutes=require("./Routes/courseRoutes");
 const tutorRoutes=require("./Routes/tutorRoutes");
+const sessionRoutes=require("./Routes/sessionRoutes");
 const path = require('path');
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
@@ -60,6 +61,7 @@ app.use('/courseUploads', express.static(path.join(__dirname, 'courseUploads')))
 app.use("/",tutorRoutes);
 app.use("/", personRoutes);
 app.use("/",courseRoutes);
+app.use("/",sessionRoutes);
 app.listen(process.env.PORT, () =>
   console.log("Server is running on port 6001")
 );
