@@ -73,8 +73,8 @@ const CourseDetailsPage = () => {
 
   const handleSessionSelect = (session) => {
     setSelectedSession(session);
+    setSelectedDuration(session.duration); // Also update duration to keep consistency
   };
-
   const handleInputChange = (e) => {
     setUpdatedCourse((prev) => ({
       ...prev,
@@ -656,8 +656,15 @@ const CourseDetailsPage = () => {
                         ${course.price}
                       </p>
                     )} */}
+
                     {selectedSession && (
                       <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
+                        <p className="text-lg font-medium">
+                          Selected Session:{" "}
+                          <span className="font-bold">
+                            {selectedSession.duration}
+                          </span>
+                        </p>
                         <p className="text-xl font-semibold mt-2">
                           Price: Rs.{" "}
                           {Number(selectedSession.price).toLocaleString(
@@ -685,7 +692,8 @@ const CourseDetailsPage = () => {
                               : "bg-white text-gray-800 border-gray-300"
                           }`}
                         >
-                          {session.duration}
+                          {session.duration} - Rs.{" "}
+                          {Number(session.price).toLocaleString("en-IN")}
                         </button>
                       ))}
                     </div>
@@ -730,11 +738,29 @@ const CourseDetailsPage = () => {
                     </div>
                   </div>
 
-                  {!showEnrollModal ? (
-                    <div></div>
-                  ) : (
+                  {showEnrollModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
                       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
+                        {/* --- Session Summary (Selected) --- */}
+                        {selectedSession && (
+                          <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow">
+                            <h3 className="text-lg font-semibold text-gray-700">
+                              Selected Session
+                            </h3>
+                            <p className="text-gray-600">
+                              Duration: {selectedSession.duration}
+                            </p>
+                            <p className="text-gray-600">
+                              Price: Rs.{" "}
+                              {Number(selectedSession.price).toLocaleString(
+                                "en-IN"
+                              )}
+                              .00
+                            </p>
+                          </div>
+                        )}
+
+                        {/* --- Course Name --- */}
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-500">
                             Course Name
@@ -749,13 +775,14 @@ const CourseDetailsPage = () => {
 
                         <div className="flex">
                           <div className="w-1/2 pr-4">
-                            {/* Tutor Selection */}
+                            {/* --- Tutor Selection --- */}
                             <label className="block mb-2">Select Tutor:</label>
                             <select
                               className="w-full p-2 border rounded mb-4"
                               onChange={(e) =>
                                 handleTutorSelection(e.target.value)
                               }
+                              value={selectedTutor}
                             >
                               <option value="">
                                 No Preference (Auto-Select)
@@ -767,7 +794,7 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
 
-                            {/* Time Slot Selection */}
+                            {/* --- Time Slot Selection (if available) --- */}
                             {availableTimeSlots.length > 0 && (
                               <>
                                 <label className="block mb-2">
@@ -775,10 +802,10 @@ const CourseDetailsPage = () => {
                                 </label>
                                 <select
                                   className="w-full p-2 border rounded mb-4"
-                                  value={selectedTimeSlot}
                                   onChange={(e) =>
                                     setSelectedTimeSlot(e.target.value)
                                   }
+                                  value={selectedTimeSlot}
                                 >
                                   <option value="">Choose a Time Slot</option>
                                   {availableTimeSlots.map((slot) => (
@@ -790,41 +817,41 @@ const CourseDetailsPage = () => {
                               </>
                             )}
 
-                            {/* Session Duration with Price */}
+                            {/* --- Session Duration Dropdown with Auto-select --- */}
                             <label className="block mb-2">
                               Select Duration:
                             </label>
                             <select
                               className="w-full p-2 border rounded mb-4"
+                              onChange={(e) =>
+                                setSelectedSession(JSON.parse(e.target.value))
+                              }
                               value={
                                 selectedSession
                                   ? JSON.stringify(selectedSession)
                                   : ""
                               }
-                              onChange={(e) =>
-                                setSelectedSession(JSON.parse(e.target.value))
-                              }
                             >
-                              <option value="">Choose a Session</option>
+                              <option value="">Select Session Duration</option>
                               {sessions.map((session, index) => (
                                 <option
                                   key={index}
                                   value={JSON.stringify(session)}
                                 >
-                                  {session.duration} — Rs.{" "}
-                                  {(
-                                    parseInt(session.price) || 0
-                                  ).toLocaleString()}
+                                  {session.duration} - Rs.{" "}
+                                  {Number(session.price).toLocaleString(
+                                    "en-IN"
+                                  )}
                                 </option>
                               ))}
                             </select>
 
-                            {/* Buttons */}
+                            {/* --- Enroll Now & Cancel Buttons --- */}
                             <button
                               onClick={handleEnrollNow}
                               className="w-full py-2 bg-green-500 text-white rounded mt-4"
                             >
-                              Confirm & Pay
+                              Confirm &amp; Pay
                             </button>
                             <button
                               onClick={() => setShowEnrollModal(false)}
@@ -834,7 +861,7 @@ const CourseDetailsPage = () => {
                             </button>
                           </div>
 
-                          {/* Calendar Section */}
+                          {/* --- Calendar on Right --- */}
                           <div className="w-1/2 pl-4 border-l">
                             <EnrollmentCalendar
                               availableDates={availableDates}
