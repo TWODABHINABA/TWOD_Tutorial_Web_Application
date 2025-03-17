@@ -317,7 +317,7 @@ const CourseDetailsPage = () => {
                       )}
                     </div>
 
-                    {!token ? (
+                    {/* {!token ? (
                       <div></div>
                     ) : (
                       <div className="space-y-4">
@@ -335,9 +335,9 @@ const CourseDetailsPage = () => {
                           Preview Course
                         </button>
                       </div>
-                    )}
+                    )} */}
 
-                    <div className="space-y-4">
+                    {/* <div className="space-y-4">
                       <div className="flex items-center space-x-3">
                         <svg
                           className="w-5 h-5 text-orange-600"
@@ -354,7 +354,7 @@ const CourseDetailsPage = () => {
                         </svg>
                         <span className="text-gray-600">{course.level}</span>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* <div className=" bg-black bg-opacity-50 flex justify-center items-center">
                       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
@@ -455,7 +455,7 @@ const CourseDetailsPage = () => {
                   </div>
                 </div>
 
-                <form
+                {/* <form
                   onSubmit={handleFeedbackSubmit}
                   className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
                 >
@@ -520,7 +520,7 @@ const CourseDetailsPage = () => {
                       )}
                     </>
                   )}
-                </form>
+                </form> */}
               </div>
 
               <section className="space-y-6">
@@ -788,70 +788,7 @@ const CourseDetailsPage = () => {
                 </button>
               </div>
             )}
-            <form
-              onSubmit={handleFeedbackSubmit}
-              className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
-            >
-              <h3 className="text-xl font-bold">Leave Your Feedback</h3>
-
-              <div className="flex space-x-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    type="button"
-                    key={star}
-                    onClick={() => setFeedback({ ...feedback, rating: star })}
-                    className={`w-8 h-8 ${
-                      feedback.rating >= star
-                        ? "text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
-
-              <textarea
-                value={feedback.comment}
-                onChange={(e) =>
-                  setFeedback({ ...feedback, comment: e.target.value })
-                }
-                placeholder="Write your feedback..."
-                className="w-full p-2 border rounded-lg"
-                required
-              ></textarea>
-
-              <button
-                type="submit"
-                className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
-              >
-                Submit Feedback
-              </button>
-              {isRoleAdmin === "admin" && (
-                <>
-                  {!isEditing ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                      className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
-                    >
-                      Edit Course
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      onClick={(e) => {
-                        setIsEditing(false);
-                        handleUpdate(e);
-                      }}
-                      className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
-                    >
-                      Update
-                    </button>
-                  )}
-                </>
-              )}
-            </form>
+            
 
             <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
@@ -1003,7 +940,7 @@ const CourseDetailsPage = () => {
                 </div>
               </div>
 
-              {/* <form
+              <form
                 onSubmit={handleFeedbackSubmit}
                 className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
               >
@@ -1066,7 +1003,7 @@ const CourseDetailsPage = () => {
                     )}
                   </>
                 )}
-              </form> */}
+              </form>
             </div>
           </div>
         </div>
