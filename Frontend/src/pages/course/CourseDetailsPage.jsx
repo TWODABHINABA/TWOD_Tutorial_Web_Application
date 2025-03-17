@@ -205,11 +205,11 @@ const CourseDetailsPage = () => {
       alert("Enrollment failed. Try again later.");
     }
   };
-  
+
   const formatPrice = (priceString) => {
     if (!priceString) return 0;
     // Remove everything except digits
-    const cleaned = priceString.replace(/[^\d]/g, '');
+    const cleaned = priceString.replace(/[^\d]/g, "");
     return Number(cleaned);
   };
 
@@ -759,7 +759,7 @@ const CourseDetailsPage = () => {
                             </p>
                             <p className="text-gray-600">
                               Price: Rs.{" "}
-                              {Number(selectedSession.price).toLocaleString(
+                              {formatPrice(selectedSession.price).toLocaleString(
                                 "en-IN"
                               )}
                               .00
