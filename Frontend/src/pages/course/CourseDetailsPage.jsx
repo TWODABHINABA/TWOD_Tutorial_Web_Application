@@ -15,7 +15,7 @@ const CourseDetailsPage = () => {
   const [feedback, setFeedback] = useState({ rating: "", comment: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [tutors, setTutors] = useState([]);
   const [selectedTutor, setSelectedTutor] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
@@ -103,7 +103,7 @@ const CourseDetailsPage = () => {
     try {
       const response = await api.get(`/courses/${courseId}/tutors`);
       setTutors(response.data);
-      // setShowEnrollModal(true);
+      setShowEnrollModal(true);
     } catch (error) {
       console.error("Error fetching tutors:", error);
     }
