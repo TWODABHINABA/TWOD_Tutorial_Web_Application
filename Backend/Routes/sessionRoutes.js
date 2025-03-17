@@ -11,7 +11,7 @@ router.post("/add", authMiddleware, async (req, res) => {
     const { sessions } = req.body;
 
     // First remove any existing pricing to keep only one set
-    await GlobalSessionPricing.deleteMany({});
+    // await GlobalSessionPricing.deleteMany({});
 
     const newPricing = new GlobalSessionPricing({
       sessions,

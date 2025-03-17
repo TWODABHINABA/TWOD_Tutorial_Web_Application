@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 
 const SessionSchema = new mongoose.Schema({
   duration: {
-    type: String, // "30 minutes", "1 hour", etc.
+    type: String, 
     required: true
   },
   price: {
-    type: Number, // 2200, 3800, etc.
+    type: String, 
     required: true
   }
 });
