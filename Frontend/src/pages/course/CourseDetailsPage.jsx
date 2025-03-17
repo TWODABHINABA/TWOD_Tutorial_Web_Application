@@ -806,15 +806,22 @@ const CourseDetailsPage = () => {
                               }
                             >
                               <option value="">Choose a Session</option>
-                              {sessions.map((session, index) => (
-                                <option
-                                  key={index}
-                                  value={JSON.stringify(session)}
-                                >
-                                  {session.duration} — Rs.{" "}
-                                  {parseInt(session.price).toLocaleString()}
-                                </option>
-                              ))}
+                              {Array.isArray(sessions) &&
+                              sessions.length > 0 ? (
+                                sessions.map((session, index) => (
+                                  <option
+                                    key={index}
+                                    value={JSON.stringify(session)}
+                                  >
+                                    {session.duration} — Rs.{" "}
+                                    {(
+                                      parseInt(session.price) || 0
+                                    ).toLocaleString()}
+                                  </option>
+                                ))
+                              ) : (
+                                <option disabled>No Sessions Available</option>
+                              )}
                             </select>
 
                             {/* Buttons */}
