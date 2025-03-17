@@ -304,7 +304,7 @@ const CourseDetailsPage = () => {
               )}
 
               <div>
-                <img src={`https://twod-tutorial-web-application-3brq.onrender.com/courseUploads/${course.nameImage}`} alt={course.nameImage} />
+                <img src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`} alt={course.nameImage} />
               </div>
 
 
