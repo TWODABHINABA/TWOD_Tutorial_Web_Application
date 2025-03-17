@@ -56,19 +56,18 @@ const CourseDetailsPage = () => {
     }
   }, [courseId]);
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const response = await api.get("/get-session");
-        if (response.data.success && response.data.data.sessions.length > 0) {
-          setSessions(response.data.data.sessions);
-          setSelectedSession(response.data.data.sessions[0]); // Default to first (30 minutes)
-        }
-      } catch (error) {
-        console.error("Failed to fetch session pricing:", error);
+  const fetchSessions = async () => {
+    try {
+      const response = await api.get("/get-session");
+      if (response.data.success) {
+        setSessions(response.data.data.sessions || []);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchSessions();
   }, []);
 
