@@ -136,6 +136,7 @@ const CourseDetailsPage = () => {
     setAvailableDates([]);
     setSelectedTimeSlot("");
     setAvailableTimeSlots([]);
+    setSelectedSession("");
 
     try {
       const response = await api.get(`/tutors/${tutorId}/available-dates`);
