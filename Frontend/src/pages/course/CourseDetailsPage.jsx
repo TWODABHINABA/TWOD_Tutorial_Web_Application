@@ -303,7 +303,7 @@ const CourseDetailsPage = () => {
                 </section>
               )}
 
-              <div className="w-full max-w-[700px] h-[500px] overflow-hidden rounded-md shadow-md">
+              <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
                 <img
                   src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
                   alt={course.nameImage}
