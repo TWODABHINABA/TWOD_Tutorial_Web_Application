@@ -205,6 +205,13 @@ const CourseDetailsPage = () => {
       alert("Enrollment failed. Try again later.");
     }
   };
+  
+  const formatPrice = (priceString) => {
+    if (!priceString) return 0;
+    // Remove everything except digits
+    const cleaned = priceString.replace(/[^\d]/g, '');
+    return Number(cleaned);
+  };
 
   if (loading)
     return (
@@ -665,9 +672,9 @@ const CourseDetailsPage = () => {
                             {selectedSession.duration}
                           </span>
                         </p>
-                        <p className="text-xl font-semibold mt-2">
+                        <p className="text-gray-600">
                           Price: Rs.{" "}
-                          {Number(selectedSession.price).toLocaleString(
+                          {formatPrice(selectedSession?.price).toLocaleString(
                             "en-IN"
                           )}
                           .00
@@ -693,7 +700,7 @@ const CourseDetailsPage = () => {
                           }`}
                         >
                           {session.duration} - Rs.{" "}
-                          {Number(session.price).toLocaleString("en-IN")}
+                          {formatPrice(session.price).toLocaleString("en-IN")}
                         </button>
                       ))}
                     </div>
@@ -839,7 +846,7 @@ const CourseDetailsPage = () => {
                                   value={JSON.stringify(session)}
                                 >
                                   {session.duration} - Rs.{" "}
-                                  {Number(session.price).toLocaleString(
+                                  {formatPrice(session.price).toLocaleString(
                                     "en-IN"
                                   )}
                                 </option>
