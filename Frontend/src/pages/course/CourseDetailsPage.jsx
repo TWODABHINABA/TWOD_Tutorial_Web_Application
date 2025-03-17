@@ -306,7 +306,7 @@ const CourseDetailsPage = () => {
               <div className="space-y-8 ">
                 <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                   <div className="space-y-6">
-                    {/* <div className="text-center">
+                    <div className="text-center">
                       <span className="text-4xl font-bold text-gray-800">
                         ${course.discountPrice}
                       </span>
@@ -335,7 +335,7 @@ const CourseDetailsPage = () => {
                           Preview Course
                         </button>
                       </div>
-                    )} */}
+                    )}
 
                     <div className="space-y-4">
                       <div className="flex items-center space-x-3">
@@ -356,7 +356,7 @@ const CourseDetailsPage = () => {
                       </div>
                     </div>
 
-                    <div className=" bg-black bg-opacity-50 flex justify-center items-center">
+                    {/* <div className=" bg-black bg-opacity-50 flex justify-center items-center">
                       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-500">
@@ -451,11 +451,11 @@ const CourseDetailsPage = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
-                {/* <form
+                <form
                   onSubmit={handleFeedbackSubmit}
                   className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
                 >
@@ -520,7 +520,7 @@ const CourseDetailsPage = () => {
                       )}
                     </>
                   )}
-                </form> */}
+                </form>
               </div>
 
               <section className="space-y-6">
@@ -553,7 +553,7 @@ const CourseDetailsPage = () => {
                                     : [];
 
                                   if (!newCurriculum[idx]) {
-                                    newCurriculum[idx] = {}; // Ensure the index exists
+                                    newCurriculum[idx] = {}; 
                                   }
 
                                   newCurriculum[idx] = {
@@ -855,7 +855,7 @@ const CourseDetailsPage = () => {
                   )}
                 </form>
 
-            {/* <div className="space-y-8 ">
+            <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                 <div className="space-y-6">
                   <div className="text-center">
@@ -1072,7 +1072,7 @@ const CourseDetailsPage = () => {
                   </>
                 )}
               </form>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>
