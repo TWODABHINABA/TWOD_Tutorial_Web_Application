@@ -646,16 +646,31 @@ const CourseDetailsPage = () => {
             <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                 <div className="space-y-6">
-                  {/* <div className="text-center">
-                    <span className="text-4xl font-bold text-gray-800">
+                  <div className="text-center">
+                    {/* <span className="text-4xl font-bold text-gray-800">
                       ${course.discountPrice}
                     </span>
                     {course.discountPrice && (
                       <p className="mt-1 text-sm text-red-600 line-through">
                         ${course.price}
                       </p>
+                    )} */}
+                    {selectedSession && (
+                      <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
+                        {/* <p className="text-lg font-medium">
+                          Selected Session:{" "}
+                          <span className="font-bold">
+                            {selectedSession.duration}
+                          </span>
+                        </p> */}
+                        <p className="text-xl font-semibold mt-2">
+                          Price: Rs.{" "}
+                          {selectedSession.price.toLocaleString("en-IN")}
+                          .00
+                        </p>
+                      </div>
                     )}
-                  </div> */}
+                  </div>
 
                   <div className="session-selector-container">
                     <h2 className="text-2xl font-semibold mb-4">
@@ -677,22 +692,6 @@ const CourseDetailsPage = () => {
                         </button>
                       ))}
                     </div>
-
-                    {selectedSession && (
-                      <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
-                        <p className="text-lg font-medium">
-                          Selected Session:{" "}
-                          <span className="font-bold">
-                            {selectedSession.duration}
-                          </span>
-                        </p>
-                        <p className="text-xl font-semibold mt-2">
-                          Price: Rs.{" "}
-                          {selectedSession.price.toLocaleString("en-IN")}
-                          .00
-                        </p>
-                      </div>
-                    )}
                   </div>
 
                   {!token ? (
