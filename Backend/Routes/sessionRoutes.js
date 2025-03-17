@@ -6,7 +6,7 @@ require("dotenv").config();
 require("../passport");
 require("dotenv").config();
 
-router.post("/add", authMiddleware, async (req, res) => {
+router.post("/add-session", async (req, res) => {
   try {
     const { sessions } = req.body;
 
@@ -52,42 +52,7 @@ router.get("/get-session", async (req, res) => {
   }
 });
 
-// router.put("/update",authMiddleware, async (req, res) => {
-//   try {
-//     const { sessions } = req.body;
-
-//     const updatedPricing = await GlobalSessionPricing.findOneAndUpdate(
-//       {}, // No filter needed since only one exists
-//       { sessions },
-//       { new: true }
-//     );
-
-//     if (!updatedPricing) {
-//       return res
-//         .status(404)
-//         .json({
-//           success: false,
-//           message: "Global session pricing not found to update",
-//         });
-//     }
-
-//     res.json({
-//       success: true,
-//       message: "Global session pricing updated successfully",
-//       data: updatedPricing,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res
-//       .status(500)
-//       .json({
-//         success: false,
-//         message: "Failed to update global session pricing",
-//       });
-//   }
-// });
-
-router.put("/:index", authMiddleware, async (req, res) => {
+router.put("/update/:index", authMiddleware, async (req, res) => {
   try {
     const { index } = req.params;
     const { duration, price } = req.body;
@@ -128,5 +93,40 @@ router.put("/:index", authMiddleware, async (req, res) => {
     });
   }
 });
+
+// router.put("/update",authMiddleware, async (req, res) => {
+//   try {
+//     const { sessions } = req.body;
+
+//     const updatedPricing = await GlobalSessionPricing.findOneAndUpdate(
+//       {}, // No filter needed since only one exists
+//       { sessions },
+//       { new: true }
+//     );
+
+//     if (!updatedPricing) {
+//       return res
+//         .status(404)
+//         .json({
+//           success: false,
+//           message: "Global session pricing not found to update",
+//         });
+//     }
+
+//     res.json({
+//       success: true,
+//       message: "Global session pricing updated successfully",
+//       data: updatedPricing,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res
+//       .status(500)
+//       .json({
+//         success: false,
+//         message: "Failed to update global session pricing",
+//       });
+//   }
+// });
 
 module.exports = router;

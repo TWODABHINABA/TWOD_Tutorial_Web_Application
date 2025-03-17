@@ -28,7 +28,7 @@ const SessionAdmin = () => {
     if (!newDuration || !newPrice)
       return alert("Please enter both duration and price");
     try {
-      const response = await api.post("/add", {
+      const response = await api.post("/add-session", {
         duration: newDuration,
         price: newPrice,
       });
