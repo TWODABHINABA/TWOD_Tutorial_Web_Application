@@ -1,5 +1,6 @@
-// models/GlobalSessionPricing.js
+
 const mongoose = require('mongoose');
+const { type } = require("os");
 
 const SessionSchema = new mongoose.Schema({
   duration: {

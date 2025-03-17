@@ -1,74 +1,56 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../components/User-management/api";
 
-const SessionAdmin = () => {
+export default function ManageSessionPricing() {
   const [sessions, setSessions] = useState([]);
   const [newDuration, setNewDuration] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [editIndex, setEditIndex] = useState(null);
-  const [editedSession, setEditedSession] = useState({ duration: '', price: '' });
+  const [editedSession, setEditedSession] = useState({ duration: "", price: "" });
 
-  useEffect(() => {
-    fetchSessions();
-  }, []);
-
+  // Fetch existing sessions
   const fetchSessions = async () => {
     try {
       const response = await api.get("/get-session");
       if (response.data.success) {
-        setSessions(response.data.data.sessions);
+        setSessions(response.data.data.sessions || []);
       }
     } catch (error) {
       console.error("Error fetching sessions:", error);
     }
   };
 
-  // Add a new session
-  const handleAddSession = async () => {
-    if (!newDuration || !newPrice)
-      return alert("Please enter both duration and price");
-    try {
-      const response = await api.post("/add-session", {
-        duration: newDuration,
-        price: newPrice,
-      });
-      if (response.data.success) {
-        fetchSessions(); // Refresh list
-        setNewDuration("");
-        setNewPrice("");
-      }
-    } catch (error) {
-      console.error("Error adding session:", error);
-    }
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  // Add session to local list
+  const handleAddSession = () => {
+    if (!newDuration || !newPrice) return alert("Please enter both duration and price");
+
+    const updatedSessions = [
+      ...sessions,
+      { duration: newDuration, price: newPrice },
+    ];
+    setSessions(updatedSessions);
+    setNewDuration("");
+    setNewPrice("");
   };
 
-  // Update session
-  //   const handleUpdateSession = async (index, updatedPrice) => {
-  //     try {
-  //       const response = await api.put("/update", {
-  //         index,
-  //         price: updatedPrice,
-  //       });
-  //       if (response.data.success) {
-  //         fetchSessions(); // Refresh list
-  //       }
-  //     } catch (error) {
-  //       console.error("Error updating session:", error);
-  //     }
-  //   };
+  // Save all sessions to backend (replacing old list)
+  const handleSaveAllSessions = async () => {
+    if (sessions.length === 0) return alert("Please add at least one session before saving.");
 
-  const handleSaveEdit = async (index) => {
     try {
-      const response = await api.put(
-        `/update/${index}`,
-        editedSession
-      );
+      const response = await api.post("/add-session", {
+        sessions,
+      });
       if (response.data.success) {
-        fetchSessions();
-        setEditIndex(null);
+        alert("Session pricing saved successfully!");
+        fetchSessions(); 
       }
     } catch (error) {
-      console.error("Error updating session:", error);
+      console.error("Error saving sessions:", error);
     }
   };
 
@@ -77,20 +59,21 @@ const SessionAdmin = () => {
     setEditedSession({ ...sessions[index] });
   };
 
-  // Delete session
+  // Handle save after edit
+  const handleSaveEdit = (index) => {
+    const updatedSessions = [...sessions];
+    updatedSessions[index] = editedSession;
+    setSessions(updatedSessions);
+    setEditIndex(null);
+  };
 
-  //   const handleDeleteSession = async (index) => {
-  //     if (!window.confirm("Are you sure you want to delete this session?"))
-  //       return;
-  //     try {
-  //       const response = await api.delete(`delete/${index}`);
-  //       if (response.data.success) {
-  //         fetchSessions(); // Refresh list
-  //       }
-  //     } catch (error) {
-  //       console.error("Error deleting session:", error);
-  //     }
-  //   };
+  // Handle delete session from local list
+  const handleDeleteSession = (index) => {
+    if (!window.confirm("Are you sure you want to delete this session?")) return;
+    const updatedSessions = sessions.filter((_, i) => i !== index);
+    setSessions(updatedSessions);
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Manage Session Pricing</h1>
@@ -123,67 +106,85 @@ const SessionAdmin = () => {
       </div>
 
       {/* Existing Sessions */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Existing Sessions</h2>
-        {sessions.map((session, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between border-b py-2 gap-4"
-          >
-            {editIndex === index ? (
-              <>
-                <input
-                  type="text"
-                  value={editedSession.duration}
-                  onChange={(e) =>
-                    setEditedSession({ ...editedSession, duration: e.target.value })
-                  }
-                  className="border rounded-lg px-2 py-1 w-1/3"
-                />
-                <input
-                  type="number"
-                  value={editedSession.price}
-                  onChange={(e) =>
-                    setEditedSession({ ...editedSession, price: e.target.value })
-                  }
-                  className="border rounded-lg px-2 py-1 w-1/4 text-right"
-                />
-                <button
-                  onClick={() => handleSaveEdit(index)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded-lg"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setEditIndex(null)}
-                  className="bg-gray-500 text-white px-3 py-1 rounded-lg"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                <p className="font-medium w-1/3">{session.duration}</p>
-                <p className="w-1/4 text-right">Rs. {session.price.toLocaleString()}</p>
-                <button
-                  onClick={() => handleEditClick(index)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded-lg"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteSession(index)}
-                  className="bg-red-500 text-white px-3 py-1 rounded-lg"
-                >
-                  Delete
-                </button>
-              </>
-            )}
-          </div>
-        ))}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <h2 className="text-xl font-semibold mb-4">Sessions List</h2>
+        {sessions.length === 0 ? (
+          <p className="text-gray-500">No sessions added yet.</p>
+        ) : (
+          sessions.map((session, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between border-b py-2 gap-4"
+            >
+              {editIndex === index ? (
+                <>
+                  <input
+                    type="text"
+                    value={editedSession.duration}
+                    onChange={(e) =>
+                      setEditedSession({
+                        ...editedSession,
+                        duration: e.target.value,
+                      })
+                    }
+                    className="border rounded-lg px-2 py-1 w-1/3"
+                  />
+                  <input
+                    type="text"
+                    value={editedSession.price}
+                    onChange={(e) =>
+                      setEditedSession({
+                        ...editedSession,
+                        price: e.target.value,
+                      })
+                    }
+                    className="border rounded-lg px-2 py-1 w-1/4 text-right"
+                  />
+                  <button
+                    onClick={() => handleSaveEdit(index)}
+                    className="bg-blue-500 text-white px-3 py-1 rounded-lg"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditIndex(null)}
+                    className="bg-gray-500 text-white px-3 py-1 rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium w-1/3">{session.duration}</p>
+                  <p className="w-1/4 text-right">Rs. {session.price}</p>
+                  <button
+                    onClick={() => handleEditClick(index)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded-lg"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSession(index)}
+                    className="bg-red-500 text-white px-3 py-1 rounded-lg"
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Save All */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleSaveAllSessions}
+          className="bg-indigo-600 text-white px-6 py-2 rounded-lg"
+        >
+          Save All Sessions
+        </button>
       </div>
     </div>
   );
-};
-
-export default SessionAdmin;
+}

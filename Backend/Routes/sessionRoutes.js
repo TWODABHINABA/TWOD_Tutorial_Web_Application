@@ -10,24 +10,46 @@ router.post("/add-session", async (req, res) => {
   try {
     const { sessions } = req.body;
 
-    // First remove any existing pricing to keep only one set
-    // await GlobalSessionPricing.deleteMany({});
+    if (!Array.isArray(sessions) || sessions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Sessions array is required and cannot be empty",
+      });
+    }
 
-    const newPricing = new GlobalSessionPricing({
-      sessions,
-    });
+    // Validate each session
+    for (const session of sessions) {
+      if (!session.duration || !session.price) {
+        return res.status(400).json({
+          success: false,
+          message: "Each session must have duration and price",
+        });
+      }
+    }
 
-    await newPricing.save();
+    // Find existing pricing
+    let pricing = await GlobalSessionPricing.findOne();
+
+    if (!pricing) {
+      // If not exists, create new
+      pricing = new GlobalSessionPricing({ sessions });
+    } else {
+      // If exists, replace sessions array
+      pricing.sessions = sessions;
+    }
+
+    await pricing.save();
+
     res.status(201).json({
       success: true,
-      message: "Global session pricing added successfully",
-      data: newPricing,
+      message: "Global session pricing set successfully",
+      data: pricing,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       success: false,
-      message: "Failed to add global session pricing",
+      message: "Failed to set global session pricing",
     });
   }
 });
