@@ -646,7 +646,7 @@ const CourseDetailsPage = () => {
             <div className="space-y-8 ">
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                 <div className="space-y-6">
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <span className="text-4xl font-bold text-gray-800">
                       ${course.discountPrice}
                     </span>
@@ -655,7 +655,7 @@ const CourseDetailsPage = () => {
                         ${course.price}
                       </p>
                     )}
-                  </div>
+                  </div> */}
 
                   <div className="session-selector-container">
                     <h2 className="text-2xl font-semibold mb-4">
