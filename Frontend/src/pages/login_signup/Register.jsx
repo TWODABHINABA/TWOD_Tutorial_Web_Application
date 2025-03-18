@@ -32,8 +32,9 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     //   return alert("Password is required!");
 
     // localStorage.setItem("googlePassword", password); 
-    // window.open("http://localhost:6001/auth", "_self");
-    window.open("https://twod-tutorial-web-application.onrender.com/auth", "_self");
+    // window.open("http://localhost:6001/auth", "_self"); // local
+    // window.open("https://twod-tutorial-web-application.onrender.com/auth", "_self"); //vinay
+    window.open("https://twod-tutorial-web-application-3brq.onrender.com/auth", "_self");
   };
 
   // useEffect(() => {

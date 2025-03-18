@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import EnrollmentCalendar from "./EnrollmentCalendar";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
+import axios from "axios";
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -22,6 +23,8 @@ const CourseDetailsPage = () => {
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("1 hr");
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
   const token = localStorage.getItem("token");
   const [isEditing, setIsEditing] = useState(false);
   const [updatedCourse, setUpdatedCourse] = useState({});
@@ -53,6 +56,25 @@ const CourseDetailsPage = () => {
     }
   }, [courseId]);
 
+  const fetchSessions = async () => {
+    try {
+      const response = await api.get("/get-session");
+      if (response.data.success) {
+        setSessions(response.data.data.sessions || []);
+      }
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  const handleSessionSelect = (session) => {
+    setSelectedSession(session);
+    setSelectedDuration(session.duration); // Also update duration to keep consistency
+  };
   const handleInputChange = (e) => {
     setUpdatedCourse((prev) => ({
       ...prev,
@@ -84,14 +106,13 @@ const CourseDetailsPage = () => {
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!token) {
-      window.location.href="/register";
+      window.location.href = "/register";
     }
     try {
-      const response = await api.post(`/courses/${courseId}/feedback`, feedback, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await api.post(
+        `/courses/${courseId}/feedback`,
+        feedback
+      );
       setCourse(response.data.course);
       setFeedback({ rating: "", comment: "" });
     } catch (err) {
@@ -144,7 +165,8 @@ const CourseDetailsPage = () => {
       !selectedTutor ||
       !selectedDate ||
       !selectedTimeSlot ||
-      !selectedDuration
+      !selectedDuration ||
+      !selectedSession
     ) {
       alert("Please select all options before enrolling.");
       return;
@@ -162,7 +184,8 @@ const CourseDetailsPage = () => {
           selectedDate, // Field names fixed to match backend schema
           selectedTime: selectedTimeSlot,
           duration: selectedDuration,
-          price: course.discountPrice || course.price,
+          selectedSession,
+          price: selectedSession.discountPrice || selectedSession.price,
         },
         {
           headers: {
@@ -181,6 +204,13 @@ const CourseDetailsPage = () => {
       console.error("Error enrolling:", error);
       alert("Enrollment failed. Try again later.");
     }
+  };
+
+  const formatPrice = (priceString) => {
+    if (!priceString) return 0;
+    // Remove everything except digits
+    const cleaned = priceString.replace(/[^\d]/g, "");
+    return Number(cleaned);
   };
 
   if (loading)
@@ -276,6 +306,88 @@ const CourseDetailsPage = () => {
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-12">
+              <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
+                <img
+                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
+                  alt={course.nameImage}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
+                <img
+                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
+                  alt={course.nameImage}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="text-center">
+                <span className="text-4xl font-bold text-gray-800">
+                  ${course.discountPrice}
+                </span>
+                {course.discountPrice && (
+                  <p className="mt-1 text-sm text-red-600 line-through">
+                    ${course.price}
+                  </p>
+                )}
+              </div>
+
+              <div className="session-selector-container">
+                <h2 className="text-2xl font-semibold mb-4">
+                  Choose a Session Duration
+                </h2>
+
+                <div className="flex gap-4 mb-6">
+                  {sessions.map((session, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSessionSelect(session)}
+                      className={`px-4 py-2 rounded-lg border ${
+                        selectedSession?.duration === session.duration
+                          ? "bg-blue-500 text-white"
+                          : "bg-white text-gray-800 border-gray-300"
+                      }`}
+                    >
+                      {session.duration}
+                    </button>
+                  ))}
+                </div>
+
+                {selectedSession && (
+                  <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
+                    <p className="text-lg font-medium">
+                      Selected Session:{" "}
+                      <span className="font-bold">
+                        {selectedSession.duration}
+                      </span>
+                    </p>
+                    <p className="text-xl font-semibold mt-2">
+                      Price: Rs. {selectedSession.price.toLocaleString("en-IN")}
+                      .00
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {!token ? (
+                <div></div>
+              ) : (
+                <div className="space-y-4">
+                  <button
+                    onClick={handleEnrollClick}
+                    className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
+                  >
+                    Enroll Now
+                  </button>
+
+                  <button
+                    onClick={() => alert("Previewing course...")}
+                    className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
+                  >
+                    Preview Course
+                  </button>
+                </div>
+              )} */}
+
               {isEditing ? (
                 <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
                   <h3 className="text-2xl font-bold mb-4 text-gray-800">
@@ -333,7 +445,7 @@ const CourseDetailsPage = () => {
                                     : [];
 
                                   if (!newCurriculum[idx]) {
-                                    newCurriculum[idx] = {}; // Ensure the index exists
+                                    newCurriculum[idx] = {};
                                   }
 
                                   newCurriculum[idx] = {
@@ -502,8 +614,9 @@ const CourseDetailsPage = () => {
                       >
                         <div className="flex items-start space-x-4">
                           <img
-                            // src={`http://localhost:6001${feedback.profilePicture}`}
-                            src={`https://twod-tutorial-web-application.onrender.com${feedback.profilePicture}`}
+                            // src={`http://localhost:6001${feedback.profilePicture}`} //local
+                            // src={`https://twod-tutorial-web-application.onrender.com${feedback.profilePicture}`} //vinay
+                            src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
                             alt="Profile"
                             className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
                           />
@@ -542,14 +655,55 @@ const CourseDetailsPage = () => {
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                 <div className="space-y-6">
                   <div className="text-center">
-                    <span className="text-4xl font-bold text-gray-800">
+                    {/* <span className="text-4xl font-bold text-gray-800">
                       ${course.discountPrice}
                     </span>
                     {course.discountPrice && (
                       <p className="mt-1 text-sm text-red-600 line-through">
                         ${course.price}
                       </p>
+                    )} */}
+
+                    {selectedSession && (
+                      <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
+                        <p className="text-lg font-medium">
+                          Selected Session:{" "}
+                          <span className="font-bold">
+                            {selectedSession.duration}
+                          </span>
+                        </p>
+                        <p className="text-gray-600">
+                          Price: Rs.{" "}
+                          {formatPrice(selectedSession?.price).toLocaleString(
+                            "en-IN"
+                          )}
+                          .00
+                        </p>
+                      </div>
                     )}
+                  </div>
+
+                  <div className="session-selector-container">
+                    <h2 className="text-2xl font-semibold mb-4">
+                      Choose a Session Duration
+                    </h2>
+
+                    <div className="flex gap-4 mb-6">
+                      {sessions.map((session, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSessionSelect(session)}
+                          className={`px-4 py-2 rounded-lg border ${
+                            selectedSession?.duration === session.duration
+                              ? "bg-blue-500 text-white"
+                              : "bg-white text-gray-800 border-gray-300"
+                          }`}
+                        >
+                          {session.duration} - Rs.{" "}
+                          {formatPrice(session.price).toLocaleString("en-IN")}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {!token ? (
@@ -594,7 +748,26 @@ const CourseDetailsPage = () => {
                   {showEnrollModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
                       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
-                        {/* Course Name at the Top */}
+                        {/* --- Session Summary (Selected) --- */}
+                        {selectedSession && (
+                          <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow">
+                            <h3 className="text-lg font-semibold text-gray-700">
+                              Selected Session
+                            </h3>
+                            <p className="text-gray-600">
+                              Duration: {selectedSession.duration}
+                            </p>
+                            <p className="text-gray-600">
+                              Price: Rs.{" "}
+                              {formatPrice(selectedSession.price).toLocaleString(
+                                "en-IN"
+                              )}
+                              .00
+                            </p>
+                          </div>
+                        )}
+
+                        {/* --- Course Name --- */}
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-500">
                             Course Name
@@ -608,14 +781,15 @@ const CourseDetailsPage = () => {
                         </div>
 
                         <div className="flex">
-                          {/* Left Column – Enrollment Options */}
                           <div className="w-1/2 pr-4">
+                            {/* --- Tutor Selection --- */}
                             <label className="block mb-2">Select Tutor:</label>
                             <select
                               className="w-full p-2 border rounded mb-4"
                               onChange={(e) =>
                                 handleTutorSelection(e.target.value)
                               }
+                              value={selectedTutor}
                             >
                               <option value="">
                                 No Preference (Auto-Select)
@@ -627,6 +801,7 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
 
+                            {/* --- Time Slot Selection (if available) --- */}
                             {availableTimeSlots.length > 0 && (
                               <>
                                 <label className="block mb-2">
@@ -637,6 +812,7 @@ const CourseDetailsPage = () => {
                                   onChange={(e) =>
                                     setSelectedTimeSlot(e.target.value)
                                   }
+                                  value={selectedTimeSlot}
                                 >
                                   <option value="">Choose a Time Slot</option>
                                   {availableTimeSlots.map((slot) => (
@@ -648,22 +824,36 @@ const CourseDetailsPage = () => {
                               </>
                             )}
 
+                            {/* --- Session Duration Dropdown with Auto-select --- */}
                             <label className="block mb-2">
                               Select Duration:
                             </label>
                             <select
                               className="w-full p-2 border rounded mb-4"
-                              value={selectedDuration}
                               onChange={(e) =>
-                                setSelectedDuration(e.target.value)
+                                setSelectedSession(JSON.parse(e.target.value))
+                              }
+                              value={
+                                selectedSession
+                                  ? JSON.stringify(selectedSession)
+                                  : ""
                               }
                             >
-                              <option value="30 mins">30 mins</option>
-                              <option value="1 hr">1 hr</option>
-                              <option value="2 hrs">2 hrs</option>
-                              <option value="3 hrs">3 hrs</option>
+                              <option value="">Select Session Duration</option>
+                              {sessions.map((session, index) => (
+                                <option
+                                  key={index}
+                                  value={JSON.stringify(session)}
+                                >
+                                  {session.duration} - Rs.{" "}
+                                  {formatPrice(session.price).toLocaleString(
+                                    "en-IN"
+                                  )}
+                                </option>
+                              ))}
                             </select>
 
+                            {/* --- Enroll Now & Cancel Buttons --- */}
                             <button
                               onClick={handleEnrollNow}
                               className="w-full py-2 bg-green-500 text-white rounded mt-4"
@@ -678,6 +868,7 @@ const CourseDetailsPage = () => {
                             </button>
                           </div>
 
+                          {/* --- Calendar on Right --- */}
                           <div className="w-1/2 pl-4 border-l">
                             <EnrollmentCalendar
                               availableDates={availableDates}

@@ -48,6 +48,7 @@ const UserInfo = () => {
       try {
         const response = await api.get("/user/courses");
         setPurchasedCourses(response.data);
+        console.log(response.data);
       } catch (err) {
         console.error("Error fetching purchased courses:", err);
       }
@@ -119,8 +120,9 @@ const UserInfo = () => {
                 src={
                   updatedUser.profilePicture instanceof File
                     ? URL.createObjectURL(updatedUser.profilePicture)
-                    // : `http://localhost:6001${user.profilePicture}`
-                    : `https://twod-tutorial-web-application.onrender.com${user.profilePicture}`
+                    // : `http://localhost:6001${user.profilePicture}` //local
+                    // : `https://twod-tutorial-web-application.onrender.com${user.profilePicture}` //vinay
+                    :`https://twod-tutorial-web-application-3brq.onrender.com${user.profilePicture}`
                 }
                 alt="Profile"
                 className="w-36 h-36 rounded-full object-cover border-4 border-orange-300"

@@ -8,18 +8,18 @@ const multer = require("multer");
 const path = require("path");
 
 const storage = multer.diskStorage({
-  destination: "uploads/",
+  destination: "courseUploads/",
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
-const upload = multer({ storage });
+const courseUploads = multer({ storage });
 
 router.post(
   "/add",
   authMiddleware,
-  upload.fields([
+  courseUploads.fields([
     { name: "courseTypeImage", maxCount: 1 },
     { name: "nameImage", maxCount: 1 },
   ]),
@@ -49,10 +49,10 @@ router.post(
       const curriculumData = JSON.parse(req.body.curriculum || "[]");
 
       const courseTypeImage = req.files["courseTypeImage"]
-        ? `/uploads/${req.files["courseTypeImage"][0].filename}`
+        ? `/courseUploads/${req.files["courseTypeImage"][0].filename}`
         : "";
       const nameImage = req.files["nameImage"]
-        ? `/uploads/${req.files["nameImage"][0].filename}`
+        ? `/courseUploads/${req.files["nameImage"][0].filename}`
         : "";
 
       const newCourse = new Course({
@@ -104,7 +104,7 @@ router.put("/courses/update/:courseId", async (req, res) => {
   }
 });
 
-router.post("/:id/feedback", authMiddleware, async (req, res) => {
+router.post("/courses/:id/feedback", authMiddleware, async (req, res) => {
   try {
     const { rating, comment } = req.body;
     const course = await Course.findById(req.params.id);
@@ -147,6 +147,31 @@ router.get("/courses/:id", async (req, res) => {
   }
 });
 
+
+router.get("/courses", async (req, res) => {
+  try {
+    const { name, courseType } = req.query;
+
+    if (!name || !courseType) {
+      return res.status(400).json({ message: "Course name and type are required" });
+    }
+
+    const course = await Course.findOne({
+      name: new RegExp(`^${name}$`, "i"),
+      courseType: new RegExp(`^${courseType}$`, "i"), // make it case-insensitive if needed
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    console.log(course);
+    res.json(course);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/allCourses", async (req, res) => {
   try {
     const courses = await Course.find();
@@ -156,25 +181,76 @@ router.get("/allCourses", async (req, res) => {
   }
 });
 
-router.get("/courses", async (req, res) => {
-  try {
-    const { name } = req.query;
+// router.get("/courses", async (req, res) => {
+//   try {
+//     const { name } = req.query;
 
-    if (!name) {
-      return res.status(400).json({ message: "Course name is required" });
-    }
+//     if (!name) {
+//       return res.status(400).json({ message: "Course name is required" });
+//     }
 
-    const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
+//     const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
 
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-    console.log(course);
-    res.json(course);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+//     if (!course) {
+//       return res.status(404).json({ message: "Course not found" });
+//     }
+//     console.log(course);
+//     res.json(course);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+// router.get("/category/:categoryName", async (req, res) => {
+//   try {
+//     const { categoryName } = req.params;
+//     const courses = await Course.find({ courseType: categoryName });
+//     res.json(courses);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+// router.get("/categories", async (req, res) => {
+//   try {
+//     const categories = await Course.aggregate([
+//       {
+//         $group: {
+//           _id: "$courseType",
+//           courses: {
+//             $push: {
+//               name: "$name",
+//               courseTypeImage: "$courseTypeImage",
+//               nameImage: "$nameImage",
+//               courseType: "$courseType", // ✅ Add this!
+//             },
+//           },
+//         },
+//       },
+//     ]);
+
+//     const formattedCategories = categories.map((cat) => ({
+//       category: cat._id,
+//       courses: cat.courses.map((course) => ({
+//         name: course.name,
+//         courseType: course.courseType, // ✅ Include here too
+//         courseTypeImage: course.courseTypeImage
+//           ? `https://twod-tutorial-web-application.onrender.com${course.courseTypeImage}`
+//           : null,
+//         nameImage: course.nameImage
+//           ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
+//           : null,
+//       })),
+//     }));
+
+//     res.json(formattedCategories);
+//   } catch (err) {
+//     res.status(500).json({ error: "Failed to fetch categories" });
+//   }
+// });
+
+
+
 
 router.get("/categories", async (req, res) => {
   try {
@@ -185,35 +261,38 @@ router.get("/categories", async (req, res) => {
           courses: {
             $push: {
               name: "$name",
-              courseTypeImage: "$courseTypeImage",
+              courseType: "$courseType", // still store for later use
               nameImage: "$nameImage",
             },
           },
+          courseTypeImage: { $first: "$courseTypeImage" }, // pick first image for category
         },
       },
     ]);
 
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
-      // courses: cat.courses,
+      courseTypeImage: cat.courseTypeImage
+        ? `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}`
+        : null,
       courses: cat.courses.map((course) => ({
         name: course.name,
-        courseTypeImage: course.courseTypeImage
-          ? `https://twod-tutorial-web-application.onrender.com${course.courseTypeImage}`
-          : null,
+        courseType: course.courseType,
         nameImage: course.nameImage
-          ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
+          ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`
           : null,
       })),
     }));
 
     res.json(formattedCategories);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
 
-router.post("/:id/enroll", authMiddleware, async (req, res) => {
+
+router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
   try {
     const { tutorId, selectedDate, selectedTime, duration, amount } = req.body;
     const course = await Course.findById(req.params.id);
@@ -240,8 +319,8 @@ router.post("/:id/enroll", authMiddleware, async (req, res) => {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
-        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+        return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
+        cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -362,7 +441,7 @@ router.get("/cancel", authMiddleware, async (req, res) => {
     await transaction.save();
 
     return res.redirect(
-      `http://localhost:5173/cancel?transactionId=${transaction._id}`
+      `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`
     );
   } catch (err) {
     console.error("Error processing PayPal cancel:", err);
@@ -390,8 +469,58 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
   }
 });
 
+// router.get("/user/courses", authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+
+//     const transactions = await Transaction.find({
+//       user: userId,
+//       status: "completed",
+//     })
+//       .populate("courseId")
+//       .populate({
+//         path: "tutorId",
+//         select: "name", 
+//       })
+//       .lean();
+
+//     if (!transactions.length) {
+//       return res.status(404).json({ message: "No purchased courses found" });
+//     }
+
+   
+//     const formattedCourses = transactions.map((transaction) => ({
+//       courseId: transaction.courseId._id,
+//       courseTypeTitle:transaction.courseId.courseType,
+//       courseTitle: transaction.courseId.name,
+//       courseDescription: transaction.courseId.description,
+//       coursePrice: transaction.courseId.price,
+//       amountPaid: transaction.amount,
+//       tutorName: transaction.tutorId
+//         ? transaction.tutorId.name
+//         : "Not Selected",
+//       selectedDate: transaction.selectedDate || "Not Selected",
+//       selectedTime: transaction.selectedTime || "Not Selected",
+//       duration: transaction.duration || "Not Selected",
+//     }));
+//     res.json(formattedCourses);
+//   } catch (err) {
+//     console.error("Error fetching purchased courses:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
+
+
+
 router.get("/user/courses", authMiddleware, async (req, res) => {
   try {
+    console.log("Authenticated user:", req.user); // Debugging
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized. User not authenticated." });
+    }
+
     const userId = req.user.id;
 
     const transactions = await Transaction.find({
@@ -401,7 +530,7 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
       .populate("courseId")
       .populate({
         path: "tutorId",
-        select: "name", 
+        select: "name",
       })
       .lean();
 
@@ -409,25 +538,24 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "No purchased courses found" });
     }
 
-   
+    // Handle possible nulls in courseId and tutorId
     const formattedCourses = transactions.map((transaction) => ({
-      courseId: transaction.courseId._id,
-      courseTypeTitle:transaction.courseId.courseType,
-      courseTitle: transaction.courseId.name,
-      courseDescription: transaction.courseId.description,
-      coursePrice: transaction.courseId.price,
+      courseId: transaction.courseId?._id || "Deleted",
+      courseTypeTitle: transaction.courseId?.courseType || "Deleted",
+      courseTitle: transaction.courseId?.name || "Deleted",
+      courseDescription: transaction.courseId?.description || "Deleted",
+      coursePrice: transaction.courseId?.price || "Deleted",
       amountPaid: transaction.amount,
-      tutorName: transaction.tutorId
-        ? transaction.tutorId.name
-        : "Not Selected",
+      tutorName: transaction.tutorId?.name || "Not Selected",
       selectedDate: transaction.selectedDate || "Not Selected",
       selectedTime: transaction.selectedTime || "Not Selected",
       duration: transaction.duration || "Not Selected",
     }));
+
     res.json(formattedCourses);
   } catch (err) {
     console.error("Error fetching purchased courses:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

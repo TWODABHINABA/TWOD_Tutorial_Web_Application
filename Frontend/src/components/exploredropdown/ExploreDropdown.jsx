@@ -7,7 +7,7 @@ import api from "../User-management/api";
 const fetchCategories = async () => {
   try {
     const response = await api.get("/categories");
-    console.log(response.data);  
+    console.log("dropdown dataaaaaaaaa",response.data);  
     return response.data; 
     
   } catch (error) {
@@ -16,9 +16,18 @@ const fetchCategories = async () => {
   }
 };
 
-const fetchCourseId = async (course) => {
+// const fetchCourseId = async (course) => {
+//   try {
+//     const response = await api.get(`/courses?name=${course}&courseType=${course}`);
+//     return response.data._id; 
+//   } catch (error) {
+//     console.error("Error fetching course ID:", error);
+//   }
+// };
+
+const fetchCourseId = async (courseName, courseType) => {
   try {
-    const response = await api.get(`/courses?name=${course}`);
+    const response = await api.get(`/courses?name=${encodeURIComponent(courseName)}&courseType=${encodeURIComponent(courseType)}`);
     return response.data._id; 
   } catch (error) {
     console.error("Error fetching course ID:", error);
@@ -130,6 +139,36 @@ const FlyoutLink = ({
 };
 
 
+// const DynamicCategoryFlyout = ({ category }) => {
+//   console.log("Category Data:", category); 
+
+//   return (
+//     <div className="w-48 bg-white p-6 shadow-xl absolute">
+//       {category.courses.length > 0 ? (
+//         category.courses.map((course, index) => (
+//           <Link
+//             key={index}
+//             to="#"
+//             onClick={async (e) => {
+//               e.preventDefault();
+//               const id = await fetchCourseId(course.name,course.courseType);
+//               if (id) window.location.href = `/courses/${id}`;
+//             }}
+//             className="block text-sm hover:underline p-2"
+//           >
+//             {course.name}
+//           </Link>
+//         ))
+//       ) : (
+//         <p className="text-gray-500">No courses available</p>
+//       )}
+//     </div>
+//   );
+// };
+
+
+
+
 const DynamicCategoryFlyout = ({ category }) => {
   console.log("Category Data:", category); 
 
@@ -142,7 +181,7 @@ const DynamicCategoryFlyout = ({ category }) => {
             to="#"
             onClick={async (e) => {
               e.preventDefault();
-              const id = await fetchCourseId(course.name);
+              const id = await fetchCourseId(course.name, category.category); // Fixed line
               if (id) window.location.href = `/courses/${id}`;
             }}
             className="block text-sm hover:underline p-2"
@@ -156,6 +195,7 @@ const DynamicCategoryFlyout = ({ category }) => {
     </div>
   );
 };
+
 
 
 const PricingContent = () => {

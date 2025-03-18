@@ -22,6 +22,7 @@ import SuccessPage from './pages/sucessPage/SuccessPage'
 import CancelPage from './pages/cancelPage/CancelPage'
 import AddTutor from './pages/addTutor/AddTutor'
 import AddAvailability from './pages/addAvailibility/AddAvailability'
+import SessionAdmin from './pages/sessionTiming/SessionAdmin'
 function App() {
   // const isAdmin=localStorage.getItem("role");
   return (
@@ -45,6 +46,7 @@ function App() {
         <Route path="/cancel" element={<CancelPage />} />
         <Route path="/add-tutor" element={<AddTutor />} />
         <Route path="/add-availability" element={<AddAvailability />} />
+        <Route path="/add-session-time" element={<SessionAdmin />} />
         
       </Routes>
       

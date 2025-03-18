@@ -15,6 +15,7 @@ require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+
 router.use(passport.initialize());
 
 router.use(
@@ -45,29 +46,6 @@ router.get(
 
 
 
-// router.get("/auth/callback/success", async (req, res) => {
-//   if (!req.user) return res.redirect("/auth/callback/failure");
-
-//   const user = req.user;
-//   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
-
-//   if (!user.password) {
-//     const userPassword = req.query.password || null;
-
-//     if (userPassword) {
-//       const hashedPassword = await bcrypt.hash(userPassword, 10);
-//       user.password = hashedPassword;
-//       await user.save();
-//     }
-//   }
-
-//   res.redirect(
-//     `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
-//       user.name
-//     )}&email=${encodeURIComponent(user.email)}`
-//   );
-// });
-
 
 router.get("/auth/callback/success", async (req, res) => {
   if (!req.user) return res.redirect("/auth/callback/failure");
@@ -78,12 +56,12 @@ router.get("/auth/callback/success", async (req, res) => {
   if (!user.password) {
 
     return res.redirect(
-      `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
+      `https://twod-tutorial-web-application-frontend.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
     );
   }
 
   return res.redirect(
-    `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
+    `https://twod-tutorial-web-application-frontend.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
       user.name
     )}&email=${encodeURIComponent(user.email)}`
   );
@@ -113,9 +91,36 @@ router.post("/set-password", async (req, res) => {
   }
 });
 
+
 router.get("/auth/callback/failure", (req, res) => {
   res.send("Error");
 });
+
+// router.get("/auth/callback/success", async (req, res) => {
+//   if (!req.user) return res.redirect("/auth/callback/failure");
+
+//   const user = req.user;
+//   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+
+//   if (!user.password) {
+//     const userPassword = req.query.password || null;
+
+//     if (userPassword) {
+//       const hashedPassword = await bcrypt.hash(userPassword, 10);
+//       user.password = hashedPassword;
+//       await user.save();
+//     }
+//   }
+
+//   res.redirect(
+//     `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
+//       user.name
+//     )}&email=${encodeURIComponent(user.email)}`
+//   );
+// });
+
+
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
