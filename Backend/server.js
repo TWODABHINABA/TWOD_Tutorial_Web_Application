@@ -11,8 +11,25 @@ const path = require('path');
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); //Local
+// app.use(cors({ origin: "http://localhost:5173", credentials: true })); //Local
 // app.use(cors({ origin: "https://twod-tutorial-web-application-frontend.vercel.app", credentials: true })); //Abhi
+const allowedOrigins = [
+  "http://localhost:5173", 
+  // "https://twod-tutorial-web-application-frontend.vercel.app"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
