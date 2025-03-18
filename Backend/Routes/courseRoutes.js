@@ -181,25 +181,6 @@ router.get("/allCourses", async (req, res) => {
   }
 });
 
-// router.get("/courses", async (req, res) => {
-//   try {
-//     const { name } = req.query;
-
-//     if (!name) {
-//       return res.status(400).json({ message: "Course name is required" });
-//     }
-
-//     const course = await Course.findOne({ name: new RegExp(`^${name}$`, "i") });
-
-//     if (!course) {
-//       return res.status(404).json({ message: "Course not found" });
-//     }
-//     console.log(course);
-//     res.json(course);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
 
 // router.get("/category/:categoryName", async (req, res) => {
 //   try {
@@ -211,43 +192,6 @@ router.get("/allCourses", async (req, res) => {
 //   }
 // });
 
-// router.get("/categories", async (req, res) => {
-//   try {
-//     const categories = await Course.aggregate([
-//       {
-//         $group: {
-//           _id: "$courseType",
-//           courses: {
-//             $push: {
-//               name: "$name",
-//               courseTypeImage: "$courseTypeImage",
-//               nameImage: "$nameImage",
-//               courseType: "$courseType", // ✅ Add this!
-//             },
-//           },
-//         },
-//       },
-//     ]);
-
-//     const formattedCategories = categories.map((cat) => ({
-//       category: cat._id,
-//       courses: cat.courses.map((course) => ({
-//         name: course.name,
-//         courseType: course.courseType, // ✅ Include here too
-//         courseTypeImage: course.courseTypeImage
-//           ? `https://twod-tutorial-web-application.onrender.com${course.courseTypeImage}`
-//           : null,
-//         nameImage: course.nameImage
-//           ? `https://twod-tutorial-web-application.onrender.com${course.nameImage}`
-//           : null,
-//       })),
-//     }));
-
-//     res.json(formattedCategories);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to fetch categories" });
-//   }
-// });
 
 
 
@@ -273,13 +217,15 @@ router.get("/categories", async (req, res) => {
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
       courseTypeImage: cat.courseTypeImage
-        ? `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}`
+        ? `http://localhost:6001${cat.courseTypeImage}` //Local
+        // ? `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Abhi
         : null,
       courses: cat.courses.map((course) => ({
         name: course.name,
         courseType: course.courseType,
         nameImage: course.nameImage
-          ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`
+          ? `http://localhost:6001${course.nameImage}`  //Local
+          // ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`  //Abhi
           : null,
       })),
     }));
@@ -319,8 +265,13 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
-        cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
+
+        return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
+        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+
+        
+        // return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
+        // cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -441,7 +392,8 @@ router.get("/cancel", authMiddleware, async (req, res) => {
     await transaction.save();
 
     return res.redirect(
-      `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`
+      `http://localhost:5173/cancel?transactionId=${transaction._id}`
+      // `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`
     );
   } catch (err) {
     console.error("Error processing PayPal cancel:", err);
@@ -468,47 +420,6 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// router.get("/user/courses", authMiddleware, async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-
-//     const transactions = await Transaction.find({
-//       user: userId,
-//       status: "completed",
-//     })
-//       .populate("courseId")
-//       .populate({
-//         path: "tutorId",
-//         select: "name", 
-//       })
-//       .lean();
-
-//     if (!transactions.length) {
-//       return res.status(404).json({ message: "No purchased courses found" });
-//     }
-
-   
-//     const formattedCourses = transactions.map((transaction) => ({
-//       courseId: transaction.courseId._id,
-//       courseTypeTitle:transaction.courseId.courseType,
-//       courseTitle: transaction.courseId.name,
-//       courseDescription: transaction.courseId.description,
-//       coursePrice: transaction.courseId.price,
-//       amountPaid: transaction.amount,
-//       tutorName: transaction.tutorId
-//         ? transaction.tutorId.name
-//         : "Not Selected",
-//       selectedDate: transaction.selectedDate || "Not Selected",
-//       selectedTime: transaction.selectedTime || "Not Selected",
-//       duration: transaction.duration || "Not Selected",
-//     }));
-//     res.json(formattedCourses);
-//   } catch (err) {
-//     console.error("Error fetching purchased courses:", err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
 
 
 

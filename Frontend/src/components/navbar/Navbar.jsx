@@ -242,15 +242,11 @@ const CustomNavbar = () => {
                     Add Availability
                   </AnimatedNavbarLink>
                   <AnimatedNavbarLink to="/add-course">
-                    {/* <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer"> */}
                       Add Course
-                    {/* </button> */}
                   </AnimatedNavbarLink>
 
                   <AnimatedNavbarLink to="/add-session-time">
-                    {/* <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer"> */}
                       Add Session Time
-                    {/* </button> */}
                   </AnimatedNavbarLink>
                 </>
               )}

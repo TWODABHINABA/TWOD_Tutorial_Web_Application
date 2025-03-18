@@ -35,9 +35,6 @@ const AddAvailability = () => {
       if (!selectedTutor) return;
       try {
         const response = await api.get(`/tutors/${selectedTutor}/availability`
-          // `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability` 
-          // `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability` //vinay
-          // `https://twod-tutorial-web-application-3brq.onrender.com/tutors/${selectedTutor}/availability`
         );
         setAvailability(response.data || []);
       } catch (error) {
@@ -102,8 +99,6 @@ const AddAvailability = () => {
 
     try {
       const response = await api.delete(`/tutors/${selectedTutor}/availability/date/${formattedDate}`
-        // `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability/date/${formattedDate}` //vinay
-        // `https://twod-tutorial-web-application-3brq.onrender.com/tutors/${selectedTutor}/availability/date/${formattedDate}`
       );
 
       if (response.status === 200) {
@@ -136,8 +131,6 @@ const AddAvailability = () => {
       console.log("Formatted time being sent:", formattedTime);
 
       const response = await api.delete(`/tutors/${selectedTutor}/availability/date/${date}/time/${formattedTime}`
-        // `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability/date/${date}/time/${formattedTime}` //vinay
-        // `https://twod-tutorial-web-application-3brq.onrender.com/tutors/${selectedTutor}/availability/date/${date}/time/${formattedTime}`
       );
 
       if (response.status === 200) {
@@ -175,8 +168,6 @@ const AddAvailability = () => {
 
     try {
       const response = await api.post(`/tutors/${selectedTutor}/availability`,
-        // `https://twod-tutorial-web-application.onrender.com/tutors/${selectedTutor}/availability`,//vinay
-         // `https://twod-tutorial-web-application-3brq.onrender.com/tutors/${selectedTutor}/availability`
         requestData
       );
       console.log("✅ Response:", response.data);
