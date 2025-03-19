@@ -12,7 +12,6 @@ import Contact from './pages/contact/Contact'
 import UserInfo from './pages/Person/UserInfo'
 import CategoryCoursesPage from "./pages/course/CategoryCoursesPage";
 import CourseDetailsPage from "./pages/course/CourseDetailsPage";
-import { Resource } from './pages/resource/Resource'
 import AddCourse from './pages/addCourse/AddCourse'
 import Pricing from "./pages/Pricing/Pricing";
 import AuthSuccess from './pages/AuthSuccess'
@@ -34,7 +33,6 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/user" element={<UserInfo />} />
-        <Route path="/resources" element={<Resource/>}/>
         <Route path="/pricing" element={<Pricing/>}/>
         <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
         {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
