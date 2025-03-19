@@ -120,45 +120,110 @@ const CourseDetailsPage = () => {
     }
   };
 
+  // const handleEnrollClick = async () => {
+  //   try {
+  //     const response = await api.get(`/courses/${courseId}/tutors`);
+  //     setTutors(response.data);
+  //     setShowEnrollModal(true);
+  //   } catch (error) {
+  //     console.error("Error fetching tutors:", error);
+  //   }
+  // };
+
   const handleEnrollClick = async () => {
     try {
       const response = await api.get(`/courses/${courseId}/tutors`);
-      setTutors(response.data);
-      setShowEnrollModal(true);
+      setTutors(response.data); // List of tutors
+
+      // Set default "No Preference"
+      setSelectedTutor("");
+
+      // Fetch all available time slots for all tutors on today's date
+      const timeSlotsResponse = await api.get(
+        `/tutors/all/available-slots?date=${todayDate}`
+      );
+      setAvailableTimeSlots(timeSlotsResponse.data); // All available slots
+
+      setShowEnrollModal(true); // Show modal after data fetched
     } catch (error) {
-      console.error("Error fetching tutors:", error);
+      console.error("Error fetching tutors or timeslots:", error);
     }
   };
 
   const handleTutorSelection = async (tutorId) => {
     setSelectedTutor(tutorId);
-    setSelectedDate("");
-    setAvailableDates([]);
-    setSelectedTimeSlot("");
-    setAvailableTimeSlots([]);
+    setSelectedDate(todayDate); // Reset date on tutor change
 
-    try {
-      const response = await api.get(`/tutors/${tutorId}/available-dates`);
-      setAvailableDates(response.data);
-    } catch (error) {
-      console.error("Error fetching available dates:", error);
+    if (tutorId === "") {
+      // If "No Preference", fetch all slots for today
+      try {
+        const response = await api.get(
+          `/tutors/all/available-slots?date=${todayDate}`
+        );
+        setAvailableTimeSlots(response.data);
+      } catch (error) {
+        console.error("Error fetching all available slots:", error);
+      }
+    } else {
+      // Fetch slots for specific tutor
+      try {
+        const response = await api.get(
+          `/tutors/${tutorId}/available-slots?date=${todayDate}`
+        );
+        setAvailableTimeSlots(response.data);
+      } catch (error) {
+        console.error("Error fetching tutor-specific slots:", error);
+      }
     }
   };
 
+  // const handleTutorSelection = async (tutorId) => {
+  //   setSelectedTutor(tutorId);
+  //   setSelectedDate("");
+  //   setAvailableDates([]);
+  //   setSelectedTimeSlot("");
+  //   setAvailableTimeSlots([]);
+
+  //   try {
+  //     const response = await api.get(`/tutors/${tutorId}/available-dates`);
+  //     setAvailableDates(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching available dates:", error);
+  //   }
+  // };
+
   const handleDateSelection = async (date) => {
     setSelectedDate(date);
-    setSelectedTimeSlot("");
-    setAvailableTimeSlots([]);
 
-    try {
+    if (selectedTutor === "") {
+      // If No Preference
+      const response = await api.get(
+        `/tutors/all/available-slots?date=${date}`
+      );
+      setAvailableTimeSlots(response.data);
+    } else {
+      // Specific tutor
       const response = await api.get(
         `/tutors/${selectedTutor}/available-slots?date=${date}`
       );
       setAvailableTimeSlots(response.data);
-    } catch (error) {
-      console.error("Error fetching time slots:", error);
     }
   };
+
+  // const handleDateSelection = async (date) => {
+  //   setSelectedDate(date);
+  //   setSelectedTimeSlot("");
+  //   setAvailableTimeSlots([]);
+
+  //   try {
+  //     const response = await api.get(
+  //       `/tutors/${selectedTutor}/available-slots?date=${date}`
+  //     );
+  //     setAvailableTimeSlots(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching time slots:", error);
+  //   }
+  // };
 
   const handleEnrollNow = async () => {
     if (
@@ -308,85 +373,12 @@ const CourseDetailsPage = () => {
             <div className="lg:col-span-2 space-y-12">
               <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
                 <img
-                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
+                  // src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
+                  src={`http://localhost:6001${course.nameImage}`}
                   alt={course.nameImage}
                   className="w-full h-full object-cover"
                 />
               </div>
-              {/* <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
-                <img
-                  src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
-                  alt={course.nameImage}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="text-center">
-                <span className="text-4xl font-bold text-gray-800">
-                  ${course.discountPrice}
-                </span>
-                {course.discountPrice && (
-                  <p className="mt-1 text-sm text-red-600 line-through">
-                    ${course.price}
-                  </p>
-                )}
-              </div>
-
-              <div className="session-selector-container">
-                <h2 className="text-2xl font-semibold mb-4">
-                  Choose a Session Duration
-                </h2>
-
-                <div className="flex gap-4 mb-6">
-                  {sessions.map((session, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSessionSelect(session)}
-                      className={`px-4 py-2 rounded-lg border ${
-                        selectedSession?.duration === session.duration
-                          ? "bg-blue-500 text-white"
-                          : "bg-white text-gray-800 border-gray-300"
-                      }`}
-                    >
-                      {session.duration}
-                    </button>
-                  ))}
-                </div>
-
-                {selectedSession && (
-                  <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
-                    <p className="text-lg font-medium">
-                      Selected Session:{" "}
-                      <span className="font-bold">
-                        {selectedSession.duration}
-                      </span>
-                    </p>
-                    <p className="text-xl font-semibold mt-2">
-                      Price: Rs. {selectedSession.price.toLocaleString("en-IN")}
-                      .00
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {!token ? (
-                <div></div>
-              ) : (
-                <div className="space-y-4">
-                  <button
-                    onClick={handleEnrollClick}
-                    className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
-                  >
-                    Enroll Now
-                  </button>
-
-                  <button
-                    onClick={() => alert("Previewing course...")}
-                    className="w-full py-4 border-2 border-orange-500 text-orange-500 rounded-xl font-semibold hover:bg-orange-50 transition-colors duration-200"
-                  >
-                    Preview Course
-                  </button>
-                </div>
-              )} */}
 
               {isEditing ? (
                 <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -614,9 +606,8 @@ const CourseDetailsPage = () => {
                       >
                         <div className="flex items-start space-x-4">
                           <img
-                            // src={`http://localhost:6001${feedback.profilePicture}`} //local
-                            // src={`https://twod-tutorial-web-application.onrender.com${feedback.profilePicture}`} //vinay
-                            src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
+                            src={`http://localhost:6001${feedback.profilePicture}`} //local
+                            // src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
                             alt="Profile"
                             className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
                           />
@@ -655,15 +646,6 @@ const CourseDetailsPage = () => {
               <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
                 <div className="space-y-6">
                   <div className="text-center">
-                    {/* <span className="text-4xl font-bold text-gray-800">
-                      ${course.discountPrice}
-                    </span>
-                    {course.discountPrice && (
-                      <p className="mt-1 text-sm text-red-600 line-through">
-                        ${course.price}
-                      </p>
-                    )} */}
-
                     {selectedSession && (
                       <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
                         <p className="text-lg font-medium">
@@ -745,10 +727,10 @@ const CourseDetailsPage = () => {
                     </div>
                   </div>
 
-                  {showEnrollModal && (
+                  {/* {showEnrollModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
                       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
-                        {/* --- Session Summary (Selected) --- */}
+                        
                         {selectedSession && (
                           <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow">
                             <h3 className="text-lg font-semibold text-gray-700">
@@ -767,7 +749,7 @@ const CourseDetailsPage = () => {
                           </div>
                         )}
 
-                        {/* --- Course Name --- */}
+                      
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-500">
                             Course Name
@@ -782,7 +764,7 @@ const CourseDetailsPage = () => {
 
                         <div className="flex">
                           <div className="w-1/2 pr-4">
-                            {/* --- Tutor Selection --- */}
+                            
                             <label className="block mb-2">Select Tutor:</label>
                             <select
                               className="w-full p-2 border rounded mb-4"
@@ -801,7 +783,7 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
 
-                            {/* --- Time Slot Selection (if available) --- */}
+                            
                             {availableTimeSlots.length > 0 && (
                               <>
                                 <label className="block mb-2">
@@ -824,7 +806,7 @@ const CourseDetailsPage = () => {
                               </>
                             )}
 
-                            {/* --- Session Duration Dropdown with Auto-select --- */}
+                           
                             <label className="block mb-2">
                               Select Duration:
                             </label>
@@ -853,7 +835,7 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
 
-                            {/* --- Enroll Now & Cancel Buttons --- */}
+                           
                             <button
                               onClick={handleEnrollNow}
                               className="w-full py-2 bg-green-500 text-white rounded mt-4"
@@ -868,10 +850,132 @@ const CourseDetailsPage = () => {
                             </button>
                           </div>
 
-                          {/* --- Calendar on Right --- */}
+                          
                           <div className="w-1/2 pl-4 border-l">
                             <EnrollmentCalendar
                               availableDates={availableDates}
+                              selectedDate={selectedDate}
+                              onChange={(dateString) =>
+                                handleDateSelection(dateString)
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )} */}
+
+                  {showEnrollModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                      <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-500">
+                            Course Name
+                          </label>
+                          <input
+                            type="text"
+                            value={course.name}
+                            disabled
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                          />
+                        </div>
+
+                        <div className="flex">
+                          <div className="w-1/2 pr-4">
+                            {/* Tutor Selection */}
+                            <label className="block mb-2">Select Tutor:</label>
+                            <select
+                              className="w-full p-2 border rounded mb-4"
+                              onChange={(e) =>
+                                handleTutorSelection(e.target.value)
+                              }
+                            >
+                              <option value="">
+                                No Preference (Auto-Select)
+                              </option>
+                              {tutors.map((tutor) => (
+                                <option key={tutor._id} value={tutor._id}>
+                                  {tutor.name}
+                                </option>
+                              ))}
+                            </select>
+
+                            {/* Date Selection */}
+                            <label className="block mb-2">Select Date:</label>
+                            <input
+                              type="date"
+                              value={selectedDate}
+                              onChange={(e) =>
+                                handleDateSelection(e.target.value)
+                              }
+                              className="w-full p-2 border rounded mb-4"
+                            />
+
+                            {/* Time Slot */}
+                            <label className="block mb-2">
+                              Select Time Slot:
+                            </label>
+                            <select
+                              className="w-full p-2 border rounded mb-4"
+                              value={selectedTimeSlot}
+                              onChange={(e) =>
+                                setSelectedTimeSlot(e.target.value)
+                              }
+                            >
+                              <option value="">Choose a Time Slot</option>
+                              {availableTimeSlots.map((slot) => (
+                                <option key={slot} value={slot}>
+                                  {slot}
+                                </option>
+                              ))}
+                            </select>
+
+                            {/* Duration */}
+                            <label className="block mb-2">
+                              Select Duration:
+                            </label>
+                            <select
+                              className="w-full p-2 border rounded mb-4"
+                              value={selectedSession?.duration}
+                              onChange={(e) => {
+                                const session = sessions.find(
+                                  (s) => s.duration === e.target.value
+                                );
+                                setSelectedSession(session);
+                                setSelectedDuration(session.duration);
+                              }}
+                            >
+                              <option value="">Select Session Duration</option>
+                              {sessions.map((session, index) => (
+                                <option key={index} value={session.duration}>
+                                  {session.duration} - Rs.{" "}
+                                  {parseFloat(session.price).toLocaleString(
+                                    "en-IN"
+                                  )}
+                                  .00
+                                </option>
+                              ))}
+                            </select>
+
+                            {/* Buttons */}
+                            <button
+                              onClick={handleEnrollNow}
+                              className="w-full py-2 bg-green-500 text-white rounded mt-4"
+                            >
+                              Confirm & Pay
+                            </button>
+                            <button
+                              onClick={() => setShowEnrollModal(false)}
+                              className="w-full py-2 mt-2 border border-gray-400 text-gray-600 rounded"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+
+                          {/* Calendar View */}
+                          <div className="w-1/2 pl-4 border-l">
+                            <EnrollmentCalendar
+                              availableDates={availableDates} // Optional if you want to keep date availability
                               selectedDate={selectedDate}
                               onChange={(dateString) =>
                                 handleDateSelection(dateString)

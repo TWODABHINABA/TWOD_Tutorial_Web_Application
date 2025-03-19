@@ -94,53 +94,6 @@ router.post("/tutors/:tutorId/availability", async (req, res) => {
     return res.status(500).json({ error: "Failed to update availability" });
   }
 });
-// router.post("/tutors/:tutorId/availability", async (req, res) => {
-//   try {
-//     const { dates, timeSlots } = req.body;
-
-//     if (!Array.isArray(dates) || !Array.isArray(timeSlots) || dates.length === 0 || timeSlots.length === 0) {
-//       return res.status(400).json({ error: "Dates and time slots must be arrays and cannot be empty" });
-//     }
-
-//     const tutor = await Tutor.findById(req.params.tutorId);
-//     if (!tutor) {
-//       console.error("Tutor not found:", req.params.tutorId);
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     if (!tutor.availability) {
-//       tutor.availability = [];
-//     }
-
-//     console.log("Before Update:", tutor.availability);
-
-//     // ✅ Ensure each date has its own time slots
-//     const newAvailability = dates.map(date => ({
-//       date,
-//       timeSlots
-//     }));
-
-//     // ✅ Check if a date already exists, update time slots instead of duplicating
-//     newAvailability.forEach(newDate => {
-//       const existingDate = tutor.availability.find(avail => avail.date === newDate.date);
-//       if (existingDate) {
-//         existingDate.timeSlots = [...new Set([...existingDate.timeSlots, ...newDate.timeSlots])]; // Merge and remove duplicates
-//       } else {
-//         tutor.availability.push(newDate);
-//       }
-//     });
-
-//     await tutor.save();
-
-//     console.log("After Update:", tutor.availability);
-
-//     return res.json({ message: "Availability updated successfully", availability: tutor.availability });
-
-//   } catch (error) {
-//     console.error("Error updating availability:", error.message);
-//     return res.status(500).json({ error: "Failed to update availability", details: error.message });
-//   }
-// });
 
 
 router.get("/tutors/:tutorId/available-dates", async (req, res) => {
@@ -201,87 +154,7 @@ router.get("/tutors/:tutorId/availability", async (req, res) => {
 });
 
 
-// router.put("/tutors/:tutorId/availability", async (req, res) => {
-//   try {
-//     const { availability } = req.body;
 
-//     if (!Array.isArray(availability) || availability.length === 0) {
-//       return res.status(400).json({ error: "Availability must be a non-empty array" });
-//     }
-
-//     const tutor = await Tutor.findById(req.params.tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     // Update existing availability or add new dates
-//     availability.forEach(({ date, timeSlots }) => {
-//       const existingDate = tutor.availability.find((entry) => entry.date === date);
-//       if (existingDate) {
-//         existingDate.timeSlots = timeSlots; 
-//       } else {
-//         tutor.availability.push({ date, timeSlots });
-//       }
-//     });
-
-//     await tutor.save();
-//     return res.json({ message: "Availability updated successfully", availability: tutor.availability });
-//   } catch (error) {
-//     console.error("Error updating availability:", error);
-//     return res.status(500).json({ error: "Failed to update availability" });
-//   }
-// });
-
-
-// router.delete("/tutors/:tutorId/availability/:date", async (req, res) => {
-//   try {
-//     const { tutorId, date } = req.params;
-
-//     const tutor = await Tutor.findById(tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     // Remove the specific date
-//     tutor.availability = tutor.availability.filter((entry) => entry.date !== date);
-//     await tutor.save();
-
-//     res.json({ message: "Availability date removed", availability: tutor.availability });
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to remove availability date" });
-//   }
-// });
-
-
-// router.delete("/tutors/:tutorId/availability/:date/:timeSlot", async (req, res) => {
-//   try {
-//     const { tutorId, date, timeSlot } = req.params;
-
-//     const tutor = await Tutor.findById(tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     const selectedDate = tutor.availability.find((entry) => entry.date === date);
-//     if (!selectedDate) {
-//       return res.status(404).json({ error: "Date not found in availability" });
-//     }
-
-//     // Remove the specific time slot
-//     selectedDate.timeSlots = selectedDate.timeSlots.filter((slot) => slot !== timeSlot);
-
-//     // If no time slots remain for this date, remove the date entry
-//     if (selectedDate.timeSlots.length === 0) {
-//       tutor.availability = tutor.availability.filter((entry) => entry.date !== date);
-//     }
-
-//     await tutor.save();
-
-//     res.json({ message: "Time slot removed", availability: tutor.availability });
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to remove time slot" });
-//   }
-// });
 
 router.get("/tutors/:tutorId", async (req, res) => {
   const tutor = await Tutor.findById(req.params.tutorId);
@@ -289,24 +162,7 @@ router.get("/tutors/:tutorId", async (req, res) => {
   res.json(tutor);
 });
 
-// router.delete("/tutors/:tutorId/availability/date/:date", async (req, res) => {
-//   const { tutorId, date } = req.params;
 
-//   try {
-//     const tutor = await Tutor.findById(tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ message: "Tutor not found" });
-//     }
-
-//     // Filter out the date from availability
-//     tutor.availability = tutor.availability.filter(item => item.date !== date);
-
-//     await tutor.save();
-//     res.json({ message: "Date deleted successfully" });
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// });
 
 router.delete("/tutors/:tutorId/availability/date/:date", async (req, res) => {
   const { tutorId, date } = req.params;

@@ -11,28 +11,26 @@ const path = require('path');
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
 
-// app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-app.use(cors({ origin: "https://twod-tutorial-web-application-frontend.vercel.app", credentials: true }));
-// const allowedOrigins = [
-//   'http://localhost:5173', // Local dev
-//   // 'https://twod-tutorial-web-application.vercel.app', // Production frontend
-//   // 'https://twod-tutorial-web-application-tn27xfrr3.vercel.app',
-//   // 'https://twod-tutorial-web-applicati-git-2ee84e-vinays-projects-73cfc7f5.vercel.app'
-//   // "https://twod-tutorial-web-application-frontend.vercel.app",
-//   // "https://twod-tutorial-web-application.vercel.app/"
-// ];
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   credentials: true,
-//   // methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   // allowedHeaders: ['Content-Type', 'Authorization'], 
-// }));
+app.use(cors({ origin: "http://localhost:5173", credentials: true })); //Local
+// app.use(cors({ origin: "https://twod-tutorial-web-application-frontend.vercel.app", credentials: true })); //Abhi
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/courseUploads', express.static(path.join(__dirname, 'courseUploads')));
+
+app.use("/",tutorRoutes);
+app.use("/", personRoutes);
+app.use("/",courseRoutes);
+app.use("/",sessionRoutes);
+app.listen(process.env.PORT, () =>
+  console.log("Server is running on port 6001")
+);
+
+
+
+
 // const corsOptions = {
 //   origin: function (origin, callback) {
 //     if (!origin || allowedOrigins.includes(origin)) {
@@ -46,8 +44,10 @@ app.use(cors({ origin: "https://twod-tutorial-web-application-frontend.vercel.ap
 // };
 
 // app.use(cors(corsOptions))
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+
+
+
 // app.use(cors(
 //   {
 //     methods:["POST","GET","PUT","DELETE"],
@@ -55,13 +55,3 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //   }
 // ));
 // app.use("/uploads", express.static("uploads"));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/courseUploads', express.static(path.join(__dirname, 'courseUploads')));
-
-app.use("/",tutorRoutes);
-app.use("/", personRoutes);
-app.use("/",courseRoutes);
-app.use("/",sessionRoutes);
-app.listen(process.env.PORT, () =>
-  console.log("Server is running on port 6001")
-);

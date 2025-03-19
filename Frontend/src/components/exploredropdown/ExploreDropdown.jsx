@@ -16,14 +16,6 @@ const fetchCategories = async () => {
   }
 };
 
-// const fetchCourseId = async (course) => {
-//   try {
-//     const response = await api.get(`/courses?name=${course}&courseType=${course}`);
-//     return response.data._id; 
-//   } catch (error) {
-//     console.error("Error fetching course ID:", error);
-//   }
-// };
 
 const fetchCourseId = async (courseName, courseType) => {
   try {
@@ -137,34 +129,6 @@ const FlyoutLink = ({
     </div>
   );
 };
-
-
-// const DynamicCategoryFlyout = ({ category }) => {
-//   console.log("Category Data:", category); 
-
-//   return (
-//     <div className="w-48 bg-white p-6 shadow-xl absolute">
-//       {category.courses.length > 0 ? (
-//         category.courses.map((course, index) => (
-//           <Link
-//             key={index}
-//             to="#"
-//             onClick={async (e) => {
-//               e.preventDefault();
-//               const id = await fetchCourseId(course.name,course.courseType);
-//               if (id) window.location.href = `/courses/${id}`;
-//             }}
-//             className="block text-sm hover:underline p-2"
-//           >
-//             {course.name}
-//           </Link>
-//         ))
-//       ) : (
-//         <p className="text-gray-500">No courses available</p>
-//       )}
-//     </div>
-//   );
-// };
 
 
 
