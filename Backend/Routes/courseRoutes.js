@@ -5,6 +5,7 @@ const Tutor=require("../Models/tutors");
 const authMiddleware = require("../Auth/Authentication");
 const paypal = require("../config/paypal");
 const Transaction = require("../Models/transaction");
+const GlobalSessionPricing = require("../Models/GlobalSessionPricing");
 const multer = require("multer");
 const path = require("path");
 
@@ -372,17 +373,36 @@ router.get("/categories", async (req, res) => {
 // });
 
 
+
 router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
   try {
-    let { tutorId, selectedDate, selectedTime, duration, amount } = req.body;
+    let { tutorId, selectedDate, selectedTime, duration } = req.body;
     const course = await Course.findById(req.params.id);
-    
+
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    const price = course.discountPrice || course.price;
-    const formattedPrice = Number(price).toFixed(2);
+    // Fetch global session pricing
+    const globalPricing = await GlobalSessionPricing.findOne();
+    console.log("Global Pricing:", globalPricing);  
+    
+    if (!globalPricing) {
+      return res.status(404).json({ message: "Session pricing not found" });
+    }
+    
+    // Find selected session price
+    const selectedSession = globalPricing.sessions.find(session => session.duration === duration);
+    console.log("Selected Session:", selectedSession);  
+    
+    if (!selectedSession) {
+      return res.status(400).json({ message: "Invalid session duration" });
+    }
+
+    // ✅ Fix: Assign selected session price to amount and sanitize it
+    let amount = selectedSession.price;
+    const formattedPrice = parseFloat(amount.replace(/,/g, '')).toFixed(2);
+    console.log("Formatted Price:", formattedPrice);
 
     // If "No Preference" is selected, auto-assign a tutor
     if (!tutorId) {
@@ -440,7 +460,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
             currency: "USD",
             total: formattedPrice,
           },
-          description: `Enrollment for course ${course.name}.`,
+          description: `Enrollment for course ${course.name}, Duration: ${duration}.`,
         },
       ],
     };
@@ -467,6 +487,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 router.get("/success", authMiddleware, async (req, res) => {

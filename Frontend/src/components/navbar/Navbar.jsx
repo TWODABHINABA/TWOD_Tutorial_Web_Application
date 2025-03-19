@@ -212,82 +212,92 @@ const CustomNavbar = () => {
         </Navbar>
       </div> */}
 
-<div className="sticky top-0 z-50 bg-orange-100">
-  <Navbar fluid rounded>
-    {/* LEFT Side - Logo and Left Links */}
-    <div className="flex items-center gap-8">
-      <NavbarBrand as={Link} to="/">
-        <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
-          <TbSquareRoot className="text-4xl text-orange-600" />
-        </h1>
-        <span className="self-center whitespace-nowrap text-xl font-semibold text-orange-500">
-          TUTOR
-        </span>
-      </NavbarBrand>
+      <div className="sticky top-0 z-50 bg-orange-100">
+        <Navbar fluid rounded>
+          {/* LEFT Side - Logo and Left Links */}
+          <div className="flex items-center gap-8">
+            <NavbarBrand as={Link} to="/">
+              <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
+                <TbSquareRoot className="text-4xl text-orange-600" />
+              </h1>
+              <span className="self-center whitespace-nowrap text-xl font-semibold text-orange-500">
+                TUTOR
+              </span>
+            </NavbarBrand>
 
-      {/* SearchBar inside Navbar */}
+            {/* SearchBar inside Navbar */}
 
-      
-      {/* LEFT Links */}
-      <div className="hidden md:flex gap-6 text-xl ml-20">
-        <AnimatedNavbarLink to="/category/:categoryName" ignoreActive>
-          <ExploreDropdown />
-        </AnimatedNavbarLink>
-        <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
-        <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
-        <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
+            {/* LEFT Links */}
+            <div className="hidden md:flex gap-6 text-xl ml-20">
+              <AnimatedNavbarLink to="/category/:categoryName" ignoreActive>
+                <ExploreDropdown />
+              </AnimatedNavbarLink>
+              <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
+              <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
+              <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
 
-        {isAuthenticated && (
-          <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
-        )}
-        {isRoleAdmin === "admin" && (
-          <>
-            <AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/add-availability">
-              Add Availability
-            </AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/add-course">Add Course</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/add-session-time">
-              Add Session Time
-            </AnimatedNavbarLink>
-          </>
-        )}
+              {isAuthenticated && (
+                <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
+              )}
+              {isRoleAdmin === "admin" && (
+                <>
+                  <AnimatedNavbarLink to="/add-tutor">
+                    Add Tutor
+                  </AnimatedNavbarLink>
+                  <AnimatedNavbarLink to="/add-availability">
+                    Add Availability
+                  </AnimatedNavbarLink>
+                  <AnimatedNavbarLink to="/add-course">
+                    Add Course
+                  </AnimatedNavbarLink>
+                  <AnimatedNavbarLink to="/add-session-time">
+                    Add Session Time
+                  </AnimatedNavbarLink>
+                </>
+              )}
+            </div>
+            <div className=" ">
+              <SearchBar />
+            </div>
+          </div>
+
+          {/* RIGHT Side - Auth Buttons */}
+          <div className="flex items-center gap-4 md:order-2">
+            {!isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
+                  type="button"
+                >
+                  <MdLogin className="mr-1" />
+                  Log In
+                </button>
+                <button
+                  onClick={() => setShowRegisterModal(true)}
+                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
+                  type="button"
+                >
+                  <FaUser className="mr-1" />
+                  Register
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
+                type="button"
+              >
+                <MdLogin className="mr-1" />
+                Log out
+              </button>
+            )}
+
+            {/* Mobile Toggle */}
+            <NavbarToggle />
+          </div>
+        </Navbar>
       </div>
-      <div className=" ">
-
-      <SearchBar />
-      </div>
-    </div>
-
-    {/* RIGHT Side - Auth Buttons */}
-    <div className="flex items-center gap-4 md:order-2">
-      {!isAuthenticated ? (
-        <>
-          <button
-            onClick={() => setShowLoginModal(true)}
-            className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
-            type="button"
-          >
-            <MdLogin className="mr-1" />
-            Log In
-          </button>
-          <button
-            onClick={() => setShowRegisterModal(true)}
-            className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
-            type="button"
-          >
-            <FaUser className="mr-1" />
-            Register
-          </button>
-        </>
-      ) : null}
-
-      {/* Mobile Toggle */}
-      <NavbarToggle />
-    </div>
-  </Navbar>
-</div>
-
 
       {showRegisterModal && (
         <Modal

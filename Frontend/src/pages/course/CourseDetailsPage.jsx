@@ -77,7 +77,7 @@ const CourseDetailsPage = () => {
 
   const handleSessionSelect = (session) => {
     setSelectedSession(session);
-    setSelectedDuration(session.duration); // Also update duration to keep consistency
+    setSelectedDuration(session.duration); 
   };
   const handleInputChange = (e) => {
     setUpdatedCourse((prev) => ({
@@ -127,7 +127,7 @@ const CourseDetailsPage = () => {
   const handleEnrollClick = async () => {
     try {
       const response = await api.get(`/courses/${courseId}/tutors`);
-      console.log("Fetched Tutors:", response.data); // Debugging
+      console.log("Fetched Tutors:", response.data); 
       setTutors(response.data);
       setShowEnrollModal(true);
     } catch (error) {
@@ -140,7 +140,7 @@ const CourseDetailsPage = () => {
 
     console.log("Filtering slots for duration:", duration);
 
-    // Convert duration string into actual minutes
+    
     const durationMap = {
       "30 Minutes Session": 30,
       "1 Hour Session": 60,
@@ -184,7 +184,7 @@ const CourseDetailsPage = () => {
           });
         }
 
-        currentStartTime = nextStartTime; // Move to the next slot
+        currentStartTime = nextStartTime; 
       }
     });
 
@@ -194,14 +194,13 @@ const CourseDetailsPage = () => {
 
   const handleTutorSelection = async (tutorId) => {
     setSelectedTutor(tutorId);
-    setSelectedDate(""); // Clear the selected date
-    setAvailableDates([]); // Reset available dates
-    setAvailableTimeSlots([]); // Reset available time slots
-    setSelectedTimeSlot(""); // Reset selected time slot
-
+    setSelectedDate(""); 
+    setAvailableDates([]); 
+    setAvailableTimeSlots([]); 
+    setSelectedTimeSlot(""); 
     try {
       const response = await api.get(`/tutors/${tutorId}/available-dates`);
-      setAvailableDates(response.data); // Set available dates for the selected tutor
+      setAvailableDates(response.data); 
     } catch (error) {
       console.error("Error fetching available dates:", error);
     }
@@ -212,7 +211,7 @@ const CourseDetailsPage = () => {
     setAvailableTimeSlots([]);
     setSelectedTimeSlot("");
 
-    // Convert the selected date to 'YYYY-MM-DD' format for API request
+
     const formattedDate = date.toISOString().split("T")[0];
 
     try {
@@ -221,11 +220,11 @@ const CourseDetailsPage = () => {
       const response = await api.get(
         `/tutors/${selectedTutor}/available-slots`,
         {
-          params: { date: formattedDate }, // Send a single formatted date
+          params: { date: formattedDate },
         }
       );
 
-      console.log("Raw Slots from Backend:", response.data); // Backend response check
+      console.log("Raw Slots from Backend:", response.data); 
 
       if (!selectedSession || !selectedSession.duration) {
         console.error("No session duration selected");
@@ -244,103 +243,25 @@ const CourseDetailsPage = () => {
     }
   };
 
-//   const handleDateSelection = async (dateString) => {
-//     const date = new Date(dateString); // Ensure it's a Date object
-//     if (isNaN(date)) {
-//         console.error("Invalid Date:", dateString);
-//         return;
-//     }
-
-//     setSelectedDate(dateString);
-//     setAvailableTimeSlots([]);
-//     setSelectedTimeSlot("");
-
-//     const formattedDates = availableDates.map((d) => formatDate(new Date(d)));
-
-//     try {
-//         console.log("Selected Date:", formatDate(date)); // ✅ Fixed here
-
-//         const response = await api.get(`/tutors/${selectedTutor}/available-slots`, {
-//             params: { date: formattedDates },
-//         });
-
-//         console.log("Raw Slots from Backend:", response.data);
-
-//         if (!selectedSession || !selectedSession.duration) {
-//             console.error("No session duration selected");
-//             return;
-//         }
-
-//         console.log("Selected Duration:", selectedSession.duration);
-
-//         const filteredSlots = filterAvailableSlots(response.data, selectedSession.duration);
-//         setAvailableTimeSlots(filteredSlots);
-//     } catch (error) {
-//         console.error("Error fetching available time slots:", error);
-//     }
-// };
 
 
   const handleSessionDurationChange = (e) => {
     const duration = e.target.value;
     setSelectedDuration(duration);
-    // When session duration changes, re-filter time slots for the current date
+
     if (selectedDate) {
-      handleDateSelection(selectedDate); // Re-fetch and filter the time slots
+      handleDateSelection(selectedDate); 
     }
   };
-  // const handleEnrollNow = async () => {
-  //   if (
-  //     !selectedTutor ||
-  //     !selectedDate ||
-  //     !selectedTimeSlot ||
-  //     !selectedDuration ||
-  //     !selectedSession
-  //   ) {
-  //     alert("Please select all options before enrolling.");
-  //     return;
-  //   }
 
-  //   try {
-  //     const response = await api.post(
-  //       `/courses/${course._id}/enroll`,
-  //       {
-  //         tutorId: selectedTutor,
-  //         // date: selectedDate,
-  //         // timeSlot: selectedTimeSlot,
-  //         // duration: selectedDuration,
-  //         // price: course.discountPrice || course.price,
-  //         selectedDate, // Field names fixed to match backend schema
-  //         selectedTime: selectedTimeSlot,
-  //         duration: selectedDuration,
-  //         selectedSession,
-  //         price: selectedSession.discountPrice || selectedSession.price,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     const { approval_url } = response.data;
-  //     if (approval_url) {
-  //       window.location.href = approval_url;
-  //     } else {
-  //       alert("Error: No approval URL received.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error enrolling:", error);
-  //     alert("Enrollment failed. Try again later.");
-  //   }
-  // };
 
   const handleEnrollNow = async () => {
     if (
       !selectedTutor ||
       !selectedDate ||
       !selectedTimeSlot ||
-      !selectedDuration
+      !selectedDuration ||
+      !selectedSession
     ) {
       alert("Please select all options before enrolling.");
       return;
@@ -351,6 +272,9 @@ const CourseDetailsPage = () => {
       return;
     }
 
+    console.log(formatPrice(selectedSession?.price).toLocaleString(
+      "en-IN"
+    ))
     try {
       const response = await api.post(
         `/courses/${course._id}/enroll`,
@@ -359,11 +283,14 @@ const CourseDetailsPage = () => {
           selectedDate,
           selectedTime: selectedTimeSlot,
           duration: selectedDuration,
-          amount: course.discountPrice || course.price,
+          // amount: course.discountPrice || course.price,
+          amount: formatPrice(selectedSession?.price).toLocaleString(
+            "en-IN"
+          )
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Ensure token is set
+            Authorization: `Bearer ${token}`, 
           },
         }
       );
@@ -381,9 +308,10 @@ const CourseDetailsPage = () => {
       );
     }
   };
+
   const formatPrice = (priceString) => {
     if (!priceString) return 0;
-    // Remove everything except digits
+
     const cleaned = priceString.replace(/[^\d]/g, "");
     return Number(cleaned);
   };
@@ -792,7 +720,6 @@ const CourseDetailsPage = () => {
                           }`}
                         >
                           {session.duration}
-                          {/* {formatPrice(session.price).toLocaleString("en-IN")} */}
                         </button>
                       ))}
                     </div>
@@ -837,143 +764,6 @@ const CourseDetailsPage = () => {
                     </div>
                   </div>
 
-                  {/* {showEnrollModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                      <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
-                        
-                        {selectedSession && (
-                          <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow">
-                            <h3 className="text-lg font-semibold text-gray-700">
-                              Selected Session
-                            </h3>
-                            <p className="text-gray-600">
-                              Duration: {selectedSession.duration}
-                            </p>
-                            <p className="text-gray-600">
-                              Price: Rs.{" "}
-                              {formatPrice(selectedSession.price).toLocaleString(
-                                "en-IN"
-                              )}
-                              .00
-                            </p>
-                          </div>
-                        )}
-
-                      
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-500">
-                            Course Name
-                          </label>
-                          <input
-                            type="text"
-                            value={course.name}
-                            disabled
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100"
-                          />
-                        </div>
-
-                        <div className="flex">
-                          <div className="w-1/2 pr-4">
-                            
-                            <label className="block mb-2">Select Tutor:</label>
-                            <select
-                              className="w-full p-2 border rounded mb-4"
-                              onChange={(e) =>
-                                handleTutorSelection(e.target.value)
-                              }
-                              value={selectedTutor}
-                            >
-                              <option value="">
-                                No Preference (Auto-Select)
-                              </option>
-                              {tutors.map((tutor) => (
-                                <option key={tutor._id} value={tutor._id}>
-                                  {tutor.name}
-                                </option>
-                              ))}
-                            </select>
-
-                            
-                            {availableTimeSlots.length > 0 && (
-                              <>
-                                <label className="block mb-2">
-                                  Select Time Slot:
-                                </label>
-                                <select
-                                  className="w-full p-2 border rounded mb-4"
-                                  onChange={(e) =>
-                                    setSelectedTimeSlot(e.target.value)
-                                  }
-                                  value={selectedTimeSlot}
-                                >
-                                  <option value="">Choose a Time Slot</option>
-                                  {availableTimeSlots.map((slot) => (
-                                    <option key={slot} value={slot}>
-                                      {slot}
-                                    </option>
-                                  ))}
-                                </select>
-                              </>
-                            )}
-
-                           
-                            <label className="block mb-2">
-                              Select Duration:
-                            </label>
-                            <select
-                              className="w-full p-2 border rounded mb-4"
-                              onChange={(e) =>
-                                setSelectedSession(JSON.parse(e.target.value))
-                              }
-                              value={
-                                selectedSession
-                                  ? JSON.stringify(selectedSession)
-                                  : ""
-                              }
-                            >
-                              <option value="">Select Session Duration</option>
-                              {sessions.map((session, index) => (
-                                <option
-                                  key={index}
-                                  value={JSON.stringify(session)}
-                                >
-                                  {session.duration} - Rs.{" "}
-                                  {formatPrice(session.price).toLocaleString(
-                                    "en-IN"
-                                  )}
-                                </option>
-                              ))}
-                            </select>
-
-                           
-                            <button
-                              onClick={handleEnrollNow}
-                              className="w-full py-2 bg-green-500 text-white rounded mt-4"
-                            >
-                              Confirm &amp; Pay
-                            </button>
-                            <button
-                              onClick={() => setShowEnrollModal(false)}
-                              className="w-full py-2 mt-2 border border-gray-400 text-gray-600 rounded"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-
-                          
-                          <div className="w-1/2 pl-4 border-l">
-                            <EnrollmentCalendar
-                              availableDates={availableDates}
-                              selectedDate={selectedDate}
-                              onChange={(dateString) =>
-                                handleDateSelection(dateString)
-                              }
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )} */}
 
                   {showEnrollModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -1010,7 +800,7 @@ const CourseDetailsPage = () => {
 
                         <div className="flex">
                           <div className="w-1/2 pr-4">
-                            {/* Tutor Selection */}
+
                             <label className="block mb-2">Select Tutor:</label>
                             <select
                               className="w-full p-2 border rounded mb-4"
@@ -1028,29 +818,7 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
 
-                            {/* Available Dates */}
-                            {/* <label className="block mb-2">Select Date:</label>
-                            <select
-                              className="w-full p-2 border rounded mb-4"
-                              value={selectedDate}
-                              onChange={(e) =>
-                                handleDateSelection(e.target.value)
-                              }
-                              disabled={availableDates.length === 0}
-                            >
-                              <option value="">Choose a Date</option>
-                              {availableDates.length > 0 ? (
-                                availableDates.map((date) => (
-                                  <option key={date} value={date}>
-                                    {new Date(date).toLocaleDateString()}
-                                  </option>
-                                ))
-                              ) : (
-                                <option disabled>No dates available</option>
-                              )}
-                            </select> */}
-
-                            {/* Available Time Slots */}
+          
                             <select
                               className="w-full p-2 border rounded mb-4"
                               value={selectedTimeSlot}
@@ -1076,7 +844,7 @@ const CourseDetailsPage = () => {
                               )}
                             </select>
 
-                            {/* Session Duration */}
+                           
                             <label className="block mb-2">
                               Select Duration:
                             </label>
@@ -1089,7 +857,7 @@ const CourseDetailsPage = () => {
                                 );
                                 setSelectedSession(session);
                                 setSelectedDuration(session?.duration);
-                                filterAvailableSlots(session?.duration); // Update the slots based on new duration
+                                filterAvailableSlots(session?.duration); 
                               }}
                             >
                               <option value="">Select Session Duration</option>
@@ -1100,7 +868,7 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
 
-                            {/* Buttons */}
+                           
                             <button
                               onClick={handleEnrollNow}
                               className="w-full py-2 bg-green-500 text-white rounded mt-4"
@@ -1115,7 +883,7 @@ const CourseDetailsPage = () => {
                             </button>
                           </div>
 
-                          {/* Calendar View */}
+                          
                           <div className="w-1/2 pl-4 border-l">
                             <EnrollmentCalendar
                               availableDates={availableDates.map(
