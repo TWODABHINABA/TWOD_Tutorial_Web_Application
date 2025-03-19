@@ -174,13 +174,15 @@ const PricingContent = () => {
       {categories.length > 0 ? (
         categories.map((cat) => (
           <FlyoutLink
-            key={cat.category}
-            href={`/category/${encodeURIComponent(cat.category)}`}
-            FlyoutContent={() => <DynamicCategoryFlyout category={cat} />}
-            direction="right"
-          >
-            {cat.category}
-          </FlyoutLink>
+  key={cat.category}
+  href={`/category/${encodeURIComponent(cat.category)}`}
+  FlyoutContent={() => <DynamicCategoryFlyout category={cat} />}
+  direction="right"
+>
+  {cat.category}
+</FlyoutLink>
+
+
         ))
       ) : (
         <p>No categories found</p>
