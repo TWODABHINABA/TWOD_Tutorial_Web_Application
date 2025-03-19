@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Course = require("../Models/course");
+const Tutor=require("../Models/tutors");
 const authMiddleware = require("../Auth/Authentication");
 const paypal = require("../config/paypal");
 const Transaction = require("../Models/transaction");
@@ -181,6 +182,16 @@ router.get("/allCourses", async (req, res) => {
   }
 });
 
+router.get("/subjects", async (req, res) => {
+  try {
+    const subjects = await Course.distinct("courseType"); // Get unique course types
+    res.json(subjects);
+  } catch (error) {
+    console.error("❌ Error fetching subjects:", error);
+    res.status(500).json({ error: "Failed to fetch subjects" });
+  }
+});
+
 
 // router.get("/category/:categoryName", async (req, res) => {
 //   try {
@@ -237,11 +248,135 @@ router.get("/categories", async (req, res) => {
   }
 });
 
+// router.post("/enroll", async (req, res) => {
+//   try {
+//     const { userId, courseId, tutorId, date, timeSlot, duration } = req.body;
+
+//     let assignedTutorId = tutorId;
+
+//     if (!tutorId) {
+//       // If "No Preference", find a tutor with availability at this date & time
+//       const tutors = await Tutor.find({ "availability.date": date });
+
+//       const availableTutors = tutors.filter((tutor) =>
+//         tutor.availability.some(
+//           (entry) => entry.date === date && entry.timeSlots.includes(timeSlot)
+//         )
+//       );
+
+//       if (availableTutors.length === 0) {
+//         return res.status(400).json({ error: "No tutors available for this time slot" });
+//       }
+
+//       assignedTutorId = availableTutors[Math.floor(Math.random() * availableTutors.length)]._id;
+//     }
+
+//     // Save the enrollment
+//     const newEnrollment = new Transaction({
+//       userId,
+//       courseId,
+//       tutorId: assignedTutorId,
+//       date,
+//       timeSlot,
+//       duration,
+//     });
+
+//     await newEnrollment.save();
+//     res.json({ message: "Enrollment successful", enrollment: newEnrollment });
+
+//   } catch (error) {
+//     console.error("Error enrolling user:", error);
+//     res.status(500).json({ error: "Failed to enroll user" });
+//   }
+// });
+
+
+// router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
+//   try {
+//     const { tutorId, selectedDate, selectedTime, duration, amount } = req.body;
+//     const course = await Course.findById(req.params.id);
+//     if (!course) {
+//       return res.status(404).json({ message: "Course not found" });
+//     }
+
+//     const price = course.discountPrice || course.price;
+//     const formattedPrice = Number(price).toFixed(2);
+
+//     const transaction = new Transaction({
+//       courseId: course._id,
+//       user: req.user.id,
+//       amount: formattedPrice,
+//       tutorId,
+//       selectedDate,
+//       selectedTime,
+//       duration,
+//       status: "pending",
+//     });
+//     await transaction.save();
+
+//     const paymentJson = {
+//       intent: "sale",
+//       payer: { payment_method: "paypal" },
+//       redirect_urls: {
+
+//         return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
+//         cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+
+        
+//         // return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
+//         // cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
+//       },
+//       transactions: [
+//         {
+//           item_list: {
+//             items: [
+//               {
+//                 name: `Course Enrollment: ${course.name}`,
+//                 sku: course._id.toString(),
+//                 price: formattedPrice,
+//                 currency: "USD",
+//                 quantity: 1,
+//               },
+//             ],
+//           },
+//           amount: {
+//             currency: "USD",
+//             total: formattedPrice,
+//           },
+//           description: `Enrollment for course ${course.name}.`,
+//         },
+//       ],
+//     };
+
+//     console.log("Payment JSON:", paymentJson);
+
+//     paypal.payment.create(paymentJson, (error, payment) => {
+//       if (error) {
+//         console.error("Error creating payment:", error);
+//         return res.status(500).json({ error: "Payment creation failed" });
+//       } else {
+//         const approvalUrl = payment.links.find(
+//           (link) => link.rel === "approval_url"
+//         );
+//         if (approvalUrl) {
+//           return res.json({ approval_url: approvalUrl.href });
+//         } else {
+//           return res.status(500).json({ error: "No approval URL found" });
+//         }
+//       }
+//     });
+//   } catch (err) {
+//     console.error("Error processing enrollment:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
 
 router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
   try {
-    const { tutorId, selectedDate, selectedTime, duration, amount } = req.body;
+    let { tutorId, selectedDate, selectedTime, duration, amount } = req.body;
     const course = await Course.findById(req.params.id);
+    
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
@@ -249,6 +384,25 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     const price = course.discountPrice || course.price;
     const formattedPrice = Number(price).toFixed(2);
 
+    // If "No Preference" is selected, auto-assign a tutor
+    if (!tutorId) {
+      const tutors = await Tutor.find({ "availability.date": selectedDate });
+
+      const availableTutors = tutors.filter((tutor) =>
+        tutor.availability.some(
+          (entry) => entry.date === selectedDate && entry.timeSlots.includes(selectedTime)
+        )
+      );
+
+      if (availableTutors.length === 0) {
+        return res.status(400).json({ error: "No tutors available for this time slot" });
+      }
+
+      // Pick a random tutor from available ones
+      tutorId = availableTutors[Math.floor(Math.random() * availableTutors.length)]._id;
+    }
+
+    // Save transaction
     const transaction = new Transaction({
       courseId: course._id,
       user: req.user.id,
@@ -261,17 +415,13 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     });
     await transaction.save();
 
+    // PayPal payment JSON
     const paymentJson = {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-
         return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
         cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
-
-        
-        // return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
-        // cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -297,14 +447,13 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
 
     console.log("Payment JSON:", paymentJson);
 
+    // Create PayPal payment
     paypal.payment.create(paymentJson, (error, payment) => {
       if (error) {
         console.error("Error creating payment:", error);
         return res.status(500).json({ error: "Payment creation failed" });
       } else {
-        const approvalUrl = payment.links.find(
-          (link) => link.rel === "approval_url"
-        );
+        const approvalUrl = payment.links.find((link) => link.rel === "approval_url");
         if (approvalUrl) {
           return res.json({ approval_url: approvalUrl.href });
         } else {
@@ -312,11 +461,13 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
         }
       }
     });
+
   } catch (err) {
     console.error("Error processing enrollment:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 router.get("/success", authMiddleware, async (req, res) => {
   try {

@@ -7,7 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import EnrollmentCalendar from "./EnrollmentCalendar";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
-import axios from "axios";
+import { formatDate } from "./EnrollmentCalendar";
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -20,11 +20,11 @@ const CourseDetailsPage = () => {
   const [selectedTutor, setSelectedTutor] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
-  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("1 hr");
   const [sessions, setSessions] = useState([]);
-  const [selectedSession, setSelectedSession] = useState(null);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null); // Track selected session
   const token = localStorage.getItem("token");
   const [isEditing, setIsEditing] = useState(false);
   const [updatedCourse, setUpdatedCourse] = useState({});
@@ -55,6 +55,10 @@ const CourseDetailsPage = () => {
       fetchCourse();
     }
   }, [courseId]);
+
+  useEffect(() => {
+    console.log("Available Dates from Backend:", availableDates);
+  }, [availableDates]);
 
   const fetchSessions = async () => {
     try {
@@ -120,108 +124,214 @@ const CourseDetailsPage = () => {
     }
   };
 
-  // const handleEnrollClick = async () => {
-  //   try {
-  //     const response = await api.get(`/courses/${courseId}/tutors`);
-  //     setTutors(response.data);
-  //     setShowEnrollModal(true);
-  //   } catch (error) {
-  //     console.error("Error fetching tutors:", error);
-  //   }
-  // };
-
   const handleEnrollClick = async () => {
     try {
       const response = await api.get(`/courses/${courseId}/tutors`);
-      setTutors(response.data); // List of tutors
-
-      // Set default "No Preference"
-      setSelectedTutor("");
-
-      // Fetch all available time slots for all tutors on today's date
-      const timeSlotsResponse = await api.get(
-        `/tutors/all/available-slots?date=${todayDate}`
-      );
-      setAvailableTimeSlots(timeSlotsResponse.data); // All available slots
-
-      setShowEnrollModal(true); // Show modal after data fetched
+      console.log("Fetched Tutors:", response.data); // Debugging
+      setTutors(response.data);
+      setShowEnrollModal(true);
     } catch (error) {
-      console.error("Error fetching tutors or timeslots:", error);
+      console.error("❌ Error fetching tutors:", error);
     }
+  };
+
+  const filterAvailableSlots = (slots, duration) => {
+    if (!slots || slots.length === 0 || !duration) return [];
+
+    console.log("Filtering slots for duration:", duration);
+
+    // Convert duration string into actual minutes
+    const durationMap = {
+      "30 Minutes Session": 30,
+      "1 Hour Session": 60,
+      "1.5 Hour Session": 90,
+      "2 Hour Session": 120,
+    };
+    const durationInMinutes = durationMap[duration];
+
+    if (!durationInMinutes) {
+      console.error("Invalid duration:", duration);
+      return [];
+    }
+
+    const filteredSlots = [];
+
+    slots.forEach((slot) => {
+      let currentStartTime = new Date(`1970-01-01T${slot.startTime}:00`);
+      const endTime = new Date(`1970-01-01T${slot.endTime}:00`);
+
+      console.log(`Processing slot: ${slot.startTime} - ${slot.endTime}`);
+
+      while (currentStartTime < endTime) {
+        let nextStartTime = new Date(
+          currentStartTime.getTime() + durationInMinutes * 60000
+        );
+
+        console.log(
+          `Checking slot: ${currentStartTime.toLocaleTimeString()} - ${nextStartTime.toLocaleTimeString()}`
+        );
+
+        if (nextStartTime <= endTime) {
+          filteredSlots.push({
+            startTime: currentStartTime.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            endTime: nextStartTime.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          });
+        }
+
+        currentStartTime = nextStartTime; // Move to the next slot
+      }
+    });
+
+    console.log("Final Filtered Slots:", filteredSlots);
+    return filteredSlots;
   };
 
   const handleTutorSelection = async (tutorId) => {
     setSelectedTutor(tutorId);
-    setSelectedDate(todayDate); // Reset date on tutor change
+    setSelectedDate(""); // Clear the selected date
+    setAvailableDates([]); // Reset available dates
+    setAvailableTimeSlots([]); // Reset available time slots
+    setSelectedTimeSlot(""); // Reset selected time slot
 
-    if (tutorId === "") {
-      // If "No Preference", fetch all slots for today
-      try {
-        const response = await api.get(
-          `/tutors/all/available-slots?date=${todayDate}`
-        );
-        setAvailableTimeSlots(response.data);
-      } catch (error) {
-        console.error("Error fetching all available slots:", error);
-      }
-    } else {
-      // Fetch slots for specific tutor
-      try {
-        const response = await api.get(
-          `/tutors/${tutorId}/available-slots?date=${todayDate}`
-        );
-        setAvailableTimeSlots(response.data);
-      } catch (error) {
-        console.error("Error fetching tutor-specific slots:", error);
-      }
+    try {
+      const response = await api.get(`/tutors/${tutorId}/available-dates`);
+      setAvailableDates(response.data); // Set available dates for the selected tutor
+    } catch (error) {
+      console.error("Error fetching available dates:", error);
     }
   };
-
-  // const handleTutorSelection = async (tutorId) => {
-  //   setSelectedTutor(tutorId);
-  //   setSelectedDate("");
-  //   setAvailableDates([]);
-  //   setSelectedTimeSlot("");
-  //   setAvailableTimeSlots([]);
-
-  //   try {
-  //     const response = await api.get(`/tutors/${tutorId}/available-dates`);
-  //     setAvailableDates(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching available dates:", error);
-  //   }
-  // };
 
   const handleDateSelection = async (date) => {
     setSelectedDate(date);
+    setAvailableTimeSlots([]);
+    setSelectedTimeSlot("");
 
-    if (selectedTutor === "") {
-      // If No Preference
+    // Convert the selected date to 'YYYY-MM-DD' format for API request
+    const formattedDate = date.toISOString().split("T")[0];
+
+    try {
+      console.log("Selected Date:", formattedDate);
+
       const response = await api.get(
-        `/tutors/all/available-slots?date=${date}`
+        `/tutors/${selectedTutor}/available-slots`,
+        {
+          params: { date: formattedDate }, // Send a single formatted date
+        }
       );
-      setAvailableTimeSlots(response.data);
-    } else {
-      // Specific tutor
-      const response = await api.get(
-        `/tutors/${selectedTutor}/available-slots?date=${date}`
+
+      console.log("Raw Slots from Backend:", response.data); // Backend response check
+
+      if (!selectedSession || !selectedSession.duration) {
+        console.error("No session duration selected");
+        return;
+      }
+
+      console.log("Selected Duration:", selectedSession.duration);
+
+      const filteredSlots = filterAvailableSlots(
+        response.data,
+        selectedSession.duration
       );
-      setAvailableTimeSlots(response.data);
+      setAvailableTimeSlots(filteredSlots);
+    } catch (error) {
+      console.error("Error fetching available time slots:", error);
     }
   };
 
-  // const handleDateSelection = async (date) => {
-  //   setSelectedDate(date);
-  //   setSelectedTimeSlot("");
-  //   setAvailableTimeSlots([]);
+//   const handleDateSelection = async (dateString) => {
+//     const date = new Date(dateString); // Ensure it's a Date object
+//     if (isNaN(date)) {
+//         console.error("Invalid Date:", dateString);
+//         return;
+//     }
+
+//     setSelectedDate(dateString);
+//     setAvailableTimeSlots([]);
+//     setSelectedTimeSlot("");
+
+//     const formattedDates = availableDates.map((d) => formatDate(new Date(d)));
+
+//     try {
+//         console.log("Selected Date:", formatDate(date)); // ✅ Fixed here
+
+//         const response = await api.get(`/tutors/${selectedTutor}/available-slots`, {
+//             params: { date: formattedDates },
+//         });
+
+//         console.log("Raw Slots from Backend:", response.data);
+
+//         if (!selectedSession || !selectedSession.duration) {
+//             console.error("No session duration selected");
+//             return;
+//         }
+
+//         console.log("Selected Duration:", selectedSession.duration);
+
+//         const filteredSlots = filterAvailableSlots(response.data, selectedSession.duration);
+//         setAvailableTimeSlots(filteredSlots);
+//     } catch (error) {
+//         console.error("Error fetching available time slots:", error);
+//     }
+// };
+
+
+  const handleSessionDurationChange = (e) => {
+    const duration = e.target.value;
+    setSelectedDuration(duration);
+    // When session duration changes, re-filter time slots for the current date
+    if (selectedDate) {
+      handleDateSelection(selectedDate); // Re-fetch and filter the time slots
+    }
+  };
+  // const handleEnrollNow = async () => {
+  //   if (
+  //     !selectedTutor ||
+  //     !selectedDate ||
+  //     !selectedTimeSlot ||
+  //     !selectedDuration ||
+  //     !selectedSession
+  //   ) {
+  //     alert("Please select all options before enrolling.");
+  //     return;
+  //   }
 
   //   try {
-  //     const response = await api.get(
-  //       `/tutors/${selectedTutor}/available-slots?date=${date}`
+  //     const response = await api.post(
+  //       `/courses/${course._id}/enroll`,
+  //       {
+  //         tutorId: selectedTutor,
+  //         // date: selectedDate,
+  //         // timeSlot: selectedTimeSlot,
+  //         // duration: selectedDuration,
+  //         // price: course.discountPrice || course.price,
+  //         selectedDate, // Field names fixed to match backend schema
+  //         selectedTime: selectedTimeSlot,
+  //         duration: selectedDuration,
+  //         selectedSession,
+  //         price: selectedSession.discountPrice || selectedSession.price,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
   //     );
-  //     setAvailableTimeSlots(response.data);
+
+  //     const { approval_url } = response.data;
+  //     if (approval_url) {
+  //       window.location.href = approval_url;
+  //     } else {
+  //       alert("Error: No approval URL received.");
+  //     }
   //   } catch (error) {
-  //     console.error("Error fetching time slots:", error);
+  //     console.error("Error enrolling:", error);
+  //     alert("Enrollment failed. Try again later.");
   //   }
   // };
 
@@ -230,10 +340,14 @@ const CourseDetailsPage = () => {
       !selectedTutor ||
       !selectedDate ||
       !selectedTimeSlot ||
-      !selectedDuration ||
-      !selectedSession
+      !selectedDuration
     ) {
       alert("Please select all options before enrolling.");
+      return;
+    }
+
+    if (!token) {
+      alert("Authentication error: Please log in first.");
       return;
     }
 
@@ -242,19 +356,14 @@ const CourseDetailsPage = () => {
         `/courses/${course._id}/enroll`,
         {
           tutorId: selectedTutor,
-          // date: selectedDate,
-          // timeSlot: selectedTimeSlot,
-          // duration: selectedDuration,
-          // price: course.discountPrice || course.price,
-          selectedDate, // Field names fixed to match backend schema
+          selectedDate,
           selectedTime: selectedTimeSlot,
           duration: selectedDuration,
-          selectedSession,
-          price: selectedSession.discountPrice || selectedSession.price,
+          amount: course.discountPrice || course.price,
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Ensure token is set
           },
         }
       );
@@ -267,10 +376,11 @@ const CourseDetailsPage = () => {
       }
     } catch (error) {
       console.error("Error enrolling:", error);
-      alert("Enrollment failed. Try again later.");
+      alert(
+        error.response?.data?.message || "Enrollment failed. Try again later."
+      );
     }
   };
-
   const formatPrice = (priceString) => {
     if (!priceString) return 0;
     // Remove everything except digits
@@ -681,8 +791,8 @@ const CourseDetailsPage = () => {
                               : "bg-white text-gray-800 border-gray-300"
                           }`}
                         >
-                          {session.duration} - Rs.{" "}
-                          {formatPrice(session.price).toLocaleString("en-IN")}
+                          {session.duration}
+                          {/* {formatPrice(session.price).toLocaleString("en-IN")} */}
                         </button>
                       ))}
                     </div>
@@ -868,6 +978,24 @@ const CourseDetailsPage = () => {
                   {showEnrollModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
                       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
+                        {selectedSession && (
+                          <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow">
+                            <h3 className="text-lg font-semibold text-gray-700">
+                              Selected Session
+                            </h3>
+                            <p className="text-gray-600">
+                              Duration: {selectedSession.duration}
+                            </p>
+                            <p className="text-gray-600">
+                              Price: Rs.{" "}
+                              {formatPrice(
+                                selectedSession.price
+                              ).toLocaleString("en-IN")}
+                              .00
+                            </p>
+                          </div>
+                        )}
+
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-500">
                             Course Name
@@ -900,37 +1028,55 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
 
-                            {/* Date Selection */}
-                            <label className="block mb-2">Select Date:</label>
-                            <input
-                              type="date"
+                            {/* Available Dates */}
+                            {/* <label className="block mb-2">Select Date:</label>
+                            <select
+                              className="w-full p-2 border rounded mb-4"
                               value={selectedDate}
                               onChange={(e) =>
                                 handleDateSelection(e.target.value)
                               }
-                              className="w-full p-2 border rounded mb-4"
-                            />
+                              disabled={availableDates.length === 0}
+                            >
+                              <option value="">Choose a Date</option>
+                              {availableDates.length > 0 ? (
+                                availableDates.map((date) => (
+                                  <option key={date} value={date}>
+                                    {new Date(date).toLocaleDateString()}
+                                  </option>
+                                ))
+                              ) : (
+                                <option disabled>No dates available</option>
+                              )}
+                            </select> */}
 
-                            {/* Time Slot */}
-                            <label className="block mb-2">
-                              Select Time Slot:
-                            </label>
+                            {/* Available Time Slots */}
                             <select
                               className="w-full p-2 border rounded mb-4"
                               value={selectedTimeSlot}
                               onChange={(e) =>
                                 setSelectedTimeSlot(e.target.value)
                               }
+                              disabled={availableTimeSlots.length === 0}
                             >
                               <option value="">Choose a Time Slot</option>
-                              {availableTimeSlots.map((slot) => (
-                                <option key={slot} value={slot}>
-                                  {slot}
+                              {availableTimeSlots.length > 0 ? (
+                                availableTimeSlots.map((slot, index) => (
+                                  <option
+                                    key={index}
+                                    value={`${slot.startTime}-${slot.endTime}`}
+                                  >
+                                    {slot.startTime} - {slot.endTime}
+                                  </option>
+                                ))
+                              ) : (
+                                <option disabled>
+                                  No time slots available
                                 </option>
-                              ))}
+                              )}
                             </select>
 
-                            {/* Duration */}
+                            {/* Session Duration */}
                             <label className="block mb-2">
                               Select Duration:
                             </label>
@@ -942,17 +1088,14 @@ const CourseDetailsPage = () => {
                                   (s) => s.duration === e.target.value
                                 );
                                 setSelectedSession(session);
-                                setSelectedDuration(session.duration);
+                                setSelectedDuration(session?.duration);
+                                filterAvailableSlots(session?.duration); // Update the slots based on new duration
                               }}
                             >
                               <option value="">Select Session Duration</option>
                               {sessions.map((session, index) => (
                                 <option key={index} value={session.duration}>
-                                  {session.duration} - Rs.{" "}
-                                  {parseFloat(session.price).toLocaleString(
-                                    "en-IN"
-                                  )}
-                                  .00
+                                  {session.duration}
                                 </option>
                               ))}
                             </select>
@@ -975,10 +1118,12 @@ const CourseDetailsPage = () => {
                           {/* Calendar View */}
                           <div className="w-1/2 pl-4 border-l">
                             <EnrollmentCalendar
-                              availableDates={availableDates} // Optional if you want to keep date availability
+                              availableDates={availableDates.map(
+                                (date) => date.split("T")[0]
+                              )} // Format to 'YYYY-MM-DD'
                               selectedDate={selectedDate}
-                              onChange={(dateString) =>
-                                handleDateSelection(dateString)
+                              onChange={(date) =>
+                                handleDateSelection(new Date(date))
                               }
                             />
                           </div>
