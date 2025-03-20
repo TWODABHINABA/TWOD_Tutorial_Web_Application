@@ -1,139 +1,81 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaCheckCircle, FaUserTie, FaChalkboardTeacher, FaCertificate, FaInfoCircle, FaBookOpen, FaClock, FaHeadset, FaGlobe, FaShieldAlt, FaUsers } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import CustomNavbar from '../../components/navbar/Navbar';
-import Footer from '../../components/footer/Footer';
+import CustomNavbar from "../../components/navbar/Navbar";
+import Footer from "../../components/footer/Footer";
 
-const Pricing = () => {
+const pricingData = [
+  { duration: "30 MINS", price: "$35", description: "Quick concept revision & Q/A session", features: ["Personalized attention", "Flexible scheduling"] },
+  { duration: "1 HOUR", price: "$60", description: "Deep-dive into complex topics with problem-solving", features: ["In-depth explanations", "Homework assistance"], popular: true },
+  { duration: "1.5 HOURS", price: "$80", description: "Comprehensive learning session with step-by-step guidance", features: ["Concept mastery", "Exam strategies"] },
+  { duration: "2 HOURS", price: "$100", description: "Intensive study session for thorough understanding & practice", features: ["Extensive practice", "Doubt clearing"] },
+];
+
+const PricingPage = () => {
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [policyAccepted, setPolicyAccepted] = useState(false);
 
   useEffect(() => {
-    AOS.init({ duration: 1000 });
+    AOS.init({ duration: 800, once: true });
   }, []);
 
   return (
-    <div className={`${darkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"} min-h-screen flex flex-col`}> 
+    <div className="bg-gray-100 min-h-screen flex flex-col">
       <CustomNavbar />
-<div className="bg-[#FAF3E0]">
-      {/* Header */}
-      <header className="text-center py-20" data-aos="fade-down">
-        <h1 className="text-5xl font-extrabold text-orange-400">Course Pricing & Plans</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mt-4 max-w-3xl mx-auto">
-          Choose the perfect plan that suits your learning needs and career goals.
-        </p>
-      </header>
 
-      {/* Pricing Section */}
-      <div className="flex flex-wrap justify-center gap-8 p-6">
-        {["Free", "Basic", "Premium", "Enterprise"].map((plan, index) => (
-          <div key={index} className="w-80 h-auto min-h-[400px] p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 flex flex-col justify-between" data-aos="fade-right">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{plan} Plan</h2>
-            <p className="text-xl mt-2 text-gray-700 dark:text-gray-300">
-              {plan === "Free" ? "₹0" : plan === "Basic" ? "₹999/month" : plan === "Premium" ? "₹1999/month" : "Custom Pricing"}
-            </p>
-            <ul className="mt-4 space-y-2 text-gray-700 dark:text-gray-300">
-              {plan === "Free" ? (
-                <>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Access to basic courses</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />1 course per month</li>
-                </>
-              ) : plan === "Basic" ? (
-                <>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Access to all courses</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />5 courses per month</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Email support</li>
-                </>
-              ) : plan === "Premium" ? (
-                <>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Unlimited courses</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />24/7 priority support</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Exclusive content</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Certification upon completion</li>
-                </>
-              ) : (
-                <>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Custom solutions for organizations</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Dedicated account manager</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Advanced analytics & reporting</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />API access</li>
-                  <li><FaCheckCircle className="inline mr-2 text-green-500" />Full access to every course</li>
-                </>
-              )}
-            </ul>
-            <button
-              className="w-full mt-4 py-2 rounded-lg font-semibold border border-orange-500 text-orange-500 transition-colors duration-300 hover:bg-orange-500 hover:text-white"
-              onClick={() => setShowPopup(true)}
+      <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col flex-grow">
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8" data-aos="fade-up">
+          Pricing Plans
+        </h1>
+
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {pricingData.map((plan, index) => (
+            <div
+              key={index}
+              data-aos="zoom-in"
+              className={`p-6 rounded-lg shadow-lg bg-white border-2 flex flex-col ${
+                plan.popular ? "border-yellow-500" : "border-gray-300"
+              }`}
             >
-              Get Started
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* More Information Section */}
-      <section className="mt-12 p-6 text-center bg-white dark:bg-gray-700" data-aos="fade-left">
-        <h2 className="text-3xl font-bold mb-4 text-orange-400">Why to choose us ?</h2>
-        <p className="text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
-          We offer tailored solutions for individual learners and businesses.
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-6">
-          {[
-            { icon: FaUserTie, label: "Business Plans" },
-            { icon: FaChalkboardTeacher, label: "Expert Mentors" },
-            { icon: FaCertificate, label: "Certified Courses" },
-            { icon: FaBookOpen, label: "Extensive Learning Resources" },
-            { icon: FaClock, label: "Flexible Learning Hours" },
-            { icon: FaHeadset, label: "24/7 Support" },
-            { icon: FaGlobe, label: "Global Access" },
-            { icon: FaShieldAlt, label: "Secure Payments" },
-            { icon: FaUsers, label: "Community Networking" }
-          ].map((item, index) => (
-            <div key={index} className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-              <item.icon className="text-4xl text-orange-500" />
-              <p className="mt-2 text-gray-700 dark:text-gray-300">{item.label}</p>
+              {plan.popular && (
+                <span className="text-sm text-white bg-yellow-500 px-3 py-1 rounded-full mb-2 inline-block" data-aos="fade-down">
+                  Most Popular
+                </span>
+              )}
+              <h3 className="text-xl font-semibold text-gray-800" data-aos="fade-right">
+                {plan.duration}
+              </h3>
+              <p className="text-2xl font-bold text-blue-600 mt-2" data-aos="fade-left">
+                {plan.price}
+              </p>
+              <p className="text-gray-600 mt-2" data-aos="fade-right">
+                {plan.description}
+              </p>
+              <ul className="mt-4 space-y-2 flex-grow" data-aos="fade-up">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-center text-gray-600">
+                    ✅ {feature}
+                  </li>
+                ))}
+              </ul>
+              
+              {/* Enroll Now Button - Aligned */}
+              <button
+                onClick={() => navigate("/booking")}
+                className="mt-auto w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+                data-aos="fade-up"
+              >
+                Enroll Now
+              </button>
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* Terms & Conditions Popup */}
-      {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" data-aos="zoom-in">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-lg text-center">
-            <h2 className="text-2xl font-semibold text-red-500">Terms & Conditions 📜</h2>
-            <p className="text-gray-700 dark:text-gray-300 mt-2">
-              By subscribing to a plan, you agree to our terms:
-            </p>
-            <ul className="text-gray-600 dark:text-gray-300 list-disc list-inside mt-4 text-left">
-              <li>📌 Access to courses based on your plan.</li>
-              <li>📌 Subscription fees are non-refundable.</li>
-              <li>📌 You must adhere to community guidelines.</li>
-              <li>📌 Enterprise users receive custom onboarding.</li>
-            </ul>
-            <label className="flex items-center justify-center space-x-2 mt-4 cursor-pointer">
-              <input type="checkbox" className="w-5 h-5" onChange={() => setPolicyAccepted(!policyAccepted)} />
-              <span className="text-gray-700 dark:text-gray-300">I accept the terms & conditions</span>
-            </label>
-            <div className="mt-4 flex justify-between">
-              <button className="px-4 py-2 bg-gray-500 text-white rounded-lg" onClick={() => setShowPopup(false)}>
-                Cancel
-              </button>
-              <button className={`px-4 py-2 rounded-lg font-semibold ${policyAccepted ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-gray-300 cursor-not-allowed"}`} disabled={!policyAccepted} onClick={() => { policyAccepted && navigate("/dashboard"); }}>
-                Proceed
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       <Footer />
-    </div>
     </div>
   );
 };
 
-export default Pricing;
+export default PricingPage;
