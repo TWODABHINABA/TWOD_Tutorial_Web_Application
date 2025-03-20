@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Course = require("../Models/course");
-const Tutor=require("../Models/tutors");
+const Tutor = require("../Models/tutors");
 const authMiddleware = require("../Auth/Authentication");
 const paypal = require("../config/paypal");
 const Transaction = require("../Models/transaction");
@@ -149,13 +149,14 @@ router.get("/courses/:id", async (req, res) => {
   }
 });
 
-
 router.get("/courses", async (req, res) => {
   try {
     const { name, courseType } = req.query;
 
     if (!name || !courseType) {
-      return res.status(400).json({ message: "Course name and type are required" });
+      return res
+        .status(400)
+        .json({ message: "Course name and type are required" });
     }
 
     const course = await Course.findOne({
@@ -193,7 +194,6 @@ router.get("/subjects", async (req, res) => {
   }
 });
 
-
 // router.get("/category/:categoryName", async (req, res) => {
 //   try {
 //     const { categoryName } = req.params;
@@ -203,10 +203,6 @@ router.get("/subjects", async (req, res) => {
 //     res.status(500).json({ error: error.message });
 //   }
 // });
-
-
-
-
 
 router.get("/categories", async (req, res) => {
   try {
@@ -230,15 +226,15 @@ router.get("/categories", async (req, res) => {
       category: cat._id,
       courseTypeImage: cat.courseTypeImage
         ? `http://localhost:6001${cat.courseTypeImage}` //Local
-        // ? `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Abhi
-        : null,
+        : // ? `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Abhi
+          null,
       courses: cat.courses.map((course) => ({
         name: course.name,
         courseType: course.courseType,
         nameImage: course.nameImage
-          ? `http://localhost:6001${course.nameImage}`  //Local
-          // ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`  //Abhi
-          : null,
+          ? `http://localhost:6001${course.nameImage}` //Local
+          : // ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`  //Abhi
+            null,
       })),
     }));
 
@@ -249,60 +245,63 @@ router.get("/categories", async (req, res) => {
   }
 });
 
-// router.post("/enroll", async (req, res) => {
-//   try {
-//     const { userId, courseId, tutorId, date, timeSlot, duration } = req.body;
-
-//     let assignedTutorId = tutorId;
-
-//     if (!tutorId) {
-//       // If "No Preference", find a tutor with availability at this date & time
-//       const tutors = await Tutor.find({ "availability.date": date });
-
-//       const availableTutors = tutors.filter((tutor) =>
-//         tutor.availability.some(
-//           (entry) => entry.date === date && entry.timeSlots.includes(timeSlot)
-//         )
-//       );
-
-//       if (availableTutors.length === 0) {
-//         return res.status(400).json({ error: "No tutors available for this time slot" });
-//       }
-
-//       assignedTutorId = availableTutors[Math.floor(Math.random() * availableTutors.length)]._id;
-//     }
-
-//     // Save the enrollment
-//     const newEnrollment = new Transaction({
-//       userId,
-//       courseId,
-//       tutorId: assignedTutorId,
-//       date,
-//       timeSlot,
-//       duration,
-//     });
-
-//     await newEnrollment.save();
-//     res.json({ message: "Enrollment successful", enrollment: newEnrollment });
-
-//   } catch (error) {
-//     console.error("Error enrolling user:", error);
-//     res.status(500).json({ error: "Failed to enroll user" });
-//   }
-// });
-
 
 // router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
 //   try {
-//     const { tutorId, selectedDate, selectedTime, duration, amount } = req.body;
+//     let { tutorId, selectedDate, selectedTime, duration } = req.body;
 //     const course = await Course.findById(req.params.id);
+
 //     if (!course) {
 //       return res.status(404).json({ message: "Course not found" });
 //     }
 
-//     const price = course.discountPrice || course.price;
-//     const formattedPrice = Number(price).toFixed(2);
+//     // Fetch global session pricing
+//     const globalPricing = await GlobalSessionPricing.findOne();
+//     console.log("Global Pricing:", globalPricing);
 
+//     if (!globalPricing) {
+//       return res.status(404).json({ message: "Session pricing not found" });
+//     }
+
+//     // Find selected session price
+//     const selectedSession = globalPricing.sessions.find(
+//       (session) => session.duration === duration
+//     );
+//     console.log("Selected Session:", selectedSession);
+
+//     if (!selectedSession) {
+//       return res.status(400).json({ message: "Invalid session duration" });
+//     }
+
+//     // ✅ Fix: Assign selected session price to amount and sanitize it
+//     let amount = selectedSession.price;
+//     const formattedPrice = parseFloat(amount.replace(/,/g, "")).toFixed(2);
+//     console.log("Formatted Price:", formattedPrice);
+
+//     // If "No Preference" is selected, auto-assign a tutor
+//     if (!tutorId) {
+//       const tutors = await Tutor.find({ "availability.date": selectedDate });
+
+//       const availableTutors = tutors.filter((tutor) =>
+//         tutor.availability.some(
+//           (entry) =>
+//             entry.date === selectedDate &&
+//             entry.timeSlots.includes(selectedTime)
+//         )
+//       );
+
+//       if (availableTutors.length === 0) {
+//         return res
+//           .status(400)
+//           .json({ error: "No tutors available for this time slot" });
+//       }
+
+//       // Pick a random tutor from available ones
+//       tutorId =
+//         availableTutors[Math.floor(Math.random() * availableTutors.length)]._id;
+//     }
+
+//     // Save transaction
 //     const transaction = new Transaction({
 //       courseId: course._id,
 //       user: req.user.id,
@@ -315,17 +314,15 @@ router.get("/categories", async (req, res) => {
 //     });
 //     await transaction.save();
 
+//     // PayPal payment JSON
 //     const paymentJson = {
 //       intent: "sale",
 //       payer: { payment_method: "paypal" },
 //       redirect_urls: {
-
 //         return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
 //         cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
-
-        
-//         // return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
-//         // cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
+//          // return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
+//          // cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
 //       },
 //       transactions: [
 //         {
@@ -344,13 +341,14 @@ router.get("/categories", async (req, res) => {
 //             currency: "USD",
 //             total: formattedPrice,
 //           },
-//           description: `Enrollment for course ${course.name}.`,
+//           description: `Enrollment for course ${course.name}, Duration: ${duration}.`,
 //         },
 //       ],
 //     };
 
 //     console.log("Payment JSON:", paymentJson);
 
+//     // Create PayPal payment
 //     paypal.payment.create(paymentJson, (error, payment) => {
 //       if (error) {
 //         console.error("Error creating payment:", error);
@@ -374,6 +372,11 @@ router.get("/categories", async (req, res) => {
 
 
 
+
+
+
+
+
 router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
   try {
     let { tutorId, selectedDate, selectedTime, duration } = req.body;
@@ -383,46 +386,63 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    // Fetch global session pricing
+    // 🔥 Get Global Session Pricing
     const globalPricing = await GlobalSessionPricing.findOne();
-    console.log("Global Pricing:", globalPricing);  
-    
     if (!globalPricing) {
       return res.status(404).json({ message: "Session pricing not found" });
     }
     
-    // Find selected session price
     const selectedSession = globalPricing.sessions.find(session => session.duration === duration);
-    console.log("Selected Session:", selectedSession);  
-    
     if (!selectedSession) {
       return res.status(400).json({ message: "Invalid session duration" });
     }
 
-    // ✅ Fix: Assign selected session price to amount and sanitize it
+    // ✅ Fix: Format price correctly
     let amount = selectedSession.price;
     const formattedPrice = parseFloat(amount.replace(/,/g, '')).toFixed(2);
-    console.log("Formatted Price:", formattedPrice);
 
-    // If "No Preference" is selected, auto-assign a tutor
+    // 🔥 If "No Preference" is selected, auto-assign a tutor and date
     if (!tutorId) {
-      const tutors = await Tutor.find({ "availability.date": selectedDate });
+      // 1️⃣ Find tutors for this course
+      const tutors = await Tutor.find({ subjects: course.courseType });
 
-      const availableTutors = tutors.filter((tutor) =>
-        tutor.availability.some(
-          (entry) => entry.date === selectedDate && entry.timeSlots.includes(selectedTime)
-        )
-      );
-
-      if (availableTutors.length === 0) {
-        return res.status(400).json({ error: "No tutors available for this time slot" });
+      if (tutors.length === 0) {
+        return res.status(400).json({ error: "No tutors available for this course" });
       }
 
-      // Pick a random tutor from available ones
-      tutorId = availableTutors[Math.floor(Math.random() * availableTutors.length)]._id;
+      // 2️⃣ Get dates from today up to 1 month ahead
+      const today = new Date();
+      const nextMonth = new Date();
+      nextMonth.setMonth(today.getMonth() + 1);
+
+      let availableTutorsWithDates = [];
+
+      // 3️⃣ Check tutor availability within the date range
+      tutors.forEach((tutor) => {
+        tutor.availability.forEach((entry) => {
+          const entryDate = new Date(entry.date);
+          if (entryDate >= today && entryDate <= nextMonth) {
+            availableTutorsWithDates.push({
+              tutorId: tutor._id,
+              date: entry.date,
+              timeSlots: entry.timeSlots, 
+            });
+          }
+        });
+      });
+
+      if (availableTutorsWithDates.length === 0) {
+        return res.status(400).json({ error: "No available tutors in the next month" });
+      }
+
+      const selectedTutorData = availableTutorsWithDates[Math.floor(Math.random() * availableTutorsWithDates.length)];
+      tutorId = selectedTutorData.tutorId;
+
+
+      console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
     }
 
-    // Save transaction
+    // 🔥 Save transaction
     const transaction = new Transaction({
       courseId: course._id,
       user: req.user.id,
@@ -435,7 +455,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     });
     await transaction.save();
 
-    // PayPal payment JSON
+    // 🔥 PayPal Payment JSON
     const paymentJson = {
       intent: "sale",
       payer: { payment_method: "paypal" },
@@ -465,9 +485,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       ],
     };
 
-    console.log("Payment JSON:", paymentJson);
-
-    // Create PayPal payment
+    // 🔥 Create PayPal payment
     paypal.payment.create(paymentJson, (error, payment) => {
       if (error) {
         console.error("Error creating payment:", error);
@@ -487,6 +505,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 
@@ -593,15 +612,14 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
   }
 });
 
-
-
-
 router.get("/user/courses", authMiddleware, async (req, res) => {
   try {
     console.log("Authenticated user:", req.user); // Debugging
 
     if (!req.user || !req.user.id) {
-      return res.status(401).json({ error: "Unauthorized. User not authenticated." });
+      return res
+        .status(401)
+        .json({ error: "Unauthorized. User not authenticated." });
     }
 
     const userId = req.user.id;

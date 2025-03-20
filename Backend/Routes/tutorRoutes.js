@@ -143,80 +143,6 @@ router.get("/courses/:courseId/tutors", async (req, res) => {
   }
 });
 
-// Get all tutors or filter by subject
-// router.get("/tutors", async (req, res) => {
-//   try {
-//     const { subject } = req.query; // Example: /tutors?subject=Biology
-
-//     let filter = {};
-//     if (subject) {
-//       filter.subjects = subject; // Find tutors that match the subject
-//     }
-
-//     const tutors = await Tutor.find(filter);
-//     res.json(tutors);
-//   } catch (error) {
-//     console.error("❌ Error fetching tutors:", error);
-//     res.status(500).json({ error: "Failed to fetch tutors" });
-//   }
-// });
-
-// router.post("/tutors/:tutorId/availability", async (req, res) => {
-//   try {
-//     const { availability } = req.body;
-
-//     if (!Array.isArray(availability) || availability.length === 0) {
-//       return res
-//         .status(400)
-//         .json({ error: "Availability must be a non-empty array" });
-//     }
-
-//     const tutor = await Tutor.findById(req.params.tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     console.log("📥 Incoming Availability Data:", availability);
-
-//     availability.forEach(({ date, timeSlots }) => {
-//       const existingDate = tutor.availability.find(
-//         (entry) => entry.date === date
-//       );
-//       if (existingDate) {
-//         existingDate.timeSlots = timeSlots;
-//       } else {
-//         tutor.availability.push({ date, timeSlots });
-//       }
-//     });
-
-//     await tutor.save();
-
-//     return res.json({
-//       message: "Availability updated successfully",
-//       availability: tutor.availability,
-//     });
-//   } catch (error) {
-//     console.error("❌ Error updating availability:", error);
-//     return res.status(500).json({ error: "Failed to update availability" });
-//   }
-// });
-
-// router.get("/tutors/:tutorId/availability", async (req, res) => {
-//   try {
-//     const { tutorId } = req.params;
-//     const tutor = await Tutor.findById(tutorId);
-
-//     if (!tutor) {
-//       return res.status(404).json({ message: "Tutor not found" });
-//     }
-
-//     res.json({ availability: tutor.availability || [] });
-//     console.log({ availability: tutor.availability || [] });
-//   } catch (error) {
-//     console.error("Error fetching availability:", error);
-//     res.status(500).json({ message: "Internal Server Error" });
-//   }
-// });
 
 router.get("/tutors/:tutorId/availability", async (req, res) => {
   try {
@@ -241,6 +167,8 @@ router.get("/tutors/:tutorId/availability", async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
+
 
 router.post("/tutors/:tutorId/availability", async (req, res) => {
   try {
@@ -298,21 +226,7 @@ router.post("/tutors/:tutorId/availability", async (req, res) => {
   }
 });
 
-// router.get("/tutors/:tutorId/available-dates", async (req, res) => {
-//   try {
-//     const { tutorId } = req.params;
 
-//     const tutor = await Tutor.findById(tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     const availableDates = tutor.availability.map((entry) => entry.date);
-//     res.json(availableDates);
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to fetch available dates" });
-//   }
-// });
 
 router.get("/tutors/:tutorId/available-dates", async (req, res) => {
   try {
@@ -355,35 +269,7 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
   }
 });
 
-// router.get("/tutors/:tutorId/available-slots", async (req, res) => {
-//   try {
-//     const { tutorId } = req.params;
-//     const { date } = req.query;
 
-//     if (!date) {
-//       return res.status(400).json({ error: "Date is required" });
-//     }
-
-//     const tutor = await Tutor.findById(tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     const selectedDate = tutor.availability.find(
-//       (entry) => entry.date === date
-//     );
-//     if (!selectedDate) {
-//       return res
-//         .status(404)
-//         .json({ error: "No available slots for this date" });
-//     }
-
-//     res.json(selectedDate.timeSlots);
-//   } catch (error) {
-//     console.error("Error fetching tutor-specific slots:", error);
-//     res.status(500).json({ error: "Failed to fetch available time slots" });
-//   }
-// });
 
 router.get("/tutors/:tutorId/available-slots", async (req, res) => {
   try {
@@ -439,33 +325,7 @@ router.get("/tutors/:tutorId/available-slots", async (req, res) => {
 });
 
 
-// router.get("/tutors/:tutorId/available-slots", async (req, res) => {
-//   try {
-//     const { tutorId } = req.params;
-//     let { date } = req.query;
 
-//     if (!Array.isArray(date)) {
-//       date = [date]; // Ensure it's an array
-//     }
-
-//     console.log("Fetching available slots for:", date);
-
-//     const tutor = await Tutor.findById(tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ message: "Tutor not found" });
-//     }
-
-//     // Query to find slots on given dates
-//     const availableSlots = tutor.availability.filter((slot) =>
-//       date.includes(slot.date)
-//     );
-
-//     res.json(availableSlots);
-//   } catch (error) {
-//     console.error("Error fetching slots:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
 
 
 
