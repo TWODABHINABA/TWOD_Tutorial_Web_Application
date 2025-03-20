@@ -3,13 +3,11 @@ import { useLocation, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import api from "../User-management/api";
 
-
 const fetchCategories = async () => {
   try {
     const response = await api.get("/categories");
-    console.log("dropdown dataaaaaaaaa",response.data);  
-    return response.data; 
-    
+    console.log("dropdown dataaaaaaaaa", response.data);
+    return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
@@ -17,20 +15,23 @@ const fetchCategories = async () => {
 };
 const fetchCourseId = async (courseName, courseType) => {
   try {
-    const response = await api.get(`/courses?name=${encodeURIComponent(courseName)}&courseType=${encodeURIComponent(courseType)}`);
-    return response.data._id; 
+    const response = await api.get(
+      `/courses?name=${encodeURIComponent(
+        courseName
+      )}&courseType=${encodeURIComponent(courseType)}`
+    );
+    return response.data._id;
   } catch (error) {
     console.error("Error fetching course ID:", error);
   }
 };
-
 
 const FlyoutLink = ({
   children,
   FlyoutContent,
   direction = "down",
   showArrow = true,
-  href, 
+  href,
 }) => {
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -108,7 +109,6 @@ const FlyoutLink = ({
             className={`${flyoutPositionClasses} bg-white text-black z-10 p-4`}
             style={flyoutTransformStyle}
           >
-          
             {direction === "right" ? (
               <>
                 <div className="absolute -left-6 top-0 bottom-0 w-6 bg-transparent" />
@@ -128,11 +128,8 @@ const FlyoutLink = ({
   );
 };
 
-
-
-
 const DynamicCategoryFlyout = ({ category }) => {
-  console.log("Category Data:", category); 
+  console.log("Category Data:", category);
 
   return (
     <div className="w-48 bg-white p-6 shadow-xl absolute">
@@ -170,15 +167,13 @@ const PricingContent = () => {
       {categories.length > 0 ? (
         categories.map((cat) => (
           <FlyoutLink
-  key={cat.category}
-  href={`/category/${encodeURIComponent(cat.category)}`}
-  FlyoutContent={() => <DynamicCategoryFlyout category={cat} />}
-  direction="right"
->
-  {cat.category}
-</FlyoutLink>
-
-
+            key={cat.category}
+            href={`/category/${encodeURIComponent(cat.category)}`}
+            FlyoutContent={() => <DynamicCategoryFlyout category={cat} />}
+            direction="right"
+          >
+            {cat.category}
+          </FlyoutLink>
         ))
       ) : (
         <p>No categories found</p>
@@ -186,7 +181,6 @@ const PricingContent = () => {
     </div>
   );
 };
-
 
 const Explore = () => {
   return (

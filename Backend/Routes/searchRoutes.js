@@ -19,7 +19,7 @@ router.get("/search", async (req, res) => {
 
     // Search across multiple collections
     const courses = await Course.find({
-      $or: [{ name: searchCondition }, { overview: searchCondition }],
+      $or: [{ name: searchCondition }, { overview: searchCondition },{courseType: searchCondition}],
     });
 
     const persons = await Person.find({
