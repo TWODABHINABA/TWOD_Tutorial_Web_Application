@@ -338,43 +338,7 @@ router.get("/tutors/:tutorId", async (req, res) => {
   res.json(tutor);
 });
 
-// router.delete("/tutors/:tutorId/availability/date/:date", async (req, res) => {
-//   const { tutorId, date } = req.params;
 
-//   console.log("Received delete request for date:", date);
-
-//   try {
-//     const tutor = await Tutor.findById(tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     // Ensure that the tutor has availability before proceeding
-//     if (!tutor.availability || tutor.availability.length === 0) {
-//       return res
-//         .status(404)
-//         .json({ error: "No availability found for this tutor" });
-//     }
-
-//     // Find and remove the date from availability
-//     const filteredAvailability = tutor.availability.filter(
-//       (item) => item.date !== date
-//     );
-
-//     // If no change, that means the date didn't exist
-//     if (filteredAvailability.length === tutor.availability.length) {
-//       return res.status(404).json({ error: "Date not found in availability" });
-//     }
-
-//     tutor.availability = filteredAvailability;
-//     await tutor.save();
-
-//     return res.json({ message: "Date deleted successfully" });
-//   } catch (error) {
-//     console.error("Error deleting date:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
 
 router.delete("/tutors/:tutorId/availability/date/:date", async (req, res) => {
   const { tutorId, date } = req.params;
@@ -414,54 +378,7 @@ router.delete("/tutors/:tutorId/availability/date/:date", async (req, res) => {
   }
 });
 
-// router.delete(
-//   "/tutors/:tutorId/availability/date/:date/time/:time",
-//   async (req, res) => {
-//     const { tutorId, date, time } = req.params;
 
-//     console.log("Received delete request for:", date, time);
-
-//     try {
-//       const tutor = await Tutor.findById(tutorId);
-//       if (!tutor) {
-//         return res.status(404).json({ error: "Tutor not found" });
-//       }
-
-//       // Find the availability object for the given date
-//       const availabilityEntry = tutor.availability.find(
-//         (entry) => entry.date === date
-//       );
-//       if (!availabilityEntry) {
-//         return res
-//           .status(404)
-//           .json({ error: "Date not found in availability" });
-//       }
-
-//       // Remove the time slot
-//       const updatedTimeSlots = availabilityEntry.timeSlots.filter(
-//         (t) => t !== time
-//       );
-//       if (updatedTimeSlots.length === availabilityEntry.timeSlots.length) {
-//         return res.status(404).json({ error: "Time slot not found" });
-//       }
-
-//       // If all time slots are removed, delete the entire date entry
-//       if (updatedTimeSlots.length === 0) {
-//         tutor.availability = tutor.availability.filter(
-//           (entry) => entry.date !== date
-//         );
-//       } else {
-//         availabilityEntry.timeSlots = updatedTimeSlots;
-//       }
-
-//       await tutor.save();
-//       return res.json({ message: "Time slot deleted successfully" });
-//     } catch (error) {
-//       console.error("Error deleting time slot:", error);
-//       res.status(500).json({ error: "Internal server error" });
-//     }
-//   }
-// );
 
 router.delete(
   "/tutors/:tutorId/availability/date/:date/time/:time",
@@ -526,76 +443,3 @@ router.delete(
 
 module.exports = router;
 
-// router.get("/tutors/:tutorId/available-slots", async (req, res) => {
-//   try {
-//     const { tutorId } = req.params;
-//     const { date } = req.query;
-
-//     if (!date) {
-//       return res.status(400).json({ error: "Date is required" });
-//     }
-
-//     const tutor = await Tutor.findById(tutorId);
-//     if (!tutor) {
-//       return res.status(404).json({ error: "Tutor not found" });
-//     }
-
-//     const selectedDate = tutor.availability.find(
-//       (entry) => entry.date === date
-//     );
-//     if (!selectedDate) {
-//       return res
-//         .status(404)
-//         .json({ error: "No available slots for this date" });
-//     }
-
-//     res.json(selectedDate.timeSlots);
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to fetch available time slots" });
-//   }
-// });
-// const getAvailableTimeSlots = (timeSlots, duration) => {
-//   const availableSlots = [];
-//   let startTime = null;
-
-//   for (let i = 0; i < timeSlots.length; i++) {
-//     if (!startTime) {
-//       startTime = timeSlots[i]; // First available time slot
-//       availableSlots.push(startTime);
-//     } else {
-//       const [prevHour, prevMin] = availableSlots[availableSlots.length - 1]
-//         .split(/[:\s]/)
-//         .map((t, i) => (i < 2 ? parseInt(t) : t));
-
-//       const [currHour, currMin] = timeSlots[i]
-//         .split(/[:\s]/)
-//         .map((t, i) => (i < 2 ? parseInt(t) : t));
-
-//       // Convert time to 24-hour format for calculation
-//       let prevTotalMins = prevHour * 60 + prevMin + duration;
-//       let currTotalMins = currHour * 60 + currMin;
-
-//       if (prevTotalMins <= currTotalMins) {
-//         availableSlots.push(timeSlots[i]);
-//       }
-//     }
-//   }
-
-//   return availableSlots;
-// };
-
-// router.get("/tutors/:tutorId/availability", async (req, res) => {
-//   const { date, duration } = req.query; // duration in minutes
-
-//   const tutor = await Tutor.findById(req.params.tutorId);
-//   if (!tutor) return res.status(404).json({ message: "Tutor not found" });
-
-//   const selectedDate = tutor.availability.find((a) => a.date === date);
-//   if (!selectedDate) return res.json({ timeSlots: [] });
-
-//   const adjustedSlots = getAvailableTimeSlots(
-//     selectedDate.timeSlots,
-//     parseInt(duration)
-//   );
-//   res.json({ timeSlots: adjustedSlots });
-// });
