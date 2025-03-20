@@ -16,7 +16,7 @@ export const formatDate = (date) => {
 const EnrollmentCalendar = ({ availableDates, selectedDate, onChange }) => {
   const tileDisabled = ({ date, view }) => {
     if (view === "month") {
-      const dateString = formatDate(date); // Convert calendar date
+      const dateString = formatDate(date); 
       // console.log("Checking date:", dateString);
       // console.log("Available dates:", availableDates);
 
@@ -31,8 +31,8 @@ const EnrollmentCalendar = ({ availableDates, selectedDate, onChange }) => {
     <div className="p-4 bg-white rounded-lg shadow-md">
       <Calendar
         onChange={(date) => {
-          console.log("Selected Date from Calendar:", date); // Debugging
-          onChange(formatDate(date)); // Ensure conversion
+          console.log("Selected Date from Calendar:", date);
+          onChange(formatDate(date)); 
         }}
         value={selectedDate ? new Date(selectedDate) : null}
         tileDisabled={tileDisabled}

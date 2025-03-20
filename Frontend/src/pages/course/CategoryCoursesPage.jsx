@@ -98,9 +98,9 @@ const CategoryCoursesPage = () => {
               ref={coursesRef}
               className="bg-gray-50 mt-6 p-6 rounded-xl shadow-lg transition-all duration-300"
             >
-              <h3 className="text-xl font-semibold text-orange-500 mb-4">
+              {/* <h3 className="text-xl font-semibold text-orange-500 mb-4">
                 {expandedCategory} Courses
-              </h3>
+              </h3> */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {categories
                   .find((cat) => cat.category === expandedCategory)
