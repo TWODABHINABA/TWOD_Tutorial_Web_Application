@@ -55,13 +55,11 @@ const AddAvailability = () => {
             `/tutors/${selectedTutor}/availability`
           );
           console.log("📤 Received Availability:", availabilityResponse.data);
-
           // Ensure availability with time slots only
           const filteredAvailability =
             availabilityResponse.data.availability.filter(
               (entry) => entry.timeSlots.length > 0
             );
-
           setAvailability(filteredAvailability);
         }
       } catch (error) {

@@ -14,7 +14,10 @@ const Explore = () => {
         <div className='w-full'>
             <CustomNavbar />
             <div className='w-full bg-[#FAF3E0] '>
+                <div className=' hidden md:block'>
                 <ShuffleHero />
+                </div>
+                    
                 <div className="bg-white p-4 h-auto md:h-[250px] flex items-center justify-center">
                     <div className="flex flex-col md:flex-row items-center text-center md:text-left">
                         <h1 className="text-xl md:text-4xl text-gray-800">
@@ -35,10 +38,11 @@ const Explore = () => {
                         <p className='text-gray-600 md:ml-2'>
                             From mastering essential soft skills to diving into advanced technical subjects, Tutor empowers your career growth.
                         </p>
-                        <CourseCard />
                     </div>
+
+                        <CourseCard />
                 </div>
-                <div className='pt-9 bg-white'>
+                <div className='pt-9 bg-white hidden md:block'>
                     <TextParallaxContents />
                 </div>
             </div>

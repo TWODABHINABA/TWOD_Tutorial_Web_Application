@@ -75,7 +75,6 @@ const fetchCourseId = async (courseName, courseType) => {
 //   );
 // };
 
-
 const Card = ({ course }) => {
   const handleCourseClick = async (e) => {
     e.preventDefault();
@@ -88,7 +87,7 @@ const Card = ({ course }) => {
       whileHover="hover"
       transition={{ duration: 0.5, ease: "easeInOut" }}
       variants={{ hover: { scale: 1.03 } }}
-      className="relative h-96 w-80 shrink-0 overflow-hidden rounded-xl bg-white shadow-lg p-8 mr-4 cursor-pointer"
+      className="relative h-96 w-72 sm:w-80 shrink-0 overflow-hidden rounded-xl bg-white shadow-lg p-8 mr-4 cursor-pointer"
       onClick={handleCourseClick}
     >
       <div className="relative z-10 text-orange-400">
@@ -192,8 +191,9 @@ const CardCarousel = () => {
   };
 
   return (
-    <section className="relative px-4 py-12 bg-[#FAF3E0]">
-      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30">
+    <section className="relative px-4 py-8 sm:px-10 sm:py-12 bg-[#FAF3E0]">
+      {/* Arrow buttons are hidden on mobile (below sm breakpoint) */}
+      <div className="hidden sm:block absolute left-0 top-1/2 transform -translate-y-1/2 z-30">
         <button
           onClick={scrollLeft}
           className="bg-gray-200 text-gray-700 rounded-full p-2 hover:bg-gray-300"
@@ -201,7 +201,7 @@ const CardCarousel = () => {
           &larr;
         </button>
       </div>
-      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30">
+      <div className="hidden sm:block absolute right-0 top-1/2 transform -translate-y-1/2 z-30">
         <button
           onClick={scrollRight}
           className="bg-gray-200 text-gray-700 rounded-full p-2 hover:bg-gray-300"
@@ -211,11 +211,15 @@ const CardCarousel = () => {
       </div>
       <div
         ref={carouselRef}
-        className="flex overflow-x-auto space-x-4 "
+        className="flex overflow-x-auto space-x-4 snap-x snap-mandatory"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {courses.length > 0 ? (
-          courses.map((course, index) => <Card key={index} course={course} />)
+          courses.map((course, index) => (
+            <div key={index} className="snap-start">
+              <Card course={course} />
+            </div>
+          ))
         ) : (
           <p className="text-center text-gray-700 w-full">
             No courses available

@@ -15,8 +15,6 @@ const fetchCategories = async () => {
     return [];
   }
 };
-
-
 const fetchCourseId = async (courseName, courseType) => {
   try {
     const response = await api.get(`/courses?name=${encodeURIComponent(courseName)}&courseType=${encodeURIComponent(courseType)}`);
@@ -159,8 +157,6 @@ const DynamicCategoryFlyout = ({ category }) => {
     </div>
   );
 };
-
-
 
 const PricingContent = () => {
   const [categories, setCategories] = useState([]);
