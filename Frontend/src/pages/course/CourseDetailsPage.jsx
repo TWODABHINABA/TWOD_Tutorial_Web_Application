@@ -405,22 +405,23 @@ const CourseDetailsPage = () => {
     );
   if (error) return <p>Error: {error}</p>;
   if (!course) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
-        <div className="max-w-md text-center space-y-4">
-          <div className="text-6xl">📚</div>
-          <h2 className="text-3xl font-bold text-gray-800">Course not found</h2>
-          <p className="text-gray-600">No details available for course</p>
-          <Link
-            to="/"
-            className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-500 transition-all duration-300 transform hover:scale-105"
-          >
-            Back to Categories
-          </Link>
-        </div>
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
+      <div className="max-w-md text-center space-y-4">
+        <div className="text-6xl">📚</div>
+        <h2 className="text-3xl font-bold text-gray-800">Course not found</h2>
+        <p className="text-gray-600">No details available for course</p>
+        <Link
+          to="/"
+          className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105"
+        >
+          Back to Categories
+        </Link>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
 
   return (
     <>
