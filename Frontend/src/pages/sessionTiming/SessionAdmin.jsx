@@ -84,14 +84,14 @@ export default function ManageSessionPricing() {
         <div className="flex gap-4">
           <input
             type="text"
-            placeholder="Duration (e.g., 30 minutes)"
+            placeholder="Duration (e.g., 30 minutes or in hrs)"
             value={newDuration}
             onChange={(e) => setNewDuration(e.target.value)}
             className="border rounded-lg px-3 py-2 w-1/2"
           />
           <input
             type="text"
-            placeholder="Price (e.g., 2200)"
+            placeholder="Price (in USD)"
             value={newPrice}
             onChange={(e) => setNewPrice(e.target.value)}
             className="border rounded-lg px-3 py-2 w-1/2"
@@ -156,7 +156,7 @@ export default function ManageSessionPricing() {
               ) : (
                 <>
                   <p className="font-medium w-1/3">{session.duration}</p>
-                  <p className="w-1/4 text-right">Rs. {session.price}</p>
+                  <p className="w-1/4 text-right">$. {session.price}</p>
                   <button
                     onClick={() => handleEditClick(index)}
                     className="bg-yellow-500 text-white px-3 py-1 rounded-lg"

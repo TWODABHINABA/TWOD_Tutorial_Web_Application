@@ -125,8 +125,6 @@ const CourseDetailsPage = () => {
     }
   };
 
-
-
   const handleEnrollClick = async () => {
     try {
       const response = await api.get(`/courses/${courseId}/tutors`);
@@ -251,7 +249,10 @@ const CourseDetailsPage = () => {
 
       console.log("Selected Duration:", selectedDuration);
 
-      const filteredSlots = filterAvailableSlots(response.data, selectedDuration);
+      const filteredSlots = filterAvailableSlots(
+        response.data,
+        selectedDuration
+      );
       setAvailableTimeSlots(filteredSlots);
     } catch (error) {
       console.error("Error fetching available time slots:", error);
@@ -270,7 +271,9 @@ const CourseDetailsPage = () => {
           : `/tutors/${selectedTutor}/available-slots`;
 
       try {
-        const response = await api.get(endpoint, { params: { date: formattedDate } });
+        const response = await api.get(endpoint, {
+          params: { date: formattedDate },
+        });
         console.log("Available Slots:", response.data);
 
         if (!selectedDuration) {
@@ -278,7 +281,10 @@ const CourseDetailsPage = () => {
           return;
         }
 
-        const filteredSlots = filterAvailableSlots(response.data, selectedDuration);
+        const filteredSlots = filterAvailableSlots(
+          response.data,
+          selectedDuration
+        );
         setAvailableTimeSlots(filteredSlots);
       } catch (error) {
         console.error("Error fetching time slots:", error);
@@ -301,33 +307,39 @@ const CourseDetailsPage = () => {
     }
   }, [selectedDuration]);
 
-
   useEffect(() => {
     if (selectedTutor === "" && selectedDate && availableTimeSlots.length > 0) {
-      console.log("Re-filtering slots for No Preference due to session duration change...");
-      
+      console.log(
+        "Re-filtering slots for No Preference due to session duration change..."
+      );
+
       // Fetch available slots again and reapply filtering
       const fetchAndFilterSlots = async () => {
         try {
           const formattedDate = selectedDate.toISOString().split("T")[0];
-  
-          const response = await api.get(`/tutors/no-preference/available-slots`, {
-            params: { date: formattedDate },
-          });
-  
+
+          const response = await api.get(
+            `/tutors/no-preference/available-slots`,
+            {
+              params: { date: formattedDate },
+            }
+          );
+
           console.log("Refetched Slots (No Preference):", response.data);
-  
-          const updatedSlots = filterAvailableSlots(response.data, selectedDuration);
+
+          const updatedSlots = filterAvailableSlots(
+            response.data,
+            selectedDuration
+          );
           setAvailableTimeSlots(updatedSlots);
         } catch (error) {
           console.error("Error re-fetching available slots:", error);
         }
       };
-  
+
       fetchAndFilterSlots();
     }
-  }, [selectedDuration]); 
-
+  }, [selectedDuration]);
 
   useEffect(() => {
     if (sessions.length > 0) {
@@ -341,8 +353,6 @@ const CourseDetailsPage = () => {
       }
     }
   }, [sessions]);
-
-
 
   const handleEnrollNow = async () => {
     if (
@@ -390,12 +400,12 @@ const CourseDetailsPage = () => {
     }
   };
 
-  const formatPrice = (priceString) => {
-    if (!priceString) return 0;
+  // const formatPrice = (priceString) => {
+  //   if (!priceString) return 0;
 
-    const cleaned = priceString.replace(/[^\d]/g, "");
-    return Number(cleaned);
-  };
+  //   const cleaned = priceString.replace(/[^\d]/g, "");
+  //   return Number(cleaned);
+  // };
 
   if (loading)
     return (
@@ -405,23 +415,22 @@ const CourseDetailsPage = () => {
     );
   if (error) return <p>Error: {error}</p>;
   if (!course) {
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
-      <div className="max-w-md text-center space-y-4">
-        <div className="text-6xl">📚</div>
-        <h2 className="text-3xl font-bold text-gray-800">Course not found</h2>
-        <p className="text-gray-600">No details available for course</p>
-        <Link
-          to="/"
-          className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105"
-        >
-          Back to Categories
-        </Link>
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
+        <div className="max-w-md text-center space-y-4">
+          <div className="text-6xl">📚</div>
+          <h2 className="text-3xl font-bold text-gray-800">Course not found</h2>
+          <p className="text-gray-600">No details available for course</p>
+          <Link
+            to="/"
+            className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105"
+          >
+            Back to Categories
+          </Link>
+        </div>
       </div>
-    </div>
-  );
-}
-
+    );
+  }
 
   return (
     <>
@@ -774,12 +783,13 @@ const CourseDetailsPage = () => {
                             {selectedSession.duration}
                           </span>
                         </p>
-                        <p className="text-gray-600">
-                          Price: Rs.{" "}
+                        <p className="text-gray-1200">
+                          {/* Price: $.{" "}
                           {formatPrice(selectedSession?.price).toLocaleString(
                             "en-IN"
                           )}
-                          .00
+                          .00 */}
+                          Price: ${selectedSession?.price}
                         </p>
                       </div>
                     )}
@@ -862,11 +872,12 @@ const CourseDetailsPage = () => {
                               Duration: {selectedSession.duration}
                             </p>
                             <p className="text-gray-600">
-                              Price: Rs.{" "}
+                              {/* Price: $.{" "}
                               {formatPrice(
                                 selectedSession.price
                               ).toLocaleString("en-IN")}
-                              .00
+                              .00 */}
+                              Price: ${selectedSession?.price}
                             </p>
                           </div>
                         )}

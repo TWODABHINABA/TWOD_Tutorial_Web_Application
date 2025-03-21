@@ -16,21 +16,16 @@ const SearchBar = () => {
       const response = await api.get(
         `/courses?name=${courseName}&courseType=${courseType}`
       );
-      return response.data._id;
+
+      // Ensure response.data is an array and has at least one result
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        return response.data[0]._id; // Get the first matching course ID
+      }
+
+      return null;
     } catch (error) {
       console.error("Error fetching course ID:", error);
       return null;
-    }
-  };
-
-  // Function to fetch categories
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get("/categories");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      return [];
     }
   };
 
@@ -43,29 +38,21 @@ const SearchBar = () => {
     setError("");
 
     try {
-      const [courseResponse, categories] = await Promise.all([
-        api.get(`/search?query=${query}`),
-        fetchCategories(),
-      ]);
+      const { data } = await api.get(`/search?query=${query}`);
 
-      console.log("Courses API Response:", courseResponse.data);
-      console.log("Categories API Response:", categories);
+      console.log("Search API Response:", data);
 
-      // Ensure filtering only happens if the API returns valid data
-      const filteredCourses = courseResponse.data.filter((course) =>
+      // Access the correct property inside the response object
+      const filteredCourses = data.courses.filter((course) =>
         course.name.toLowerCase().includes(query.toLowerCase())
       );
 
-      const filteredCategories = categories
-        .filter((category) => category?.name) // Check if category name exists
-        .filter((category) =>
-          category.name.toLowerCase().includes(query.toLowerCase())
-        );
-
-      console.log("Filtered Courses:", filteredCourses);
-      console.log("Filtered Categories:", filteredCategories);
-
-      setResults({ courses: filteredCourses, categories: filteredCategories });
+      setResults({
+        courses: filteredCourses,
+        categories: data.categories || [],
+        tutors: data.tutors || [],
+        persons: data.persons || [],
+      });
     } catch (err) {
       console.error("Search error:", err);
       setError("Failed to fetch results.");
@@ -74,13 +61,13 @@ const SearchBar = () => {
     }
   };
 
-  // Handle click on search result (course or category)
+
   const handleResultClick = async (item, type) => {
     if (type === "category") {
-      // Navigate to category page
-      navigate(`/categories/${item.name}`);
+
+      navigate(`/category/${item.name}`);  ///category/${encodeURIComponent(cat.category)
     } else {
-      // Navigate to specific course
+
       const id = await fetchCourseId(item.name, item.courseType);
       if (id) {
         navigate(`/courses/${id}`);
@@ -143,27 +130,30 @@ const SearchBar = () => {
                   className="p-2 border-b last:border-none cursor-pointer hover:bg-gray-100"
                   onClick={() => handleResultClick(course, "course")}
                 >
-                  {`${course.courseType} - ${course.name}`}
+                  {`Course: ${course.name} | Type: ${course.courseType}`}{" "}
+                  {/* Debug display */}
                 </div>
               ))}
             </div>
           )}
 
           {/* Category Results */}
-          {results.categories.length > 0 && (
+          {/* {results.categories.length > 0 && (
             <div className="p-2">
-              <h3 className="text-sm font-semibold text-blue-500">CATEGORIES</h3>
+              <h3 className="text-sm font-semibold text-blue-500">
+                CATEGORIES
+              </h3>
               {results.categories.map((category, index) => (
                 <div
                   key={index}
                   className="p-2 border-b last:border-none cursor-pointer hover:bg-gray-100"
                   onClick={() => handleResultClick(category, "category")}
                 >
-                  {category.name}
+                  {category.courseType}
                 </div>
               ))}
             </div>
-          )}
+          )} */}
         </div>
       )}
     </div>
@@ -171,4 +161,3 @@ const SearchBar = () => {
 };
 
 export default SearchBar;
-

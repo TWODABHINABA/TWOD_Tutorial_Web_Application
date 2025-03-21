@@ -246,133 +246,6 @@ router.get("/categories", async (req, res) => {
 });
 
 
-// router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
-//   try {
-//     let { tutorId, selectedDate, selectedTime, duration } = req.body;
-//     const course = await Course.findById(req.params.id);
-
-//     if (!course) {
-//       return res.status(404).json({ message: "Course not found" });
-//     }
-
-//     // Fetch global session pricing
-//     const globalPricing = await GlobalSessionPricing.findOne();
-//     console.log("Global Pricing:", globalPricing);
-
-//     if (!globalPricing) {
-//       return res.status(404).json({ message: "Session pricing not found" });
-//     }
-
-//     // Find selected session price
-//     const selectedSession = globalPricing.sessions.find(
-//       (session) => session.duration === duration
-//     );
-//     console.log("Selected Session:", selectedSession);
-
-//     if (!selectedSession) {
-//       return res.status(400).json({ message: "Invalid session duration" });
-//     }
-
-//     // ✅ Fix: Assign selected session price to amount and sanitize it
-//     let amount = selectedSession.price;
-//     const formattedPrice = parseFloat(amount.replace(/,/g, "")).toFixed(2);
-//     console.log("Formatted Price:", formattedPrice);
-
-//     // If "No Preference" is selected, auto-assign a tutor
-//     if (!tutorId) {
-//       const tutors = await Tutor.find({ "availability.date": selectedDate });
-
-//       const availableTutors = tutors.filter((tutor) =>
-//         tutor.availability.some(
-//           (entry) =>
-//             entry.date === selectedDate &&
-//             entry.timeSlots.includes(selectedTime)
-//         )
-//       );
-
-//       if (availableTutors.length === 0) {
-//         return res
-//           .status(400)
-//           .json({ error: "No tutors available for this time slot" });
-//       }
-
-//       // Pick a random tutor from available ones
-//       tutorId =
-//         availableTutors[Math.floor(Math.random() * availableTutors.length)]._id;
-//     }
-
-//     // Save transaction
-//     const transaction = new Transaction({
-//       courseId: course._id,
-//       user: req.user.id,
-//       amount: formattedPrice,
-//       tutorId,
-//       selectedDate,
-//       selectedTime,
-//       duration,
-//       status: "pending",
-//     });
-//     await transaction.save();
-
-//     // PayPal payment JSON
-//     const paymentJson = {
-//       intent: "sale",
-//       payer: { payment_method: "paypal" },
-//       redirect_urls: {
-//         return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
-//         cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
-//          // return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
-//          // cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
-//       },
-//       transactions: [
-//         {
-//           item_list: {
-//             items: [
-//               {
-//                 name: `Course Enrollment: ${course.name}`,
-//                 sku: course._id.toString(),
-//                 price: formattedPrice,
-//                 currency: "USD",
-//                 quantity: 1,
-//               },
-//             ],
-//           },
-//           amount: {
-//             currency: "USD",
-//             total: formattedPrice,
-//           },
-//           description: `Enrollment for course ${course.name}, Duration: ${duration}.`,
-//         },
-//       ],
-//     };
-
-//     console.log("Payment JSON:", paymentJson);
-
-//     // Create PayPal payment
-//     paypal.payment.create(paymentJson, (error, payment) => {
-//       if (error) {
-//         console.error("Error creating payment:", error);
-//         return res.status(500).json({ error: "Payment creation failed" });
-//       } else {
-//         const approvalUrl = payment.links.find(
-//           (link) => link.rel === "approval_url"
-//         );
-//         if (approvalUrl) {
-//           return res.json({ approval_url: approvalUrl.href });
-//         } else {
-//           return res.status(500).json({ error: "No approval URL found" });
-//         }
-//       }
-//     });
-//   } catch (err) {
-//     console.error("Error processing enrollment:", err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
-
-
-
 
 
 
@@ -386,7 +259,6 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    // 🔥 Get Global Session Pricing
     const globalPricing = await GlobalSessionPricing.findOne();
     if (!globalPricing) {
       return res.status(404).json({ message: "Session pricing not found" });
@@ -397,27 +269,28 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Invalid session duration" });
     }
 
-    // ✅ Fix: Format price correctly
+
     let amount = selectedSession.price;
     const formattedPrice = parseFloat(amount.replace(/,/g, '')).toFixed(2);
+    console.log(formattedPrice);
 
-    // 🔥 If "No Preference" is selected, auto-assign a tutor and date
+
     if (!tutorId) {
-      // 1️⃣ Find tutors for this course
+
       const tutors = await Tutor.find({ subjects: course.courseType });
 
       if (tutors.length === 0) {
         return res.status(400).json({ error: "No tutors available for this course" });
       }
 
-      // 2️⃣ Get dates from today up to 1 month ahead
+ 
       const today = new Date();
       const nextMonth = new Date();
       nextMonth.setMonth(today.getMonth() + 1);
 
       let availableTutorsWithDates = [];
 
-      // 3️⃣ Check tutor availability within the date range
+
       tutors.forEach((tutor) => {
         tutor.availability.forEach((entry) => {
           const entryDate = new Date(entry.date);
@@ -442,7 +315,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
     }
 
-    // 🔥 Save transaction
+
     const transaction = new Transaction({
       courseId: course._id,
       user: req.user.id,
@@ -455,7 +328,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     });
     await transaction.save();
 
-    // 🔥 PayPal Payment JSON
+ 
     const paymentJson = {
       intent: "sale",
       payer: { payment_method: "paypal" },
@@ -487,7 +360,6 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       ],
     };
 
-    // 🔥 Create PayPal payment
     paypal.payment.create(paymentJson, (error, payment) => {
       if (error) {
         console.error("Error creating payment:", error);
