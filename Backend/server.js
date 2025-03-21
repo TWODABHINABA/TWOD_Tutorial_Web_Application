@@ -12,15 +12,34 @@ const path = require("path");
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
 
+
+const allowedOrigins = [
+  "https://twod-tutorial-web-application-phi.vercel.app",
+  "http://localhost:5173",
+];
+
 app.use(
   cors({
-    origin:
-    "https://twod-tutorial-web-application-phi.vercel.app" ||
-    "http://localhost:5173",
-      
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
-); //Local
+);
+
+// app.use(
+//   cors({
+//     origin:
+//     "https://twod-tutorial-web-application-phi.vercel.app" ||
+//     "http://localhost:5173",
+      
+//     credentials: true,
+//   })
+// ); //Local
 // app.use(cors({ origin: "https://twod-tutorial-web-application-phi.vercel.app", credentials: true })); //Abhi
 
 app.use(bodyParser.json());
