@@ -57,12 +57,12 @@ router.get("/auth/callback/success", async (req, res) => {
       //   `https://twod-tutorial-web-application-phi.vercel.app//set-password?token=${token}&email=${encodeURIComponent(
       //     user.email
       //   )}` //Local
-      `https://twod-tutorial-web-application-phi.vercel.app//set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
+      `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
     );
   }
 
   return res.redirect(
-    `https://twod-tutorial-web-application-phi.vercel.app//auth-success?token=${token}&name=${encodeURIComponent(
+    `https://twod-tutorial-web-application-phi.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
       user.name
     )}&email=${encodeURIComponent(user.email)}`
 
