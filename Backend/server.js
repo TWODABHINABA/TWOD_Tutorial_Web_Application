@@ -12,15 +12,15 @@ const path = require("path");
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
 
-app.use(
-  cors({
-    origin:
-      "http://localhost:5173" ||
-      "https://twod-tutorial-web-application-phi.vercel.app/",
-    credentials: true,
-  })
-); //Local
-// app.use(cors({ origin: "https://twod-tutorial-web-application-frontend.vercel.app", credentials: true })); //Abhi
+// app.use(
+//   cors({
+//     origin:
+//       "http://localhost:5173" ||
+//       "https://twod-tutorial-web-application-phi.vercel.app/",
+//     credentials: true,
+//   })
+// ); //Local
+app.use(cors({ origin: "https://twod-tutorial-web-application-frontend.vercel.app", credentials: true })); //Abhi
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
