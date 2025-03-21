@@ -738,10 +738,7 @@ const CourseDetailsPage = () => {
                       >
                         <div className="flex items-start space-x-4">
                           <img
-                            src={
-                              `http://localhost:6001${feedback.profilePicture}` ||
-                              `https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`
-                            } //local
+                            src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}` || `http://localhost:6001${feedback.profilePicture}`} //local
                             // src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
                             alt="Profile"
                             className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"

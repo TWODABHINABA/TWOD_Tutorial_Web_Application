@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:6001" || "https://twod-tutorial-web-application-3brq.onrender.com",   
+        target: "https://twod-tutorial-web-application-3brq.onrender.com" ||"http://localhost:6001" ,   
         // target: "https://twod-tutorial-web-application-3brq.onrender.com",
         changeOrigin: true,
         secure: false,

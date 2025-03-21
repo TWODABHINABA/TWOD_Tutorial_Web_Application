@@ -15,8 +15,9 @@ app.use(express.json());
 app.use(
   cors({
     origin:
-      "http://localhost:5173" ||
-      "https://twod-tutorial-web-application-phi.vercel.app",
+    "https://twod-tutorial-web-application-phi.vercel.app" ||
+    "http://localhost:5173",
+      
     credentials: true,
   })
 ); //Local

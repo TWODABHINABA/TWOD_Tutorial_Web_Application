@@ -225,16 +225,16 @@ router.get("/categories", async (req, res) => {
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
       courseTypeImage: cat.courseTypeImage
-        ? `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Abhi
-        : // `http://localhost:6001${cat.courseTypeImage}` ||
-          //   `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Local
-          null,
+        ? // `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Abhi
+          `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` ||
+          `http://localhost:6001${cat.courseTypeImage}`
+        : null,
       courses: cat.courses.map((course) => ({
         name: course.name,
         courseType: course.courseType,
         nameImage: course.nameImage
-          ? // ? `http://localhost:6001${course.nameImage}` //Local
-            `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}` //Abhi
+          ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}` ||
+            `http://localhost:6001${course.nameImage}`
           : null,
       })),
     }));
@@ -333,11 +333,11 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       payer: { payment_method: "paypal" },
       redirect_urls: {
         return_url:
-          `http://localhost:5173/success?transactionId=${transaction._id}` ||
-          `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
+        `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`||
+          `http://localhost:5173/success?transactionId=${transaction._id}`,
         cancel_url:
-          `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
-          `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+        `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` ||
+          `http://localhost:5173/cancel?transactionId=${transaction._id}`,
         // return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
         // cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
       },
@@ -458,8 +458,8 @@ router.get("/cancel", authMiddleware, async (req, res) => {
     await transaction.save();
 
     return res.redirect(
-      `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
-      `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`
+      `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` ||
+      `http://localhost:5173/cancel?transactionId=${transaction._id}`
       // `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`
     );
   } catch (err) {
