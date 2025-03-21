@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import api from "../../components/User-management/api";
+import Footer from "../../components/footer/Footer";
 // import "./UserInfo.css";
 
 const UserInfo = () => {
@@ -292,6 +293,7 @@ const UserInfo = () => {
           </div>
         )}
       </div>
+      <Footer/>
     </>
   );
 };

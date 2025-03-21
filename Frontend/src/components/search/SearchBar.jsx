@@ -61,17 +61,10 @@ const SearchBar = () => {
     }
   };
 
-
   const handleResultClick = async (item, type) => {
-    if (type === "category") {
-
-      navigate(`/category/${item.name}`);  ///category/${encodeURIComponent(cat.category)
-    } else {
-
-      const id = await fetchCourseId(item.name, item.courseType);
-      if (id) {
-        navigate(`/courses/${id}`);
-      }
+    const id = await fetchCourseId(item.name, item.courseType);
+    if (id) {
+      navigate(`/courses/${id}`);
     }
   };
 

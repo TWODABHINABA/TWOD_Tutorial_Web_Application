@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import api from "../../components/User-management/api";
+import Footer from "../../components/footer/Footer";
 
 const AddTutor = () => {
   const [name, setName] = useState("");
@@ -162,7 +163,7 @@ const AddTutor = () => {
         </form>
       </div> */}
 
-      <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
+      <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg mb-6 mt-6">
         <h2 className="text-2xl font-bold mb-4">Add Tutor</h2>
         {message && (
           <p
@@ -258,6 +259,7 @@ const AddTutor = () => {
           </button>
         </form>
       </div>
+      <Footer/>
     </>
   );
 };
