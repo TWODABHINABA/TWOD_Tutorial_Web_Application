@@ -20,7 +20,7 @@ app.use(express.json());
 //     credentials: true,
 //   })
 // ); //Local
-app.use(cors({ origin: "https://twod-tutorial-web-application-frontend.vercel.app", credentials: true })); //Abhi
+app.use(cors({ origin: "https://twod-tutorial-web-application-phi.vercel.app/", credentials: true })); //Abhi
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

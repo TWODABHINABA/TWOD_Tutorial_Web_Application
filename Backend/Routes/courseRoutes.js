@@ -340,8 +340,8 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
         // cancel_url:
         //   `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
         //   `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
-        return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
-        cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
+        return_url: `https://twod-tutorial-web-application-phi.vercel.app//success?transactionId=${transaction._id}`,
+        cancel_url: `https://twod-tutorial-web-application-phi.vercel.app//cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -462,7 +462,7 @@ router.get("/cancel", authMiddleware, async (req, res) => {
     return res.redirect(
       // `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
       //   `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`
-      `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`
+      `https://twod-tutorial-web-application-phi.vercel.app//cancel?transactionId=${transaction._id}`
     );
   } catch (err) {
     console.error("Error processing PayPal cancel:", err);
