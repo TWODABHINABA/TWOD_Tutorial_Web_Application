@@ -225,14 +225,16 @@ router.get("/categories", async (req, res) => {
     const formattedCategories = categories.map((cat) => ({
       category: cat._id,
       courseTypeImage: cat.courseTypeImage
-        ? `http://localhost:6001${cat.courseTypeImage}` //Local
+        ? `http://localhost:6001${cat.courseTypeImage}` ||
+          `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Local
         : // ? `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Abhi
           null,
       courses: cat.courses.map((course) => ({
         name: course.name,
         courseType: course.courseType,
         nameImage: course.nameImage
-          ? `http://localhost:6001${course.nameImage}` //Local
+          ? `http://localhost:6001${course.nameImage}` ||
+            `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}` //Local
           : // ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`  //Abhi
             null,
       })),
@@ -244,11 +246,6 @@ router.get("/categories", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
-
-
-
-
-
 
 router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
   try {
@@ -263,33 +260,32 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     if (!globalPricing) {
       return res.status(404).json({ message: "Session pricing not found" });
     }
-    
-    const selectedSession = globalPricing.sessions.find(session => session.duration === duration);
+
+    const selectedSession = globalPricing.sessions.find(
+      (session) => session.duration === duration
+    );
     if (!selectedSession) {
       return res.status(400).json({ message: "Invalid session duration" });
     }
 
-
     let amount = selectedSession.price;
-    const formattedPrice = parseFloat(amount.replace(/,/g, '')).toFixed(2);
+    const formattedPrice = parseFloat(amount.replace(/,/g, "")).toFixed(2);
     console.log(formattedPrice);
 
-
     if (!tutorId) {
-
       const tutors = await Tutor.find({ subjects: course.courseType });
 
       if (tutors.length === 0) {
-        return res.status(400).json({ error: "No tutors available for this course" });
+        return res
+          .status(400)
+          .json({ error: "No tutors available for this course" });
       }
 
- 
       const today = new Date();
       const nextMonth = new Date();
       nextMonth.setMonth(today.getMonth() + 1);
 
       let availableTutorsWithDates = [];
-
 
       tutors.forEach((tutor) => {
         tutor.availability.forEach((entry) => {
@@ -298,23 +294,28 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
             availableTutorsWithDates.push({
               tutorId: tutor._id,
               date: entry.date,
-              timeSlots: entry.timeSlots, 
+              timeSlots: entry.timeSlots,
             });
           }
         });
       });
 
       if (availableTutorsWithDates.length === 0) {
-        return res.status(400).json({ error: "No available tutors in the next month" });
+        return res
+          .status(400)
+          .json({ error: "No available tutors in the next month" });
       }
 
-      const selectedTutorData = availableTutorsWithDates[Math.floor(Math.random() * availableTutorsWithDates.length)];
+      const selectedTutorData =
+        availableTutorsWithDates[
+          Math.floor(Math.random() * availableTutorsWithDates.length)
+        ];
       tutorId = selectedTutorData.tutorId;
 
-
-      console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
+      console.log(
+        `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
+      );
     }
-
 
     const transaction = new Transaction({
       courseId: course._id,
@@ -328,13 +329,16 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     });
     await transaction.save();
 
- 
     const paymentJson = {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
-        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+        return_url:
+          `http://localhost:5173/success?transactionId=${transaction._id}` ||
+          `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
+        cancel_url:
+          `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
+          `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
         // return_url: `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
         // cancel_url: `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
       },
@@ -365,7 +369,9 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
         console.error("Error creating payment:", error);
         return res.status(500).json({ error: "Payment creation failed" });
       } else {
-        const approvalUrl = payment.links.find((link) => link.rel === "approval_url");
+        const approvalUrl = payment.links.find(
+          (link) => link.rel === "approval_url"
+        );
         if (approvalUrl) {
           return res.json({ approval_url: approvalUrl.href });
         } else {
@@ -373,15 +379,11 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
         }
       }
     });
-
   } catch (err) {
     console.error("Error processing enrollment:", err);
     res.status(500).json({ error: err.message });
   }
 });
-
-
-
 
 router.get("/success", authMiddleware, async (req, res) => {
   try {
@@ -457,7 +459,8 @@ router.get("/cancel", authMiddleware, async (req, res) => {
     await transaction.save();
 
     return res.redirect(
-      `http://localhost:5173/cancel?transactionId=${transaction._id}`
+      `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
+        `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`
       // `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`
     );
   } catch (err) {

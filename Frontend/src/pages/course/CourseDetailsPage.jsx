@@ -503,7 +503,10 @@ const CourseDetailsPage = () => {
               <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md">
                 <img
                   // src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
-                  src={`http://localhost:6001${course.nameImage}`}
+                  src={
+                    `http://localhost:6001${course.nameImage}` ||
+                    `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`
+                  }
                   alt={course.nameImage}
                   className="w-full h-full object-cover"
                 />
@@ -735,7 +738,10 @@ const CourseDetailsPage = () => {
                       >
                         <div className="flex items-start space-x-4">
                           <img
-                            src={`http://localhost:6001${feedback.profilePicture}`} //local
+                            src={
+                              `http://localhost:6001${feedback.profilePicture}` ||
+                              `https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`
+                            } //local
                             // src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
                             alt="Profile"
                             className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
