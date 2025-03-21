@@ -504,8 +504,8 @@ const CourseDetailsPage = () => {
                 <img
                   // src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
                   src={
-                    `http://localhost:6001${course.nameImage}` ||
-                    `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`
+                    `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`||
+                    `http://localhost:6001${course.nameImage}` 
                   }
                   alt={course.nameImage}
                   className="w-full h-full object-cover"
