@@ -32,7 +32,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     //   return alert("Password is required!");
 
     // localStorage.setItem("googlePassword", password); 
-    // window.open("http://localhost:6001/auth", "_self"); // local
+    window.open("http://localhost:6001/auth", "_self"); // local
     window.open("https://twod-tutorial-web-application-3brq.onrender.com/auth", "_self");
   };
 

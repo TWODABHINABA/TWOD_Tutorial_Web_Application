@@ -332,14 +332,14 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        // return_url:
-        //   `http://localhost:5173/success?transactionId=${transaction._id}` ||
-        //   `https://twod-tutorial-web-application-frontend.vercel.app/success?transactionId=${transaction._id}`,
-        // cancel_url:
-        //   `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
-        //   `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`,
-        return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
-        cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+        return_url:
+          `http://localhost:5173/success?transactionId=${transaction._id}` ||
+          `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
+        cancel_url:
+          `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
+          `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+        // return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
+        // cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -458,9 +458,9 @@ router.get("/cancel", authMiddleware, async (req, res) => {
     await transaction.save();
 
     return res.redirect(
-      // `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
-      //   `https://twod-tutorial-web-application-frontend.vercel.app/cancel?transactionId=${transaction._id}`
+      `http://localhost:5173/cancel?transactionId=${transaction._id}` ||
       `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`
+      // `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`
     );
   } catch (err) {
     console.error("Error processing PayPal cancel:", err);

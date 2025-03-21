@@ -1,6 +1,6 @@
 import axios from "axios";
-const API_URL = "https://twod-tutorial-web-application-3brq.onrender.com"; 
-// const API_URL = "http://localhost:6001" || "https://twod-tutorial-web-application-3brq.onrender.com"; 
+// const API_URL = "https://twod-tutorial-web-application-3brq.onrender.com"; 
+const API_URL = "http://localhost:6001" || "https://twod-tutorial-web-application-3brq.onrender.com"; 
 
 const api = axios.create({
   baseURL: API_URL,

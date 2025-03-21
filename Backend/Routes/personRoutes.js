@@ -51,24 +51,24 @@ router.get("/auth/callback/success", async (req, res) => {
 
   if (!user.password) {
     return res.redirect(
-      // `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(
-      //   user.email
-      // )}` ||
-      //   `https://twod-tutorial-web-application-phi.vercel.app//set-password?token=${token}&email=${encodeURIComponent(
-      //     user.email
-      //   )}` //Local
-      `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
+      `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(
+        user.email
+      )}` ||
+        `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(
+          user.email
+        )}` //Local
+      // `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
     );
   }
 
   return res.redirect(
     `https://twod-tutorial-web-application-phi.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
       user.name
-    )}&email=${encodeURIComponent(user.email)}`
+    )}&email=${encodeURIComponent(user.email)}` ||
 
-    // `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
-    //   user.name
-    // )}&email=${encodeURIComponent(user.email)}`
+    `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
+      user.name
+    )}&email=${encodeURIComponent(user.email)}`
   );
 });
 
