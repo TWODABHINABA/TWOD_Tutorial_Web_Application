@@ -1,53 +1,129 @@
-import React from 'react';
-import { BsDribbble, BsFacebook, BsGithub, BsInstagram, BsTwitter } from 'react-icons/bs';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from "react";
+import {
+  BsDribbble,
+  BsFacebook,
+  BsGithub,
+  BsInstagram,
+  BsTwitter,
+} from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 
 const CustomFooter = () => {
   const navigate = useNavigate();
+  const isAuthenticated = localStorage.getItem("token");
+  useEffect(() => {
+    // const isAuthenticated = localStorage.getItem("token");
+  }, [isAuthenticated]);
+  const isRoleAdmin = localStorage.getItem("role");
+  console.log(isRoleAdmin);
 
   return (
     <footer className="bg-[#e89a55] py-8">
       <div className="container mx-auto px-4">
         <div className="flex flex-col sm:flex-row justify-between items-center">
           <div className="mb-4 sm:mb-0">
-            <div 
-              onClick={() => navigate("/")} 
+            <div
+              onClick={() => navigate("/")}
               className="text-2xl font-bold cursor-pointer font-serif text-white"
             >
               TUTOR
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-8 sm:mt-4 sm:grid-cols-3 sm:gap-6">
+          <div className="grid grid-cols-2 gap-8 sm:mt-4 sm:grid-cols-4 sm:gap-6">
+            {isRoleAdmin==="admin" && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2 uppercase text-white">
+                  ADMIN CONTROL
+                </h3>
+                <ul>
+                  <li className="mb-1">
+                    <a
+                      href="/add-tutor"
+                      className="hover:text-[#D35400] text-white"
+                    >
+                      {" "}
+                      Add Tutor
+                    </a>
+                  </li>
+                  <li className="mb-1">
+                    <a
+                      href="/add-session-time"
+                      className="hover:text-[#D35400] text-white"
+                    >
+                      {" "}
+                      Add Session Time
+                    </a>
+                  </li>
+
+                  <li className="mb-1">
+                    <a
+                      href="/add-availability"
+                      className="hover:text-[#D35400] text-white"
+                    >
+                      Add Availibility
+                    </a>
+                  </li>
+
+                  <li className="mb-1">
+                    <a
+                      href="/add-course"
+                      className="hover:text-[#D35400] text-white"
+                    >
+                      Add Course
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            )}
+
             <div>
-              <h3 className="text-lg font-semibold mb-2 uppercase text-white">About</h3>
+              <h3 className="text-lg font-semibold mb-2 uppercase text-white">
+                About
+              </h3>
               <ul>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">TUTOR</a>
+                  <a href="#" className="hover:text-[#D35400] text-white">
+                    TUTOR
+                  </a>
                 </li>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">Online Tutorials</a>
+                  <a href="#" className="hover:text-[#D35400] text-white">
+                    Online Tutorials
+                  </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-2 uppercase text-white">Follow us</h3>
+              <h3 className="text-lg font-semibold mb-2 uppercase text-white">
+                Follow us
+              </h3>
               <ul>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">Github</a>
+                  <a href="#" className="hover:text-[#D35400] text-white">
+                    Github
+                  </a>
                 </li>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">Discord</a>
+                  <a href="#" className="hover:text-[#D35400] text-white">
+                    Discord
+                  </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-2 uppercase text-white">Legal</h3>
+              <h3 className="text-lg font-semibold mb-2 uppercase text-white">
+                Legal
+              </h3>
               <ul>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">Privacy Policy</a>
+                  <a href="#" className="hover:text-[#D35400] text-white">
+                    Privacy Policy
+                  </a>
                 </li>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">Terms &amp; Conditions</a>
+                  <a href="#" className="hover:text-[#D35400] text-white">
+                    Terms &amp; Conditions
+                  </a>
                 </li>
               </ul>
             </div>

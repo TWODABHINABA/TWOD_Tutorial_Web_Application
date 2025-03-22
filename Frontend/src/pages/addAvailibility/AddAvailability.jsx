@@ -18,30 +18,6 @@ const AddAvailability = () => {
   const [endTime, setEndTime] = useState("");
 
   const navigate = useNavigate();
-  // useEffect(() => {
-  //   const fetchTutors = async () => {
-  //     try {
-  //       const response = await api.get("/tutors");
-  //       setTutors(response.data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch tutors");
-  //     }
-  //   };
-  //   fetchTutors();
-  // }, []);
-  // useEffect(() => {
-  //   const fetchAvailability = async () => {
-  //     if (!selectedTutor) return;
-  //     try {
-  //       const response = await api.get(`/tutors/${selectedTutor}/availability`
-  //       );
-  //       setAvailability(response.data || []);
-  //     } catch (error) {
-  //       console.error("Failed to fetch availability", error);
-  //     }
-  //   };
-  //   fetchAvailability();
-  // }, [selectedTutor]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,7 +31,7 @@ const AddAvailability = () => {
             `/tutors/${selectedTutor}/availability`
           );
           console.log("📤 Received Availability:", availabilityResponse.data);
-          // Ensure availability with time slots only
+
           const filteredAvailability =
             availabilityResponse.data.availability.filter(
               (entry) => entry.timeSlots.length > 0
@@ -81,32 +57,17 @@ const AddAvailability = () => {
     }
   };
 
-  // const handleAddDate = () => {
-  //   if (
-  //     selectedDate &&
-  //     !newAvailableDates.some((d) => d.date === selectedDate)
-  //   ) {
-  //     setNewAvailableDates([
-  //       ...newAvailableDates,
-  //       { date: selectedDate, timeSlots: [] },
-  //     ]);
-  //     setSelectedDate("");
-  //   }
-  // };
 
-  // const handleRemoveDate = (date) => {
-  //   setNewAvailableDates(newAvailableDates.filter((d) => d.date !== date));
-  // };
 
   const handleAddDate = () => {
-    if (!selectedDate) return; // Ensure a date is selected
+    if (!selectedDate) return; 
 
     setNewAvailableDates((prevDates) => {
-      if (prevDates.some((d) => d.date === selectedDate)) return prevDates; // Prevent duplicates
+      if (prevDates.some((d) => d.date === selectedDate)) return prevDates;
       return [...prevDates, { date: selectedDate, timeSlots: [] }];
     });
 
-    setSelectedDate(""); // Reset input after adding
+    setSelectedDate(""); 
   };
 
   const handleRemoveDate = (date) => {
@@ -115,28 +76,6 @@ const AddAvailability = () => {
     );
   };
 
-  // const handleAddTimeSlotToDate = (date) => {
-  //   if (timeSlot) {
-  //     setNewAvailableDates(
-  //       newAvailableDates.map((d) =>
-  //         d.date === date && !d.timeSlots.includes(timeSlot)
-  //           ? { ...d, timeSlots: [...d.timeSlots, timeSlot] }
-  //           : d
-  //       )
-  //     );
-  //     setTimeSlot("");
-  //   }
-  // };
-
-  // const handleRemoveTimeSlotFromDate = (date, slot) => {
-  //   setNewAvailableDates(
-  //     newAvailableDates.map((d) =>
-  //       d.date === date
-  //         ? { ...d, timeSlots: d.timeSlots.filter((s) => s !== slot) }
-  //         : d
-  //     )
-  //   );
-  // };
 
   const handleAddTimeSlotToDate = (date) => {
     setNewAvailableDates((prevDates) =>
@@ -166,29 +105,6 @@ const AddAvailability = () => {
     );
   };
 
-  // const handleDeleteDate = async (date) => {
-  //   console.log("Deleting date:", date, "for tutor:", selectedTutor);
-
-  //   // Ensure the date format matches the stored format in MongoDB
-  //   const formattedDate = date; // Your database already stores "YYYY-MM-DD"
-
-  //   try {
-  //     const response = await api.delete(`/tutors/${selectedTutor}/availability/date/${formattedDate}`
-  //     );
-
-  //     if (response.status === 200) {
-  //       setAvailability(availability.filter((d) => d.date !== date));
-  //       console.log("Date deleted successfully");
-  //     } else {
-  //       console.error("Unexpected response:", response);
-  //     }
-  //   } catch (error) {
-  //     console.error(
-  //       "Error deleting date:",
-  //       error.response?.data || error.message
-  //     );
-  //   }
-  // };
 
   const handleDeleteDate = async (date) => {
     if (!selectedTutor) {
@@ -225,43 +141,7 @@ const AddAvailability = () => {
     }
   };
 
-  // Delete a specific time slot
-  // const handleDeleteTimeSlot = async (date, time) => {
-  //   console.log(
-  //     "Deleting time slot:",
-  //     time,
-  //     "on date:",
-  //     date,
-  //     "for tutor:",
-  //     selectedTutor
-  //   );
-
-  //   try {
-  //     const formattedTime = encodeURIComponent(time); // Ensure URL encoding for space (%20)
-  //     console.log("Formatted time being sent:", formattedTime);
-
-  //     const response = await api.delete(`/tutors/${selectedTutor}/availability/date/${date}/time/${formattedTime}`
-  //     );
-
-  //     if (response.status === 200) {
-  //       setAvailability((prev) =>
-  //         prev.map((d) =>
-  //           d.date === date
-  //             ? { ...d, timeSlots: d.timeSlots.filter((t) => t !== time) }
-  //             : d
-  //         )
-  //       );
-  //       console.log("Time slot deleted successfully");
-  //     } else {
-  //       console.error("Unexpected response:", response);
-  //     }
-  //   } catch (error) {
-  //     console.error(
-  //       "Error deleting time slot:",
-  //       error.response?.data || error.message
-  //     );
-  //   }
-  // };
+  
 
   const handleDeleteTimeSlot = async (date, time) => {
     if (!selectedTutor) {
@@ -269,14 +149,14 @@ const AddAvailability = () => {
       return;
     }
 
-    // Assuming time is an object, compare using a unique field (e.g., time._id or time.time)
-    const timeSlotIdentifier = time._id || time; // Use the unique identifier for comparison
+ 
+    const timeSlotIdentifier = time._id || time;
     console.log(
       `🕒 Deleting time slot: ${timeSlotIdentifier} on date: ${date} for tutor: ${selectedTutor}`
     );
 
     try {
-      const formattedTime = encodeURIComponent(timeSlotIdentifier); // Ensure URL encoding for special characters
+      const formattedTime = encodeURIComponent(timeSlotIdentifier); 
       console.log(
         `🚀 Sending API request to delete time slot: ${formattedTime}`
       );
@@ -286,14 +166,14 @@ const AddAvailability = () => {
       );
 
       if (response.status === 200) {
-        // Update the availability state by filtering out the deleted time slot
+
         setAvailability((prevAvailability) =>
           prevAvailability.map((d) =>
             d.date === date
               ? {
                   ...d,
                   timeSlots: d.timeSlots.filter(
-                    (t) => t._id !== timeSlotIdentifier // Ensure comparison by _id
+                    (t) => t._id !== timeSlotIdentifier 
                   ),
                 }
               : d
@@ -316,34 +196,6 @@ const AddAvailability = () => {
     }
   };
 
-  // const handleSetAvailability = async () => {
-  //   const requestData = {
-  //     availability: newAvailableDates.map((item) => ({
-  //       date: item.date,
-  //       timeSlots: item.timeSlots,
-  //     })),
-  //   };
-
-  //   console.log(
-  //     "📤 Sending API Request:",
-  //     JSON.stringify(requestData, null, 2)
-  //   );
-
-  //   try {
-  //     const response = await api.post(`/tutors/${selectedTutor}/availability`,
-  //       requestData
-  //     );
-  //     console.log("✅ Response:", response.data);
-  //     setMessage(response.data.message);
-  //     setMessageType("success");
-  //     navigate("/");
-  //   } catch (error) {
-  //     console.error(
-  //       "❌ Error setting availability:",
-  //       error.response?.data || error.message
-  //     );
-  //   }
-  // };
 
   const handleSetAvailability = async () => {
     const requestData = {
@@ -383,7 +235,7 @@ const AddAvailability = () => {
       {!isDelete ? (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 shadow-md rounded-lg w-96 max-h-[80vh] flex flex-col">
-            {/* Header */}
+
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Set Availability</h2>
               <button
@@ -394,7 +246,7 @@ const AddAvailability = () => {
               </button>
             </div>
 
-            {/* Status Message */}
+         
             {message && (
               <p
                 className={`text-${
@@ -406,7 +258,7 @@ const AddAvailability = () => {
             )}
 
             <div className="overflow-y-auto max-h-[60vh] mt-2 px-1">
-              {/* Select Tutor */}
+             
               <div className="mb-4">
                 <label className="block font-semibold">Select Tutor</label>
                 <select
@@ -423,7 +275,7 @@ const AddAvailability = () => {
                 </select>
               </div>
 
-              {/* Select Date */}
+             
               <div className="mb-4">
                 <label className="block font-semibold">Select Date</label>
                 <div className="flex gap-2">
@@ -446,7 +298,7 @@ const AddAvailability = () => {
                 </div>
               </div>
 
-              {/* Display Dates & Time Slots */}
+             
               {newAvailableDates.length > 0 ? (
                 newAvailableDates.map((dateObj, index) => (
                   <div key={index} className="mb-4 border p-2 rounded">
@@ -460,23 +312,6 @@ const AddAvailability = () => {
                       </button>
                     </div>
 
-                    {/* Display Time Slots */}
-                    {/* {dateObj.timeSlots.map((slot, idx) => (
-                      <span
-                        key={idx}
-                        className="bg-gray-200 p-1 m-1 rounded inline-block"
-                      >
-                        {slot.startTime} - {slot.endTime}{" "}
-                        <button
-                          className="text-red-500"
-                          onClick={() =>
-                            handleRemoveTimeSlotFromDate(dateObj.date, slot)
-                          }
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    ))} */}
                     {dateObj.timeSlots.length > 0 ? (
                       dateObj.timeSlots.map((slot, idx) => (
                         <span
@@ -498,7 +333,7 @@ const AddAvailability = () => {
                       <p className="text-gray-500">No time slots added yet.</p>
                     )}
 
-                    {/* Add Time Slot with Start and End Time */}
+                   
                     <div className="flex gap-2 mt-2">
                       <input
                         type="time"
@@ -547,7 +382,7 @@ const AddAvailability = () => {
               )}
             </div>
 
-            {/* Buttons */}
+
             <button
               className="bg-green-500 text-white p-2 rounded w-full mt-4 disabled:opacity-50"
               onClick={handleSetAvailability}
@@ -568,7 +403,7 @@ const AddAvailability = () => {
           <div className="bg-white p-6 shadow-md rounded-lg w-96 max-h-[80vh] flex flex-col overflow-y-auto">
             <h2 className="text-2xl font-bold">Delete Availability</h2>
 
-            {/* Select Tutor */}
+
             <select
               className="w-full p-2 border rounded"
               onChange={(e) => setSelectedTutor(e.target.value)}
@@ -582,7 +417,7 @@ const AddAvailability = () => {
               ))}
             </select>
 
-            {/* Show Availability */}
+
             {availability.length > 0 ? (
               <div className="mt-2 overflow-y-auto max-h-40 border rounded p-2">
                 {availability.map((dateObj) => (

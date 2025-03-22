@@ -15,7 +15,6 @@ require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-
 router.use(passport.initialize());
 
 router.use(
@@ -44,9 +43,6 @@ router.get(
   })
 );
 
-
-
-
 router.get("/auth/callback/success", async (req, res) => {
   if (!req.user) return res.redirect("/auth/callback/failure");
 
@@ -54,15 +50,21 @@ router.get("/auth/callback/success", async (req, res) => {
   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
 
   if (!user.password) {
-
     return res.redirect(
-      `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Local
-      // `https://twod-tutorial-web-application-frontend.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
+      `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(
+        user.email
+      )}` ||
+      `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(
+        user.email
+      )}`
+      // `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
     );
   }
 
   return res.redirect(
-    // `https://twod-tutorial-web-application-frontend.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
+    `https://twod-tutorial-web-application-phi.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
+      user.name
+    )}&email=${encodeURIComponent(user.email)}` ||
     `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
       user.name
     )}&email=${encodeURIComponent(user.email)}`
@@ -80,19 +82,14 @@ router.post("/set-password", async (req, res) => {
 
     await user.save();
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
-    );
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
     res.json({ token, role: user.role });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 router.get("/auth/callback/failure", (req, res) => {
   res.send("Error");
@@ -120,9 +117,6 @@ router.get("/auth/callback/failure", (req, res) => {
 //     )}&email=${encodeURIComponent(user.email)}`
 //   );
 // });
-
-
-
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

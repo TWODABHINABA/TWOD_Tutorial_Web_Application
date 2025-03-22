@@ -1,19 +1,31 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import CustomNavbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
+import api from "../../components/User-management/api";
 
-const pricingData = [
-  { duration: "30 MINS", price: "$35", description: "Quick concept revision & Q/A session", features: ["Personalized attention", "Flexible scheduling"] },
-  { duration: "1 HOUR", price: "$60", description: "Deep-dive into complex topics with problem-solving", features: ["In-depth explanations", "Homework assistance"], popular: true },
-  { duration: "1.5 HOURS", price: "$80", description: "Comprehensive learning session with step-by-step guidance", features: ["Concept mastery", "Exam strategies"] },
-  { duration: "2 HOURS", price: "$100", description: "Intensive study session for thorough understanding & practice", features: ["Extensive practice", "Doubt clearing"] },
-];
 
 const PricingPage = () => {
   const navigate = useNavigate();
+  const [sessions, setSessions] = useState([]);
+
+  const fetchSessions = async () => {
+    try {
+      const response = await api.get("/get-session");
+      if (response.data.success) {
+        setSessions(response.data.data.sessions || []);
+        console.log(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
+  }, []);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
@@ -28,9 +40,9 @@ const PricingPage = () => {
           Pricing Plans
         </h1>
 
-        {/* Pricing Cards */}
+
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {pricingData.map((plan, index) => (
+          {sessions.map((plan, index) => (
             <div
               key={index}
               data-aos="zoom-in"
@@ -38,7 +50,7 @@ const PricingPage = () => {
                 plan.popular ? "border-yellow-500" : "border-gray-300"
               }`}
             >
-              {plan.popular && (
+              {plan.duration==="1 Hour Session" && (
                 <span className="text-sm text-white bg-yellow-500 px-3 py-1 rounded-full mb-2 inline-block" data-aos="fade-down">
                   Most Popular
                 </span>
@@ -47,7 +59,7 @@ const PricingPage = () => {
                 {plan.duration}
               </h3>
               <p className="text-2xl font-bold text-blue-600 mt-2" data-aos="fade-left">
-                {plan.price}
+                ${plan.price}
               </p>
               <p className="text-gray-600 mt-2" data-aos="fade-right">
                 {plan.description}
@@ -60,7 +72,7 @@ const PricingPage = () => {
                 ))}
               </ul>
               
-              {/* Enroll Now Button - Aligned */}
+
               <button
                 onClick={() => navigate("/booking")}
                 className="mt-auto w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"

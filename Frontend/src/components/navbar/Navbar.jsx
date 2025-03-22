@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdLogin, MdLogout } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaUserTie } from "react-icons/fa";
 import { TbSquareRoot } from "react-icons/tb";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
@@ -12,6 +12,7 @@ import {
 import Modal from "../../pages/login_signup/Modal";
 import ExploreDropdown from "../exploredropdown/ExploreDropdown";
 import SearchBar from "../search/SearchBar";
+import { FaUserGraduate } from "react-icons/fa";
 
 // Logout function remains in the code but its UI option has been removed.
 const handleLogout = async (e) => {
@@ -64,153 +65,13 @@ const CustomNavbar = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const isAuthenticated = localStorage.getItem("token");
+  useEffect(() => {
+    // const isAuthenticated = localStorage.getItem("token");
+  }, [isAuthenticated]);
   const isRoleAdmin = localStorage.getItem("role");
   return (
     <>
-      {/* <div className="m-3 mt-4 top-bar">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-left justify-between">
-            <div className="w-full md:w-3/4 flex flex-wrap">
-              <span className="text-sm mr-3 flex items-center cursor-default text-orange-600">
-                <span className="icon-question-circle-o mr-2"></span>
-                <span className="hidden lg:inline-block">Have a question?</span>
-              </span>
-              <span className="text-sm mr-3 flex items-center cursor-default text-orange-600">
-                <span className="icon-phone mr-2"></span>
-                <span className="hidden lg:inline-block">10 20 123 456</span>
-              </span>
-              <span className="text-sm mr-3 flex items-center cursor-default text-orange-600">
-                <span className="icon-envelope mr-2"></span>
-                <span className="hidden lg:inline-block">info@mydomain.com</span>
-              </span>
-            </div> 
-            <div className="w-full md:w-1/4 text-right mt-2 md:mt-0">
-              {!isAuthenticated ? (
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  className="text-sm mr-6 inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
-                  type="button"
-                >
-                  <span className="icon-lock mr-1">
-                    <MdLogin />
-                  </span>
-                  Log In
-                </button>
-              ) : (
-                <button onClick={handleLogout}>
-                  <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex icon-lock gap-2 mr-5 mt-4">
-                    <MdLogout className="mt-1" />
-                    Log Out
-                  </span>
-                </button>
-              )}
-              {isRoleAdmin === "admin" && (
-                <AnimatedNavbarLink to="/add-course">
-                  <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
-                    Add Course
-                  </button>
-                </AnimatedNavbarLink>
-                
-              )}
-              {!isAuthenticated ? (
-                <button
-                  onClick={() => setShowRegisterModal(true)}
-                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 mr-6 text-orange-500 hover:text-orange-600"
-                  type="button"
-                >
-                  <span className="icon-person mr-1">
-                    <FaUser />
-                  </span>
-                  Register
-                </button>
-              ) : (
-                <button></button>
-              )}
-            </div> 
-          </div>
-        </div>
-      </div> */}
-
       <div className="h-[1px] bg-orange-400"></div>
-      {/* <div className="sticky top-0 z-50 bg-orange-100 ">
-        <Navbar fluid rounded>
-          <NavbarBrand as={Link} to="/">
-            <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
-              <TbSquareRoot className="text-4xl text-orange-600" />
-            </h1>
-            <span className="self-center whitespace-nowrap text-xl font-semibold text-orange-500">
-              TUTOR
-            </span>
-          </NavbarBrand>
-          <div className="flex md:order-2 items-center">
-            <button className="mr-3 rounded-lg border-2 border-orange-500 px-4 py-2 font-semibold transition-colors hover:bg-orange-500 hover:text-white hover:border-orange-500"
-            onClick={() => window.location.href = `/category/}`}>
-              Get Started
-            </button>
-            <NavbarToggle />
-          </div>
-          <NavbarCollapse className="transition-all duration-300 ease-in-out text-xl">
-            <AnimatedNavbarLink to="/" ignoreActive>
-              <ExploreDropdown />
-            </AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/resources">Resources &nbsp;&nbsp;</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/pricing">Pricing &nbsp;&nbsp;</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/about">About&nbsp;&nbsp;</AnimatedNavbarLink>
-            <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
-            {!isAuthenticated ? (
-              <></>
-            ) : (
-              <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
-            )}
-           {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-tutor">Add Tutor</AnimatedNavbarLink>):(<></>)}
-
-           {isRoleAdmin==="admin" ?(<AnimatedNavbarLink to="/add-availability">Add Tutor Availability</AnimatedNavbarLink>):(<></>)}
-           
-              {!isAuthenticated ? (
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  className="text-sm mr-6 inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
-                  type="button"
-                >
-                  <span className="icon-lock mr-1">
-                    <MdLogin />
-                  </span>
-                  Log In
-                </button>
-              ) : (
-                <button onClick={handleLogout}>
-                  <span className="border-2 border-orange-500 text-orange-500 px-3 py-2 rounded-md hover:bg-orange-500 hover:text-white transition-all flex icon-lock gap-2 mr-5 mt-4">
-                    <MdLogout className="mt-1" />
-                    Log Out
-                  </span>
-                </button>
-              )}
-              {isRoleAdmin === "admin" && (
-                <AnimatedNavbarLink to="/add-course">
-                  <button className="bg-green-500 text-white px-2 py-2 rounded cursor-pointer">
-                    Add Course
-                  </button>
-                </AnimatedNavbarLink>
-                
-              )}
-              {!isAuthenticated ? (
-                <button
-                  onClick={() => setShowRegisterModal(true)}
-                  className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 mr-6 text-orange-500 hover:text-orange-600"
-                  type="button"
-                >
-                  <span className="icon-person mr-1">
-                    <FaUser />
-                  </span>
-                  Register
-                </button>
-              ) : (
-                <button></button>
-              )}
-            
-          </NavbarCollapse>
-        </Navbar>
-      </div> */}
 
       <div className="sticky top-0 z-50 bg-orange-100">
         <Navbar fluid rounded>
@@ -235,26 +96,6 @@ const CustomNavbar = () => {
               <AnimatedNavbarLink to="/pricing">Pricing</AnimatedNavbarLink>
               <AnimatedNavbarLink to="/about">About</AnimatedNavbarLink>
               <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
-
-              {isAuthenticated && (
-                <AnimatedNavbarLink to="/user">UserInfo</AnimatedNavbarLink>
-              )}
-              {isRoleAdmin === "admin" && (
-                <>
-                  <AnimatedNavbarLink to="/add-tutor">
-                    Add Tutor
-                  </AnimatedNavbarLink>
-                  <AnimatedNavbarLink to="/add-availability">
-                    Add Availability
-                  </AnimatedNavbarLink>
-                  <AnimatedNavbarLink to="/add-course">
-                    Add Course
-                  </AnimatedNavbarLink>
-                  <AnimatedNavbarLink to="/add-session-time">
-                    Add Session Time
-                  </AnimatedNavbarLink>
-                </>
-              )}
             </div>
             <div className=" ">
               <SearchBar />
@@ -263,6 +104,27 @@ const CustomNavbar = () => {
 
           {/* RIGHT Side - Auth Buttons */}
           <div className="flex items-center gap-4 md:order-2">
+            {isAuthenticated && (
+              <AnimatedNavbarLink to="/user">
+                <FaUserTie size={20} color="orange" title="UserInfo" />
+              </AnimatedNavbarLink>
+            )}
+            {/* {isRoleAdmin === "admin" && (
+              <>
+                <AnimatedNavbarLink to="/add-tutor">
+                  Add Tutor
+                </AnimatedNavbarLink>
+                <AnimatedNavbarLink to="/add-availability">
+                  Add Availability
+                </AnimatedNavbarLink>
+                <AnimatedNavbarLink to="/add-course">
+                  Add Course
+                </AnimatedNavbarLink>
+                <AnimatedNavbarLink to="/add-session-time">
+                  Add Session Time
+                </AnimatedNavbarLink>
+              </>
+            )} */}
             {!isAuthenticated ? (
               <>
                 <button
