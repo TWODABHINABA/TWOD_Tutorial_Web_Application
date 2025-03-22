@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import api from "../User-management/api";
 
 const SearchBar = () => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState({ courses: [], categories: [] }); // Updated state
+  const [results, setResults] = useState({
+    courses: [],
+    categories: [],
+    tutors: [],
+    persons: [],
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const containerRef = useRef(null);
 
   // Function to fetch course ID
   const fetchCourseId = async (courseName, courseType) => {
@@ -16,15 +22,12 @@ const SearchBar = () => {
       const response = await api.get(
         `/courses?name=${courseName}&courseType=${courseType}`
       );
-
-      // Ensure response.data is an array and has at least one result
       if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data[0]._id; // Get the first matching course ID
+        return response.data[0]._id;
       }
-
       return null;
-    } catch (error) {
-      console.error("Error fetching course ID:", error);
+    } catch (err) {
+      console.error("Error fetching course ID:", err);
       return null;
     }
   };
@@ -39,10 +42,6 @@ const SearchBar = () => {
 
     try {
       const { data } = await api.get(`/search?query=${query}`);
-
-      console.log("Search API Response:", data);
-
-      // Access the correct property inside the response object
       const filteredCourses = data.courses.filter((course) =>
         course.name.toLowerCase().includes(query.toLowerCase())
       );
@@ -61,13 +60,10 @@ const SearchBar = () => {
     }
   };
 
-
   const handleResultClick = async (item, type) => {
     if (type === "category") {
-
-      navigate(`/category/${item.name}`);  ///category/${encodeURIComponent(cat.category)
+      navigate(`/category/${item.name}`);
     } else {
-
       const id = await fetchCourseId(item.name, item.courseType);
       if (id) {
         navigate(`/courses/${id}`);
@@ -75,85 +71,132 @@ const SearchBar = () => {
     }
   };
 
+  // Hide the results if clicking outside the container
+  const handleClickOutside = (event) => {
+    if (containerRef.current && !containerRef.current.contains(event.target)) {
+      setResults({
+        courses: [],
+        categories: [],
+        tutors: [],
+        persons: [],
+      });
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative w-full max-w-lg mx-auto sm:w-[150%]">
-      <form onSubmit={handleSearch}>
-        <label
-          htmlFor="search-input"
-          className="mb-2 text-sm font-medium text-gray-900 sr-only"
-        >
+    <div ref={containerRef} className="relative w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
+      <form onSubmit={handleSearch} className="flex">
+        <label htmlFor="search-input" className="sr-only">
           Search
         </label>
-        <div className="relative">
-          {/* Search Icon */}
-          <div className="absolute inset-y-0 left-0 flex items-center pl-2 sm:pl-3 pointer-events-none">
-            <FaSearch className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
-          </div>
-
-          {/* Search Input */}
+        <div className="relative flex-grow">
+          <FaSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-orange-500" />
           <input
             type="text"
             id="search-input"
-            className="block w-full p-2 sm:p-3 pl-8 sm:pl-10 text-xs sm:text-sm text-gray-900 border border-orange-500 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500"
+            className="block w-full pl-10 pr-16 py-2 border border-orange-500 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base"
             placeholder="Search anything..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             required
           />
-
-          {/* Search Button */}
-          <button
-            type="submit"
-            className="absolute right-1.5 bottom-1.5 text-xs sm:text-sm px-3 py-1 sm:px-4 sm:py-2 transition-colors text-orange-500 hover:bg-orange-500 hover:text-white focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg"
-          >
-            Search
-          </button>
         </div>
+        <button
+          type="submit"
+          className="ml-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm sm:text-base"
+        >
+          Search
+        </button>
       </form>
 
-      {/* Loading Indicator */}
-      {loading && <p className="text-sm text-gray-500 mt-2">Searching...</p>}
+      {loading && (
+        <p className="mt-2 text-sm text-gray-500">Searching...</p>
+      )}
+      {error && (
+        <p className="mt-2 text-sm text-red-500">{error}</p>
+      )}
 
-      {/* Error Message */}
-      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
-
-      {/* Search Results Dropdown */}
-      {(results.courses.length > 0 || results.categories.length > 0) && (
-        <div className="absolute w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-          {/* Course Results */}
+      {(results.courses.length > 0 ||
+        results.categories.length > 0 ||
+        results.tutors.length > 0 ||
+        results.persons.length > 0) && (
+        <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-2 max-h-80 overflow-y-auto">
           {results.courses.length > 0 && (
             <div className="p-2">
-              <h3 className="text-sm font-semibold text-orange-500">COURSES</h3>
+              <h3 className="text-xs sm:text-sm font-semibold text-orange-500 uppercase">
+                Courses
+              </h3>
               {results.courses.map((course, index) => (
                 <div
-                  key={index}
-                  className="p-2 border-b last:border-none cursor-pointer hover:bg-gray-100"
+                  key={`course-${index}`}
+                  className="p-2 cursor-pointer hover:bg-gray-100 border-b last:border-0 text-sm sm:text-base"
                   onClick={() => handleResultClick(course, "course")}
                 >
-                  {`Course: ${course.name} | Type: ${course.courseType}`}{" "}
-                  {/* Debug display */}
+                  <span className="font-medium">{course.name}</span>{" "}
+                  <span className="text-gray-500">
+                    ({course.courseType})
+                  </span>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Category Results */}
-          {/* {results.categories.length > 0 && (
+          {results.categories.length > 0 && (
             <div className="p-2">
-              <h3 className="text-sm font-semibold text-blue-500">
-                CATEGORIES
+              <h3 className="text-xs sm:text-sm font-semibold text-blue-500 uppercase">
+                Categories
               </h3>
               {results.categories.map((category, index) => (
                 <div
-                  key={index}
-                  className="p-2 border-b last:border-none cursor-pointer hover:bg-gray-100"
+                  key={`category-${index}`}
+                  className="p-2 cursor-pointer hover:bg-gray-100 border-b last:border-0 text-sm sm:text-base"
                   onClick={() => handleResultClick(category, "category")}
                 >
-                  {category.courseType}
+                  {category.name}
                 </div>
               ))}
             </div>
-          )} */}
+          )}
+
+          {results.tutors.length > 0 && (
+            <div className="p-2">
+              <h3 className="text-xs sm:text-sm font-semibold text-green-500 uppercase">
+                Tutors
+              </h3>
+              {results.tutors.map((tutor, index) => (
+                <div
+                  key={`tutor-${index}`}
+                  className="p-2 cursor-pointer hover:bg-gray-100 border-b last:border-0 text-sm sm:text-base"
+                  onClick={() => handleResultClick(tutor, "tutor")}
+                >
+                  {tutor.name}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {results.persons.length > 0 && (
+            <div className="p-2">
+              <h3 className="text-xs sm:text-sm font-semibold text-purple-500 uppercase">
+                Persons
+              </h3>
+              {results.persons.map((person, index) => (
+                <div
+                  key={`person-${index}`}
+                  className="p-2 cursor-pointer hover:bg-gray-100 border-b last:border-0 text-sm sm:text-base"
+                  onClick={() => handleResultClick(person, "person")}
+                >
+                  {person.name}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
