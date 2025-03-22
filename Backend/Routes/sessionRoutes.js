@@ -17,7 +17,7 @@ router.post("/add-session", async (req, res) => {
       });
     }
 
-    // Validate each session
+ 
     for (const session of sessions) {
       if (!session.duration || !session.price) {
         return res.status(400).json({
@@ -27,14 +27,14 @@ router.post("/add-session", async (req, res) => {
       }
     }
 
-    // Find existing pricing
+
     let pricing = await GlobalSessionPricing.findOne();
 
     if (!pricing) {
-      // If not exists, create new
+
       pricing = new GlobalSessionPricing({ sessions });
     } else {
-      // If exists, replace sessions array
+
       pricing.sessions = sessions;
     }
 
@@ -79,7 +79,7 @@ router.put("/update/:index", authMiddleware, async (req, res) => {
     const { index } = req.params;
     const { duration, price } = req.body;
 
-    // Fetch the existing pricing document
+ 
     const pricingDoc = await GlobalSessionPricing.findOne();
     if (!pricingDoc) {
       return res.status(404).json({
@@ -88,7 +88,7 @@ router.put("/update/:index", authMiddleware, async (req, res) => {
       });
     }
 
-    // Check if index is valid
+ 
     if (index < 0 || index >= pricingDoc.sessions.length) {
       return res.status(400).json({
         success: false,
@@ -96,16 +96,16 @@ router.put("/update/:index", authMiddleware, async (req, res) => {
       });
     }
 
-    // Update specific session at the index
+
     pricingDoc.sessions[index] = { duration, price };
 
-    // Save the updated document
+
     await pricingDoc.save();
 
     res.json({
       success: true,
       message: "Session updated successfully",
-      data: pricingDoc.sessions[index], // return updated session only
+      data: pricingDoc.sessions[index], 
     });
   } catch (err) {
     console.error(err);
@@ -116,39 +116,6 @@ router.put("/update/:index", authMiddleware, async (req, res) => {
   }
 });
 
-// router.put("/update",authMiddleware, async (req, res) => {
-//   try {
-//     const { sessions } = req.body;
 
-//     const updatedPricing = await GlobalSessionPricing.findOneAndUpdate(
-//       {}, // No filter needed since only one exists
-//       { sessions },
-//       { new: true }
-//     );
-
-//     if (!updatedPricing) {
-//       return res
-//         .status(404)
-//         .json({
-//           success: false,
-//           message: "Global session pricing not found to update",
-//         });
-//     }
-
-//     res.json({
-//       success: true,
-//       message: "Global session pricing updated successfully",
-//       data: updatedPricing,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res
-//       .status(500)
-//       .json({
-//         success: false,
-//         message: "Failed to update global session pricing",
-//       });
-//   }
-// });
 
 module.exports = router;

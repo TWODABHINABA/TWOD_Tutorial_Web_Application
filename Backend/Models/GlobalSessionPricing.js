@@ -10,11 +10,15 @@ const SessionSchema = new mongoose.Schema({
   price: {
     type: String, 
     required: true
+  },
+  features: {
+    type: [String],
+    default: [],
   }
 });
 
 const GlobalSessionPricingSchema = new mongoose.Schema({
-  sessions: [SessionSchema] // Array of session options and prices
+  sessions: [SessionSchema] 
 }, { timestamps: true });
 
 
