@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import api from "../User-management/api";
@@ -9,8 +9,8 @@ const SearchBar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const containerRef = useRef(null);
 
+  // Function to fetch course ID
   const fetchCourseId = async (courseName, courseType) => {
     try {
       const response = await api.get(
@@ -19,15 +19,17 @@ const SearchBar = () => {
 
       // Ensure response.data is an array and has at least one result
       if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data[0]._id;
+        return response.data[0]._id; // Get the first matching course ID
       }
+
       return null;
-    } catch (err) {
-      console.error("Error fetching course ID:", err);
+    } catch (error) {
+      console.error("Error fetching course ID:", error);
       return null;
     }
   };
 
+  // Function to handle search submission
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -59,6 +61,7 @@ const SearchBar = () => {
     }
   };
 
+
   const handleResultClick = async (item, type) => {
     if (type === "category") {
 
@@ -72,28 +75,13 @@ const SearchBar = () => {
     }
   };
 
-  // Hide the results if clicking outside the container
-  const handleClickOutside = (event) => {
-    if (containerRef.current && !containerRef.current.contains(event.target)) {
-      setResults({
-        courses: [],
-        categories: [],
-        tutors: [],
-        persons: [],
-      });
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
-    <div ref={containerRef} className="relative w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
-      <form onSubmit={handleSearch} className="flex">
-        <label htmlFor="search-input" className="sr-only">
+    <div className="relative w-full max-w-lg mx-auto sm:w-[150%]">
+      <form onSubmit={handleSearch}>
+        <label
+          htmlFor="search-input"
+          className="mb-2 text-sm font-medium text-gray-900 sr-only"
+        >
           Search
         </label>
         <div className="relative">
@@ -106,7 +94,7 @@ const SearchBar = () => {
           <input
             type="text"
             id="search-input"
-            className="block w-full pl-10 pr-16 py-2 border border-orange-500 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base"
+            className="block w-full p-2 sm:p-3 pl-8 sm:pl-10 text-xs sm:text-sm text-gray-900 border border-orange-500 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500"
             placeholder="Search anything..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -135,13 +123,11 @@ const SearchBar = () => {
           {/* Course Results */}
           {results.courses.length > 0 && (
             <div className="p-2">
-              <h3 className="text-xs sm:text-sm font-semibold text-orange-500 uppercase">
-                Courses
-              </h3>
+              <h3 className="text-sm font-semibold text-orange-500">COURSES</h3>
               {results.courses.map((course, index) => (
                 <div
-                  key={`course-${index}`}
-                  className="p-2 cursor-pointer hover:bg-gray-100 border-b last:border-0 text-sm sm:text-base"
+                  key={index}
+                  className="p-2 border-b last:border-none cursor-pointer hover:bg-gray-100"
                   onClick={() => handleResultClick(course, "course")}
                 >
                   {`Course: ${course.name} | Type: ${course.courseType}`}{" "}
