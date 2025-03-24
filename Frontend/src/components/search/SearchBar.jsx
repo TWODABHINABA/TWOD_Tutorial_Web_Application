@@ -5,29 +5,18 @@ import api from "../User-management/api";
 
 const SearchBar = () => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState({ courses: [], categories: [], tutors: [], persons: [] });
+  const [results, setResults] = useState({
+    courses: [],
+    categories: [],
+    tutors: [],
+    persons: [],
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const containerRef = useRef(null);
 
-  // Function to fetch course ID (for redirection when suggestion clicked)
-  const fetchCourseId = async (courseName, courseType) => {
-    try {
-      const response = await api.get(
-        `/courses?name=${courseName}&courseType=${courseType}`
-      );
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        return response.data[0]._id;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error fetching course ID:", error);
-      return null;
-    }
-  };
 
-  // Debounced suggestions as user types
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (query.trim()) {
@@ -36,13 +25,21 @@ const SearchBar = () => {
         try {
           const { data } = await api.get(`/search?query=${query}`);
           console.log("Suggestions API Response:", data);
-          // Optionally filter courses if needed:
           const filteredCourses = data.courses.filter((course) =>
             course.name.toLowerCase().includes(query.toLowerCase())
           );
+
+          const uniqueCategories = [];
+          const categorySet = new Set();
+          data.courses.forEach((course) => {
+            if (!categorySet.has(course.courseType.toLowerCase())) {
+              categorySet.add(course.courseType.toLowerCase());
+              uniqueCategories.push({ courseType: course.courseType });
+            }
+          });
           setResults({
             courses: filteredCourses,
-            categories: data.categories || [],
+            categories: uniqueCategories || [],
             tutors: data.tutors || [],
             persons: data.persons || [],
           });
@@ -60,71 +57,26 @@ const SearchBar = () => {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Function to handle form submission (on Enter)
-  // const handleSearch = (e) => {
-  //   e.preventDefault();
-  //   if (!query.trim()) return;
+  console.log("CATEGORY COURSE TYPEEEEEEEEE", results.categories);
 
-  //   // Check if query includes "grade" followed by a number
-  //   const gradeMatch = query.match(/grade\s*\d+/i);
-  //   if (gradeMatch) {
-  //     // Redirect to category page (using the grade as the category)
-  //     navigate(`/category/:categoryName`);
-  //   } else {
-  //     // Otherwise, redirect to search results page for subjects (e.g., Maths, Chemistry)
-  //     navigate(`/category/:categoryName`);
-  //   }
-  // };
   const handleSearch = (e) => {
     e.preventDefault();
     if (!query.trim()) return;
-  
+
     // If the query contains a grade (e.g., "grade 10"), use that.
     const gradeMatch = query.match(/grade\s*\d+/i);
     if (gradeMatch) {
       // Use the extracted grade (case-insensitive match)
-      navigate(`/category/${encodeURIComponent(gradeMatch[0].trim())}`);
-    } else {
+      navigate(`/courses/${encodeURIComponent(gradeMatch[0].trim())}`);
+    } else if (results.categories.length > 0) {
       // Otherwise, treat the entire query as a subject.
       // Convert the query to lowercase to enforce case-insensitivity.
       const subject = query.trim().toLowerCase();
+      console.log("Subjectsssssssssssss", subject);
       navigate(`/category/${encodeURIComponent(subject)}`);
     }
   };
 
-  // const handleSearch = (e) => {
-  //   e.preventDefault();
-  //   if (!query.trim()) return;
-  
-  //   // Check if query includes common subject keywords
-  //   const subjectMatch = query.match(/(maths|physics|chemistry)/i);
-  //   if (subjectMatch) {
-  //     // Redirect to a category page for the matched subject
-  //     // For example, if the query is "maths grade 10", this will extract "maths"
-  //     navigate(`/category/${encodeURIComponent(query.category)}`);
-  //   } else {
-  //     // Fallback: redirect to a generic search results page
-  //     navigate(`/category/${encodeURIComponent(query.category)}`);
-  //   }
-  // };
-  
-
-
-  // Handle click on a suggestion from the dropdown
-  // const handleResultClick = async (item, type) => {
-  //   console.log(`Result clicked: ${type}`, item);
-  //   if (type === "category") {
-  //     navigate(`/courses/${id}`);
-  //   } else if (type === "course") {
-  //     const id = await fetchCourseId(item.name, item.courseType);
-  //     if (id) {
-  //       navigate(`/courses/${id}`);
-  //     }
-  //   } else if (type === "tutor") {
-  //     // Assuming tutor items have an _id field for navigation
-  //     navigate(`/courses/${id}`);
-  //   }
-  // };
   const handleResultClick = async (item, type) => {
     setQuery(""); // Clear search query
     setResults({ courses: [], categories: [], tutors: [], persons: [] }); // Clear results
@@ -142,17 +94,17 @@ const SearchBar = () => {
 
         case "category":
           // Navigate to category page using encoded category name
-          navigate(`/category/${encodeURIComponent(item.name)}`);
+          navigate(`/category/${encodeURIComponent(item.courseType)}`);
           break;
 
-        // case "tutor":
-        //   // Navigate to tutor profile page
-        //   if (item._id) {
-        //     navigate(`/courses/${item._id}`);
-        //   } else {
-        //     console.error("Tutor ID not found in search result:", item);
-        //   }
-        //   break;
+        case "tutor":
+          // Navigate to tutor profile page
+          if (item._id) {
+            navigate(`/tutors/${item._id}`);
+          } else {
+            console.error("Tutor ID not found in search result:", item);
+          }
+          break;
 
         default:
           console.warn("Unknown result type:", type);
@@ -163,11 +115,13 @@ const SearchBar = () => {
     }
   };
 
-
   // Hide suggestions when clicking outside the container
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
         setResults({ courses: [], categories: [], tutors: [], persons: [] });
       }
     };
@@ -209,7 +163,9 @@ const SearchBar = () => {
       </form>
 
       {/* Suggestions Dropdown */}
-      {(results.courses.length > 0 || results.tutors.length > 0 || results.categories.length > 0) && (
+      {(results.courses.length > 0 ||
+        results.tutors.length > 0 ||
+        results.courses.length > 0) && (
         <div className="absolute w-full mt-2 bg-white border-2 border-orange-100 rounded-xl shadow-lg max-h-80 overflow-y-auto z-50">
           {/* Course Suggestions */}
           {results.courses.length > 0 && (
@@ -232,7 +188,23 @@ const SearchBar = () => {
             </div>
           )}
 
-          {/* Tutor Suggestions */}
+          {results.categories.length > 0 && (
+            <div className="py-2">
+              <h3 className="px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50">
+                CATEGORIES
+              </h3>
+              {results.categories.map((category, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-3 text-sm sm:text-base text-gray-700 hover:bg-blue-50 cursor-pointer transition-colors border-b border-blue-100 last:border-0"
+                  onClick={() => handleResultClick(category, "category")}
+                >
+                  {category.courseType}
+                </div>
+              ))}
+            </div>
+          )}
+
           {results.tutors.length > 0 && (
             <div className="py-2">
               <h3 className="px-4 py-2 text-sm font-bold text-green-600 bg-green-50">
@@ -254,26 +226,6 @@ const SearchBar = () => {
               ))}
             </div>
           )}
-
-          {/* Uncomment below to display category suggestions if needed */}
-          {/*
-          {results.categories.length > 0 && (
-            <div className="py-2">
-              <h3 className="px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50">
-                CATEGORIES
-              </h3>
-              {results.categories.map((category, index) => (
-                <div
-                  key={index}
-                  className="px-4 py-3 text-sm sm:text-base text-gray-700 hover:bg-blue-50 cursor-pointer transition-colors border-b border-blue-100 last:border-0"
-                  onClick={() => handleResultClick(category, "category")}
-                >
-                  {category.name}
-                </div>
-              ))}
-            </div>
-          )}
-          */}
         </div>
       )}
 

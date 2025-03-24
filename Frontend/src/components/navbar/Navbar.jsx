@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { MdLogin, MdLogout } from "react-icons/md";
-import { FaUser, FaUserTie } from "react-icons/fa";
+import { FaGraduationCap, FaUser, FaUserTie } from "react-icons/fa";
 import { TbSquareRoot } from "react-icons/tb";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
@@ -12,14 +12,9 @@ import {
 import Modal from "../../pages/login_signup/Modal";
 import ExploreDropdown from "../exploredropdown/ExploreDropdown";
 import SearchBar from "../search/SearchBar";
-import { FaUserGraduate } from "react-icons/fa";
+import authLogout from "../useLogout/UseLogout";
 
-// Logout function remains in the code but its UI option has been removed.
-const handleLogout = async (e) => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
-  window.location.href = "/";
-};
+
 
 const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
   const location = useLocation();
@@ -27,20 +22,6 @@ const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
   const [hovered, setHovered] = useState(false);
 
   return (
-    // <Link
-    //   to={to}
-    //   onMouseEnter={() => setHovered(true)}
-    //   onMouseLeave={() => setHovered(false)}
-    //   className={`relative block md:inline-block text-black text-base ${
-    //     isActive ? "font-bold" : ""
-    //   } transition-colors duration-300`}
-    // >
-    //   {children}
-    //   <span
-    //     style={{ transform: hovered ? "scaleX(1)" : "scaleX(0)" }}
-    //     className="absolute left-0 right-0 -bottom-1 h-0.5 bg-orange-400 transition-transform duration-300 ease-out origin-left"
-    //   />
-    // </Link>
 
     <Link
       to={to}
@@ -63,12 +44,9 @@ const CustomNavbar = () => {
   const navigate = useNavigate();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const {handleLogout}=authLogout();
 
   const isAuthenticated = localStorage.getItem("token");
-  useEffect(() => {
-    // const isAuthenticated = localStorage.getItem("token");
-  }, [isAuthenticated]);
-  const isRoleAdmin = localStorage.getItem("role");
   return (
     <>
       <div className="h-[1px] bg-orange-400"></div>
@@ -109,22 +87,12 @@ const CustomNavbar = () => {
                 <FaUserTie size={20} color="orange" title="UserInfo" />
               </AnimatedNavbarLink>
             )}
-            {/* {isRoleAdmin === "admin" && (
-              <>
-                <AnimatedNavbarLink to="/add-tutor">
-                  Add Tutor
-                </AnimatedNavbarLink>
-                <AnimatedNavbarLink to="/add-availability">
-                  Add Availability
-                </AnimatedNavbarLink>
-                <AnimatedNavbarLink to="/add-course">
-                  Add Course
-                </AnimatedNavbarLink>
-                <AnimatedNavbarLink to="/add-session-time">
-                  Add Session Time
-                </AnimatedNavbarLink>
-              </>
-            )} */}
+            {isAuthenticated && (
+              <AnimatedNavbarLink to="/purchased-course">
+                <FaGraduationCap size={20} color="orange" title="Purchased Course" />
+                
+              </AnimatedNavbarLink>
+            )}
             {!isAuthenticated ? (
               <>
                 <button
