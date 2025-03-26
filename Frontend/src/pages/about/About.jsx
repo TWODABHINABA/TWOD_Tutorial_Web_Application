@@ -1,65 +1,105 @@
-import React, { useEffect } from 'react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import './about.css';
-import CustomNavbar from '../../components/navbar/Navbar';
-import Footer from '../../components/footer/Footer';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import Navbar from "../../components/navbar/Navbar";
+import Footer from "../../components/footer/Footer";
+
+// Demo tutors data
+const demoTutors = [
+  {
+    _id: "1",
+    name: "John Doe",
+    role: "Mathematics Tutor",
+    about:
+      "John has been teaching mathematics for over 10 years, specializing in algebra and calculus.",
+    areasOfExpertise: ["Algebra", "Calculus", "Geometry"],
+    profilePicture: "https://via.placeholder.com/150",
+  },
+  {
+    _id: "2",
+    name: "Jane Smith",
+    role: "Literature Tutor",
+    about:
+      "Jane is passionate about literature and creative writing, helping students discover the beauty of language.",
+    areasOfExpertise: ["Creative Writing", "Poetry", "Literary Analysis"],
+    profilePicture: "https://via.placeholder.com/150",
+  },
+  {
+    _id: "3",
+    name: "Robert Brown",
+    role: "Computer Science Tutor",
+    about:
+      "Robert specializes in programming and computer science, making complex topics accessible to beginners.",
+    areasOfExpertise: ["Programming", "Data Structures", "Algorithms"],
+    profilePicture: "https://via.placeholder.com/150",
+  },
+];
 
 const About = () => {
+  const [tutors, setTutors] = useState([]);
+  const [error, setError] = useState(null);
+
+  // Simulate an API call with demo data
   useEffect(() => {
-    AOS.init({
-      duration: 800, 
-      once: true,    
-    });
+    setTutors(demoTutors);
   }, []);
+
+  if (error)
+    return <p className="text-center text-red-500 mt-10">{error}</p>;
 
   return (
     <>
-      <CustomNavbar />
-
-      <section className="about-section">
-        <div className="container">
-          <header className="about-header" data-aos="fade-down">
-            <h1>About TUTOR</h1>
-            <p>
-              TUTOR is an innovative online learning platform dedicated to empowering learners worldwide through high-quality, accessible courses.
+      <Navbar />
+      <div className="min-h-screen bg-[#FAF3E0] animate-fade-in py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <header className="mb-12 text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r text-orange-400 bg-clip-text ">
+              Our Tutors
+            </h1>
+            <p className="text-gray-600 mt-3">
+              Meet our experienced and passionate tutors.
             </p>
           </header>
 
-          <div className="about-content">
-            <div className="about-text" data-aos="fade-right">
-              <h2>Our Story</h2>
-              <p>
-                At TUTOR, our journey began with a simple vision: to make education accessible and engaging for everyone, everywhere. We carefully curate courses from industry experts so that every lesson inspires and empowers you.
-              </p>
-              <p>
-                We believe that learning is a lifelong pursuit, and our platform is here to help you unlock your full potential—one course at a time.
-              </p>
-            </div>
-            <div className="about-image" data-aos="fade-left">
-              <img src="https://via.placeholder.com/500" alt="About TUTOR" />
-            </div>
-          </div>
-
-          <div className="about-values" data-aos="zoom-in">
-            <h2>Our Core Values</h2>
-            <div className="values-grid">
-              <div className="value-card" data-aos="flip-left">
-                <h3>Empowerment</h3>
-                <p>We empower every learner to achieve greatness.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {tutors.map((tutor) => (
+              <div
+                key={tutor._id}
+                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 duration-300 p-6 flex flex-col justify-between"
+              >
+                <div className="flex flex-col items-center">
+                  <img
+                    src={tutor.profilePicture}
+                    alt={tutor.name}
+                    className="w-28 h-28 rounded-full object-cover mb-4 border-4 border-orange-500"
+                  />
+                  <h2 className="text-2xl font-semibold text-orange-500">
+                    {tutor.name}
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">{tutor.role}</p>
+                  <p className="text-gray-600 text-center mt-4 px-2">
+                    {tutor.about}
+                  </p>
+                  <div className="mt-4 w-full">
+                    <h3 className="text-sm font-bold text-orange-500 text-center">
+                      Areas of Expertise:
+                    </h3>
+                    <ul className="mt-2 space-y-1">
+                      {tutor.areasOfExpertise.map((area, index) => (
+                        <li
+                          key={index}
+                          className="text-xs text-gray-600 text-center"
+                        >
+                          • {area}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
-              <div className="value-card" data-aos="flip-up">
-                <h3>Excellence</h3>
-                <p>We deliver outstanding educational experiences that pave the way for success.</p>
-              </div>
-              <div className="value-card" data-aos="flip-right">
-                <h3>Community</h3>
-                <p>We cultivate a vibrant community where ideas and knowledge thrive.</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
       <Footer />
     </>
   );

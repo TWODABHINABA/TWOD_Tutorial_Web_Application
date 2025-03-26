@@ -28,8 +28,14 @@ const cardVariants = {
 
 const CategorySection = () => {
   const [categories, setCategories] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Check window width to determine if it is mobile
+    if (window.innerWidth <= 2000 ) {
+      setIsMobile(true);
+    }
+    
     const fetchCategories = async () => {
       try {
         const response = await api.get("/categories"); 
@@ -63,8 +69,10 @@ const CategorySection = () => {
           className="grid-container"
           variants={containerVariants}
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          // Use animate on mobile; whileInView for larger screens
+          {...(isMobile 
+            ? { animate: "visible" } 
+            : { whileInView: "visible", viewport: { once: true, amount: 0.2 } })}
         >
           {categories.map((cat, index) => (
             <motion.div
