@@ -1,51 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
-
-// Demo tutors data
-const demoTutors = [
-  {
-    _id: "1",
-    name: "John Doe",
-    role: "Mathematics Tutor",
-    about:
-      "John has been teaching mathematics for over 10 years, specializing in algebra and calculus.",
-    areasOfExpertise: ["Algebra", "Calculus", "Geometry"],
-    profilePicture: "https://via.placeholder.com/150",
-  },
-  {
-    _id: "2",
-    name: "Jane Smith",
-    role: "Literature Tutor",
-    about:
-      "Jane is passionate about literature and creative writing, helping students discover the beauty of language.",
-    areasOfExpertise: ["Creative Writing", "Poetry", "Literary Analysis"],
-    profilePicture: "https://via.placeholder.com/150",
-  },
-  {
-    _id: "3",
-    name: "Robert Brown",
-    role: "Computer Science Tutor",
-    about:
-      "Robert specializes in programming and computer science, making complex topics accessible to beginners.",
-    areasOfExpertise: ["Programming", "Data Structures", "Algorithms"],
-    profilePicture: "https://via.placeholder.com/150",
-  },
-];
+import api from "../../components/User-management/api";
 
 const About = () => {
   const [tutors, setTutors] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
-  // Simulate an API call with demo data
   useEffect(() => {
-    setTutors(demoTutors);
+    const fetchTutors = async () => {
+      try {
+        const response = await api.get("/tutors"); // Axios handles JSON parsing
+        setTutors(response.data); // Use response.data directly
+      } catch (err) {
+        setError(err.response?.data?.error || "Failed to fetch tutors");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTutors();
   }, []);
 
-  if (error)
-    return <p className="text-center text-red-500 mt-10">{error}</p>;
+  if (loading)
+    return <p className="text-center text-gray-500 mt-10">Loading...</p>;
+  if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
 
+  console.log(tutors);
   return (
     <>
       <Navbar />
@@ -61,6 +44,7 @@ const About = () => {
           </header>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
             {tutors.map((tutor) => (
               <div
                 key={tutor._id}
@@ -68,23 +52,35 @@ const About = () => {
               >
                 <div className="flex flex-col items-center">
                   <img
-                    src={tutor.profilePicture}
+                    // src={tutor.profilePicture}
+                    src={
+                      `https://twod-tutorial-web-application-3brq.onrender.com${tutor.profilePicture}` ||
+                      `http://localhost:6001${tutor.profilePicture}`
+                    }
                     alt={tutor.name}
                     className="w-28 h-28 rounded-full object-cover mb-4 border-4 border-orange-500"
                   />
                   <h2 className="text-2xl font-semibold text-orange-500">
                     {tutor.name}
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">{tutor.role}</p>
+
                   <p className="text-gray-600 text-center mt-4 px-2">
-                    {tutor.about}
+                    {expanded
+                      ? tutor.description
+                      : tutor.description.substring(0, 100) + "..."}
+                    <button
+                      onClick={() => setExpanded(!expanded)}
+                      className="text-blue-500 ml-2"
+                    >
+                      {expanded ? "Read Less" : "Read More"}
+                    </button>
                   </p>
                   <div className="mt-4 w-full">
                     <h3 className="text-sm font-bold text-orange-500 text-center">
                       Areas of Expertise:
                     </h3>
                     <ul className="mt-2 space-y-1">
-                      {tutor.areasOfExpertise.map((area, index) => (
+                      {tutor.subjects.map((area, index) => (
                         <li
                           key={index}
                           className="text-xs text-gray-600 text-center"

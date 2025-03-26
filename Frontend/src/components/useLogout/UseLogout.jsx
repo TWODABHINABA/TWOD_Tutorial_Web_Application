@@ -8,27 +8,33 @@ const UseLogout = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("role");
     setIsAuthenticated(false);
-    // window.location.reload();
+    window.location.reload();
     navigate("/");
   };
+  const handleLogoutRemoveAuthentication=()=>{
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    setIsAuthenticated(false);
+  }
 
   useEffect(() => {
     const checkTokenExpiry = () => {
       const token = localStorage.getItem("token");
-      if (!token) return handleLogout();
+      if (!token) 
+        return handleLogoutRemoveAuthentication();
 
       try {
         const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000; // Convert to seconds
+        const currentTime = Date.now() / 1000; 
 
         if (decoded.exp < currentTime) {
           handleLogout();
         }
       } catch (error) {
         console.error("Invalid token:", error);
-        handleLogout();
+        handleLogoutRemoveAuthentication();
       }
     };
 

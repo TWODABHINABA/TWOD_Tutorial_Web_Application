@@ -8,6 +8,7 @@ const courseRoutes = require("./Routes/courseRoutes");
 const tutorRoutes = require("./Routes/tutorRoutes");
 const sessionRoutes = require("./Routes/sessionRoutes");
 const searchRoutes = require("./Routes/searchRoutes");
+const googleRoutes=require("./Routes/googleRoutes");
 const path = require("path");
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
@@ -56,6 +57,7 @@ app.use("/", personRoutes);
 app.use("/", courseRoutes);
 app.use("/", sessionRoutes);
 app.use("/", searchRoutes);
+app.use("/",googleRoutes);
 app.listen(process.env.PORT, () =>
   console.log("Server is running on port 6001")
 );
