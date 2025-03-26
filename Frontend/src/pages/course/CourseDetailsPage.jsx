@@ -409,99 +409,107 @@ const CourseDetailsPage = () => {
 
 
   if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen max-sm:h-[50vh]">
-        <ClipLoader size={80} color="#3498db" className="max-sm:scale-75" />
-      </div>
-    );
-  
-  if (error) return <p className="text-center p-4 max-sm:text-sm">Error: {error}</p>;
-  
-  if (!course) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
-        <div className="max-w-md text-center space-y-4 max-sm:space-y-3">
-          <div className="text-6xl max-sm:text-4xl">📚</div>
-          <h2 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">Course not found</h2>
-          <p className="text-gray-600 max-sm:text-sm">No details available for course</p>
-          <Link
-            to="/"
-            className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105 max-sm:px-4 max-sm:py-2 max-sm:text-sm"
-          >
-            Back to Categories
-          </Link>
+      return (
+        <div className="flex justify-center items-center h-screen">
+          <ClipLoader size={80} color="#3498db" />
         </div>
-      </div>
-    );
-  }
+      );
+    if (error) return <p>Error: {error}</p>;
+    if (!course) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
+          <div className="max-w-md text-center space-y-4">
+            <div className="text-6xl">📚</div>
+            <h2 className="text-3xl font-bold text-gray-800">Course not found</h2>
+            <p className="text-gray-600">No details available for course</p>
+            <Link
+              to="/"
+              className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105"
+            >
+              Back to Categories
+            </Link>
+          </div>
+        </div>
+      );
+    }
   
-  return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-50 font-sans animate-fade-in">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8 max-sm:px-4">
-          <header className="mb-12 max-sm:mb-8">
-            <div className="space-y-4 max-sm:space-y-3">
-              <Link
-                to={`/category/${encodeURIComponent(course.category)}`}
-                className="inline-flex items-center text-orange-500 hover:text-orange-600 transition-colors duration-200 max-sm:text-sm"
-              >
-                <svg
-                  className="w-4 h-4 mr-1 max-sm:w-3 max-sm:h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gray-50 font-sans animate-fade-in">
+          <div className="max-w-7xl mx-auto p-6 lg:p-8">
+            <header className="mb-12">
+              <div className="space-y-4">
+                <Link
+                  to={`/category/${encodeURIComponent(course.category)}`}
+                  className="inline-flex items-center text-orange-500 hover:text-orange-600 transition-colors duration-200"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                  </svg>
+                  Back to {course.category}
+                </Link>
+  
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="name"
+                    value={updatedCourse.name}
+                    onChange={(e) =>
+                      setUpdatedCourse((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent border border-orange-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
-                </svg>
-                Back to {course.category}
-              </Link>
+                ) : (
+                  <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                    {course.name}
+                  </h1>
+                )}
   
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={updatedCourse.name}
-                  onChange={(e) => setUpdatedCourse(prev => ({ ...prev, name: e.target.value }))}
-                  className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent border border-orange-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 max-sm:text-3xl max-sm:px-3 max-sm:py-1"
-                />
-              ) : (
-                <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent max-sm:text-3xl">
-                  {course.name}
-                </h1>
-              )}
+                {isEditing ? (
+                  <textarea
+                    name="overview"
+                    value={updatedCourse.overview}
+                    onChange={(e) =>
+                      setUpdatedCourse((prev) => ({
+                        ...prev,
+                        overview: e.target.value,
+                      }))
+                    }
+                    className="text-xl text-gray-600 font-medium border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                ) : (
+                  <h2 className="text-xl text-gray-600 font-medium">
+                    {course.overview}
+                  </h2>
+                )}
+              </div>
+            </header>
   
-              {isEditing ? (
-                <textarea
-                  name="overview"
-                  value={updatedCourse.overview}
-                  onChange={(e) => setUpdatedCourse(prev => ({ ...prev, overview: e.target.value }))}
-                  className="text-xl text-gray-600 font-medium border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 max-sm:text-base max-sm:px-3"
-                />
-              ) : (
-                <h2 className="text-xl text-gray-600 font-medium max-sm:text-base">
-                  {course.overview}
-                </h2>
-              )}
-            </div>
-          </header>
-  
-          <div className="grid lg:grid-cols-3 gap-8 max-sm:gap-6">
-          <div className="lg:col-span-2 space-y-12 max-sm:space-y-8">
-            <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md max-sm:h-64 max-sm:max-w-full">
-              <img 
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-12">
+                <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md max-sm:max-w-[450px]">
+                  <img 
                     // src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
                     src={
                       `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`||
                       `http://localhost:6001${course.nameImage}` 
                     }
                     alt={course.nameImage}
-                    className="w-full h-full object-cover max-sm:object-contain"
+                    className="w-full h-full max-sm:w-[70%] max-sm:h-[30%]   object-cover"
                   />
                 </div>
   
@@ -532,39 +540,61 @@ const CourseDetailsPage = () => {
                   </section>
                 )}
   
-  <section className="space-y-6 max-sm:space-y-4">
-              <h3 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">Curriculum</h3>
-              <div className="space-y-4 max-sm:space-y-3">
-                {course?.curriculum?.map((module, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 max-sm:p-4"
-                  >
-                    <div className="flex items-start space-x-4 max-sm:space-x-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center max-sm:w-6 max-sm:h-6">
-                        <span className="text-orange-600 font-bold max-sm:text-sm">
-                          {idx + 1}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            // ... (keep existing editing logic)
-                            className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 transition-all duration-300 max-sm:p-2 max-sm:text-sm"
-                          />
-                        ) : (
-                          <h4 className="text-xl font-semibold text-gray-800 max-sm:text-lg">
-                            {module.sectionTitle}
-                          </h4>
-                        )}
-
-                        <ul className="mt-2 space-y-2 max-sm:space-y-1.5">
-                          {module.lessons?.map((lecture, i) => (
-                            <li
-                              key={i}
-                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition-colors duration-200 max-sm:p-2"
-                            >
+                <section className="space-y-6">
+                  <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
+                  <div className="space-y-4">
+                    {course?.curriculum?.map((module, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+                      >
+                        <div className="flex items-start space-x-4">
+                          <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <span className="text-orange-600 font-bold">
+                              {idx + 1}
+                            </span>
+                          </div>
+                          <div className="flex-1">
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                name="sectionTitle"
+                                value={
+                                  updatedCourse.curriculum?.[idx]?.sectionTitle ||
+                                  ""
+                                }
+                                onChange={(e) => {
+                                  setUpdatedCourse((prev) => {
+                                    const newCurriculum = prev.curriculum
+                                      ? [...prev.curriculum]
+                                      : [];
+  
+                                    if (!newCurriculum[idx]) {
+                                      newCurriculum[idx] = {};
+                                    }
+  
+                                    newCurriculum[idx] = {
+                                      ...newCurriculum[idx],
+                                      sectionTitle: e.target.value,
+                                    };
+  
+                                    return { ...prev, curriculum: newCurriculum };
+                                  });
+                                }}
+                                className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                              />
+                            ) : (
+                              <h4 className="text-xl font-semibold text-gray-800">
+                                {module.sectionTitle}
+                              </h4>
+                            )}
+  
+                            <ul className="mt-2 space-y-2">
+                              {module.lessons?.map((lecture, i) => (
+                                <li
+                                  key={i}
+                                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition-colors duration-200"
+                                >
                                   {isEditing ? (
                                     <>
                                       {/* Lesson Title Input */}
@@ -641,10 +671,12 @@ const CourseDetailsPage = () => {
                                     </>
                                   ) : (
                                     <>
- <span className="text-gray-600 max-sm:text-sm">{lecture.title}</span>
-                              <span className="text-sm text-orange-600 max-sm:text-xs">
-                                {lecture.duration}
-                              </span>
+                                      <span className="text-gray-600">
+                                        {lecture.title}
+                                      </span>
+                                      <span className="text-sm text-orange-600">
+                                        {lecture.duration}
+                                      </span>
                                     </>
                                   )}
                                 </li>
@@ -695,27 +727,30 @@ const CourseDetailsPage = () => {
                 </section>
   
                 {course.feedbacks && (
-              <section className="space-y-6 max-sm:space-y-4">
-                <h3 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">Student Feedback</h3>
-                <div className="grid md:grid-cols-2 gap-6 max-sm:gap-4">
-                  {course.feedbacks.map((feedback, i) => (
-                    <div
-                      key={i}
-                      className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 max-sm:p-4"
-                    >
-                      <div className="flex items-start space-x-4 max-sm:space-x-3">
-                        <img
+                  <section className="space-y-6">
+                    <h3 className="text-3xl font-bold text-gray-800">
+                      Student Feedback
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {course.feedbacks.map((feedback, i) => (
+                        <div
+                          key={i}
+                          className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+                        >
+                          <div className="flex items-start space-x-4">
+                            <img
                               src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}` || `http://localhost:6001${feedback.profilePicture}`} //local
                               // src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
                               alt="Profile"
-                              className="w-12 h-12 rounded-full max-sm:w-10 max-sm:h-10"
-                        />
-                        <div>
-                          <p className="mt-3 font-medium text-gray-800 max-sm:text-sm">
-                            {feedback.name}
-                          </p>
-                          <p className="text-gray-600 italic max-sm:text-sm">
-                            "{feedback.comment}"
+                              className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
+                            />
+  
+                            <div>
+                              <p className="mt-3 font-medium text-gray-800">
+                                {feedback.name}
+                              </p>
+                              <p className="text-gray-600 italic">
+                                "{feedback.comment}"
                               </p>
                             </div>
   
@@ -740,37 +775,66 @@ const CourseDetailsPage = () => {
                 )}
               </div>
   
-              <div className="space-y-8 max-sm:space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-lg lg:sticky lg:top-8 max-sm:static">
-              <div className="space-y-6 max-sm:space-y-4">
-                {/* ... existing sidebar content */}
-                <div className="session-selector-container">
-                  <h2 className="text-2xl font-semibold mb-4 max-sm:text-xl max-sm:mb-3">
-                    Choose a Session Duration
-                  </h2>
-                  <div className="flex gap-4 mb-6 max-sm:gap-2 max-sm:mb-4">
-                    {sessions.map((session, index) => (
-                      <button
-                        key={index}
-                        className={`p-2 border rounded max-sm:text-sm max-sm:px-2 ${
-                          selectedSession?.duration === session.duration
-                            ? "bg-orange-500 text-white"
-                            : "bg-white text-black"
-                        }`}
-                      >
-                        {session.duration}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-4 max-sm:space-y-3">
-                  <button
-                    onClick={handleEnrollClick}
-                    className="w-full py-4 text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 max-sm:py-3 max-sm:text-sm"
-                  >
-                    Enroll Now
-                    </button>
+              <div className="space-y-8 ">
+                <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      {selectedSession && (
+                        <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
+                          <p className="text-lg font-medium">
+                            Selected Session:{" "}
+                            <span className="font-bold">
+                              {selectedSession.duration}
+                            </span>
+                          </p>
+                          <p className="text-gray-1200">
+                            {/* Price: $.{" "}
+                            {formatPrice(selectedSession?.price).toLocaleString(
+                              "en-IN"
+                            )}
+                            .00 */}
+                            Price: ${selectedSession?.price}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+  
+                    <div className="session-selector-container">
+                      <h2 className="text-2xl font-semibold mb-4">
+                        Choose a Session Duration
+                      </h2>
+  
+                      <div className="flex gap-4 mb-6">
+                        {sessions.map((session, index) => (
+                          <button
+                            key={index}
+                            className={`p-2 border rounded ${
+                              selectedSession?.duration === session.duration
+                                ? "bg-orange-500 text-white"
+                                : "bg-white text-black"
+                            }`}
+                            onClick={() => {
+                              setSelectedSession(session);
+                              setSelectedDuration(session.duration);
+                              filterAvailableSlots(session.duration);
+                            }}
+                          >
+                            {session.duration}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+  
+                    {!token ? (
+                      <div></div>
+                    ) : (
+                      <div className="space-y-4">
+                        <button
+                          onClick={handleEnrollClick}
+                          className="w-full py-4  text-orange-500 rounded-xl border-2 hover:text-white border-orange-500 font-semibold hover:bg-orange-500 transition-all duration-300 transform hover:scale-[1.02]"
+                        >
+                          Enroll Now
+                        </button>
   
                         <button
                           onClick={() => alert("Previewing course...")}
@@ -779,7 +843,7 @@ const CourseDetailsPage = () => {
                           Preview Course
                         </button>
                       </div>
-
+                    )}
   
                     <div className="space-y-4">
                       <div className="flex items-center space-x-3">
@@ -963,37 +1027,44 @@ const CourseDetailsPage = () => {
                 </div>
   
                 <form
-              onSubmit={handleFeedbackSubmit}
-              className="space-y-4 bg-white p-6 rounded-xl shadow-sm max-sm:p-4"
-            >
-              <h3 className="text-xl font-bold max-sm:text-lg">Leave Your Feedback</h3>
-              <div className="flex space-x-1 max-sm:space-x-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    type="button"
-                    key={star}
-                    className={`w-8 h-8 max-sm:w-6 max-sm:h-6 ${
-                      feedback.rating >= star ? "text-yellow-400" : "text-gray-300"
-                    }`}
-                  >
-                    ★
-                  </button>
+                  onSubmit={handleFeedbackSubmit}
+                  className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
+                >
+                  <h3 className="text-xl font-bold">Leave Your Feedback</h3>
+  
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setFeedback({ ...feedback, rating: star })}
+                        className={`w-8 h-8 ${
+                          feedback.rating >= star
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      >
+                        ★
+                      </button>
                     ))}
                   </div>
   
                   <textarea
-                value={feedback.comment}
-                onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
-                className="w-full p-2 border rounded-lg max-sm:text-sm max-sm:p-1.5"
-                placeholder="Write your feedback..."
-              ></textarea>
-              <button
-                type="submit"
-                className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500 max-sm:text-sm max-sm:py-1.5 max-sm:px-3"
-              >
-                Submit Feedback
-              </button>
-
+                    value={feedback.comment}
+                    onChange={(e) =>
+                      setFeedback({ ...feedback, comment: e.target.value })
+                    }
+                    placeholder="Write your feedback..."
+                    className="w-full p-2 border rounded-lg"
+                    required
+                  ></textarea>
+  
+                  <button
+                    type="submit"
+                    className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
+                  >
+                    Submit Feedback
+                  </button>
                   {isRoleAdmin === "admin" && (
                     <>
                       {!isEditing ? (
@@ -1027,5 +1098,6 @@ const CourseDetailsPage = () => {
       </>
     );
   };
+  
   export default CourseDetailsPage;
 
