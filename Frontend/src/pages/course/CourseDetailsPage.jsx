@@ -144,8 +144,8 @@ const CourseDetailsPage = () => {
     const durationMap = {
       "30 Minutes Session": 30,
       "1 Hour Session": 60,
-      "1.5 Hour Session": 90,
-      "2 Hour Session": 120,
+      "1.5 Hours Session": 90, 
+      "2 Hours Session": 120,   
     };
     const durationInMinutes = durationMap[duration];
 
@@ -788,11 +788,6 @@ const CourseDetailsPage = () => {
                             </span>
                           </p>
                           <p className="text-gray-1200">
-                            {/* Price: $.{" "}
-                            {formatPrice(selectedSession?.price).toLocaleString(
-                              "en-IN"
-                            )}
-                            .00 */}
                             Price: ${selectedSession?.price}
                           </p>
                         </div>

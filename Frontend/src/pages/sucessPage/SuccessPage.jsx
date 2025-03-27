@@ -57,7 +57,7 @@ const SuccessPage = () => {
           <h2 className="text-2xl font-bold text-green-600">Payment Successful!</h2>
           <p className="text-gray-700">You have been successfully enrolled in the course.</p>
           <button
-            onClick={() => navigate(`/user`)}
+            onClick={() => navigate(`/purchased-course`)}
             className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition"
           >
             Go to Courses
