@@ -8,7 +8,6 @@ import EnrollmentCalendar from "./EnrollmentCalendar";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import { formatDate } from "./EnrollmentCalendar";
-import './courseDetail.css'
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
@@ -51,16 +50,13 @@ const CourseDetailsPage = () => {
         setLoading(false);
       }
     };
-
     if (courseId) {
       fetchCourse();
     }
   }, [courseId]);
-
   useEffect(() => {
     console.log("Available Dates from Backend:", availableDates);
   }, [availableDates]);
-
   const fetchSessions = async () => {
     try {
       const response = await api.get("/get-session");
@@ -71,11 +67,9 @@ const CourseDetailsPage = () => {
       console.error("Error fetching sessions:", error);
     }
   };
-
   useEffect(() => {
     fetchSessions();
   }, []);
-
   const handleSessionSelect = (session) => {
     setSelectedSession(session);
     setSelectedDuration(session.duration);
@@ -87,15 +81,12 @@ const CourseDetailsPage = () => {
     }));
     setIsEditing(true);
   };
-
   const handleUpdate = async (e) => {
     e.preventDefault();
-
     if (Object.keys(updatedCourse).length === 0) {
       alert("No changes made!");
       return;
     }
-
     try {
       const response = await api.put(`/courses/update/${courseId}`, {
         ...updatedCourse,
@@ -107,7 +98,6 @@ const CourseDetailsPage = () => {
       setError(err.message);
     }
   };
-
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!token) {
@@ -124,7 +114,6 @@ const CourseDetailsPage = () => {
       console.error("Error submitting feedback:", err);
     }
   };
-
   const handleEnrollClick = async () => {
     try {
       const response = await api.get(`/courses/${courseId}/tutors`);
@@ -135,12 +124,9 @@ const CourseDetailsPage = () => {
       console.error("❌ Error fetching tutors:", error);
     }
   };
-
   const filterAvailableSlots = (slots, duration) => {
     if (!slots || slots.length === 0 || !duration) return [];
-
     console.log("Filtering slots for duration:", duration);
-
     const durationMap = {
       "30 Minutes Session": 30,
       "1 Hour Session": 60,
@@ -148,29 +134,22 @@ const CourseDetailsPage = () => {
       "2 Hours Session": 120,   
     };
     const durationInMinutes = durationMap[duration];
-
     if (!durationInMinutes) {
       console.error("Invalid duration:", duration);
       return [];
     }
-
     const filteredSlots = [];
-
     slots.forEach((slot) => {
       let currentStartTime = new Date(`1970-01-01T${slot.startTime}:00`);
       const endTime = new Date(`1970-01-01T${slot.endTime}:00`);
-
       console.log(`Processing slot: ${slot.startTime} - ${slot.endTime}`);
-
       while (currentStartTime < endTime) {
         let nextStartTime = new Date(
           currentStartTime.getTime() + durationInMinutes * 60000
         );
-
         console.log(
           `Checking slot: ${currentStartTime.toLocaleTimeString()} - ${nextStartTime.toLocaleTimeString()}`
         );
-
         if (nextStartTime <= endTime) {
           filteredSlots.push({
             startTime: currentStartTime.toLocaleTimeString([], {
@@ -183,15 +162,12 @@ const CourseDetailsPage = () => {
             }),
           });
         }
-
         currentStartTime = nextStartTime;
       }
     });
-
     console.log("Final Filtered Slots:", filteredSlots);
     return filteredSlots;
   };
-
   const handleTutorSelection = async (tutorId) => {
     setSelectedTutor(tutorId);
     setSelectedDate("");
@@ -205,7 +181,6 @@ const CourseDetailsPage = () => {
       console.error("Error fetching available dates:", error);
     }
   };
-
   useEffect(() => {
     const fetchAvailableDates = async () => {
       let endpoint = "/tutors/no-preference/available-dates";
@@ -217,38 +192,29 @@ const CourseDetailsPage = () => {
         console.error("Error fetching available dates:", error);
       }
     };
-
     if (selectedTutor === "") {
       fetchAvailableDates();
     }
   }, [selectedTutor]);
-
   const handleDateSelection = async (date) => {
     setSelectedDate(date);
     setAvailableTimeSlots([]);
     setSelectedTimeSlot("");
-
     const formattedDate = date.toISOString().split("T")[0];
-
     try {
       console.log("Selected Date:", formattedDate);
-
       const response = await api.get(
         `/tutors/${selectedTutor}/available-slots`,
         {
           params: { date: formattedDate },
         }
       );
-
       console.log("Raw Slots from Backend:", response.data);
-
       if (!selectedDuration) {
         console.error("No session duration selected");
         return;
       }
-
       console.log("Selected Duration:", selectedDuration);
-
       const filteredSlots = filterAvailableSlots(
         response.data,
         selectedDuration
@@ -258,29 +224,23 @@ const CourseDetailsPage = () => {
       console.error("Error fetching available time slots:", error);
     }
   };
-
   useEffect(() => {
     const fetchAvailableSlots = async () => {
       if (!selectedDate) return;
-
       const formattedDate = selectedDate.toISOString().split("T")[0];
-
       let endpoint =
         selectedTutor === ""
           ? `/tutors/no-preference/available-slots`
           : `/tutors/${selectedTutor}/available-slots`;
-
       try {
         const response = await api.get(endpoint, {
           params: { date: formattedDate },
         });
         console.log("Available Slots:", response.data);
-
         if (!selectedDuration) {
           console.error("No session duration selected");
           return;
         }
-
         const filteredSlots = filterAvailableSlots(
           response.data,
           selectedDuration
@@ -290,43 +250,35 @@ const CourseDetailsPage = () => {
         console.error("Error fetching time slots:", error);
       }
     };
-
     fetchAvailableSlots();
   }, [selectedDate, selectedTutor]);
-
   const handleSessionDurationChange = (e) => {
     const selectedDuration = e.target.value;
     const session = sessions.find((s) => s.duration === selectedDuration);
     setSelectedSession(session);
     setSelectedDuration(selectedDuration);
   };
-
   useEffect(() => {
     if (selectedDate) {
       handleDateSelection(selectedDate);
     }
   }, [selectedDuration]);
-
   useEffect(() => {
     if (selectedTutor === "" && selectedDate && availableTimeSlots.length > 0) {
       console.log(
         "Re-filtering slots for No Preference due to session duration change..."
       );
-
       // Fetch available slots again and reapply filtering
       const fetchAndFilterSlots = async () => {
         try {
           const formattedDate = selectedDate.toISOString().split("T")[0];
-
           const response = await api.get(
             `/tutors/no-preference/available-slots`,
             {
               params: { date: formattedDate },
             }
           );
-
           console.log("Refetched Slots (No Preference):", response.data);
-
           const updatedSlots = filterAvailableSlots(
             response.data,
             selectedDuration
@@ -336,11 +288,9 @@ const CourseDetailsPage = () => {
           console.error("Error re-fetching available slots:", error);
         }
       };
-
       fetchAndFilterSlots();
     }
   }, [selectedDuration]);
-
   useEffect(() => {
     if (sessions.length > 0) {
       const defaultSession = sessions.find(
@@ -353,7 +303,6 @@ const CourseDetailsPage = () => {
       }
     }
   }, [sessions]);
-
   const handleEnrollNow = async () => {
     if (
       !selectedDate ||
@@ -364,12 +313,10 @@ const CourseDetailsPage = () => {
       alert("Please select all options before enrolling.");
       return;
     }
-
     if (!token) {
       alert("Authentication error: Please log in first.");
       return;
     }
-
     try {
       const response = await api.post(
         `/courses/${course._id}/enroll`,
@@ -385,7 +332,6 @@ const CourseDetailsPage = () => {
           },
         }
       );
-
       const { approval_url } = response.data;
       if (approval_url) {
         window.location.href = approval_url; // ✅ Redirect to PayPal
@@ -407,96 +353,95 @@ const CourseDetailsPage = () => {
   //   return Number(cleaned);
   // };
 
-
+  
   if (loading)
-      return (
-        <div className="flex justify-center items-center h-screen">
-          <ClipLoader size={80} color="#3498db" />
-        </div>
-      );
-    if (error) return <p>Error: {error}</p>;
-    if (!course) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
-          <div className="max-w-md text-center space-y-4">
-            <div className="text-6xl">📚</div>
-            <h2 className="text-3xl font-bold text-gray-800">Course not found</h2>
-            <p className="text-gray-600">No details available for course</p>
-            <Link
-              to="/"
-              className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105"
-            >
-              Back to Categories
-            </Link>
-          </div>
-        </div>
-      );
-    }
-  
     return (
-      <>
-        <Navbar />
-        <div className="min-h-screen bg-gray-50 font-sans animate-fade-in">
-          <div className="max-w-7xl mx-auto p-6 lg:p-8">
-            <header className="mb-12">
-              <div className="space-y-4">
-                <Link
-                  to={`/category/${encodeURIComponent(course.category)}`}
-                  className="inline-flex items-center text-orange-500 hover:text-orange-600 transition-colors duration-200"
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={80} color="#3498db" />
+      </div>
+    );
+  if (error) return <p>Error: {error}</p>;
+  if (!course) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 animate-fade-in">
+        <div className="max-w-md text-center space-y-4">
+          <div className="text-6xl">📚</div>
+          <h2 className="text-3xl font-bold text-gray-800">Course not found</h2>
+          <p className="text-gray-600">No details available for course</p>
+          <Link
+            to="/"
+            className="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105"
+          >
+            Back to Categories
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gray-50 font-sans animate-fade-in">
+        <div className="max-w-7xl mx-auto p-6 lg:p-8">
+          <header className="mb-12">
+            <div className="space-y-4">
+              <Link
+                to={`/category/${encodeURIComponent(course.category)}`}
+                className="inline-flex items-center text-orange-500 hover:text-orange-600 transition-colors duration-200"
                 >
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                  </svg>
-                  Back to {course.category}
-                </Link>
-  
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="name"
-                    value={updatedCourse.name}
-                    onChange={(e) =>
-                      setUpdatedCourse((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent border border-orange-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
                   />
-                ) : (
-                  <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-                    {course.name}
-                  </h1>
-                )}
-  
-                {isEditing ? (
-                  <textarea
-                    name="overview"
-                    value={updatedCourse.overview}
-                    onChange={(e) =>
-                      setUpdatedCourse((prev) => ({
-                        ...prev,
-                        overview: e.target.value,
-                      }))
-                    }
-                    className="text-xl text-gray-600 font-medium border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+                </svg>
+                Back to {course.category}
+              </Link>
+
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="name"
+                  value={updatedCourse.name}
+                  onChange={(e) =>
+                    setUpdatedCourse((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
+                  className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent border border-orange-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
-                ) : (
-                  <h2 className="text-xl text-gray-600 font-medium">
-                    {course.overview}
-                  </h2>
-                )}
-              </div>
+              ) : (
+                <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                  {course.name}
+                </h1>
+              )}
+
+              {isEditing ? (
+                <textarea
+                  name="overview"
+                  value={updatedCourse.overview}
+                  onChange={(e) =>
+                    setUpdatedCourse((prev) => ({
+                      ...prev,
+                      overview: e.target.value,
+                    }))
+                  }
+                  className="text-xl text-gray-600 font-medium border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              ) : (
+                <h2 className="text-xl text-gray-600 font-medium">
+                  {course.overview}
+                </h2>
+              )}
+            </div>
             </header>
   
             <div className="grid lg:grid-cols-3 gap-8">
@@ -788,6 +733,11 @@ const CourseDetailsPage = () => {
                             </span>
                           </p>
                           <p className="text-gray-1200">
+                            {/* Price: $.{" "}
+                            {formatPrice(selectedSession?.price).toLocaleString(
+                              "en-IN"
+                            )}
+                            .00 */}
                             Price: ${selectedSession?.price}
                           </p>
                         </div>
@@ -1025,74 +975,73 @@ const CourseDetailsPage = () => {
                   onSubmit={handleFeedbackSubmit}
                   className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
                 >
-                  <h3 className="text-xl font-bold">Leave Your Feedback</h3>
-  
-                  <div className="flex space-x-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
+                <h3 className="text-xl font-bold">Leave Your Feedback</h3>
+                <div className="flex space-x-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setFeedback({ ...feedback, rating: star })}
+                      className={`w-8 h-8 ${
+                        feedback.rating >= star
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  value={feedback.comment}
+                  onChange={(e) =>
+                    setFeedback({ ...feedback, comment: e.target.value })
+                  }
+                  placeholder="Write your feedback..."
+                  className="w-full p-2 border rounded-lg"
+                  required
+                ></textarea>
+
+                <button
+                  type="submit"
+                  className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
+                  >
+                  Submit Feedback
+                </button>
+                {isRoleAdmin === "admin" && (
+                  <>
+                    {!isEditing ? (
                       <button
                         type="button"
-                        key={star}
-                        onClick={() => setFeedback({ ...feedback, rating: star })}
-                        className={`w-8 h-8 ${
-                          feedback.rating >= star
-                            ? "text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      >
-                        ★
+                        onClick={() => setIsEditing(true)}
+                        className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                        >
+                        Edit Course
                       </button>
-                    ))}
-                  </div>
-  
-                  <textarea
-                    value={feedback.comment}
-                    onChange={(e) =>
-                      setFeedback({ ...feedback, comment: e.target.value })
-                    }
-                    placeholder="Write your feedback..."
-                    className="w-full p-2 border rounded-lg"
-                    required
-                  ></textarea>
-  
-                  <button
-                    type="submit"
-                    className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
-                  >
-                    Submit Feedback
-                  </button>
-                  {isRoleAdmin === "admin" && (
-                    <>
-                      {!isEditing ? (
-                        <button
-                          type="button"
-                          onClick={() => setIsEditing(true)}
-                          className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                    ) : (
+                      <button
+                        type="submit"
+                        onClick={(e) => {
+                          setIsEditing(false);
+                          handleUpdate(e);
+                        }}
+                        className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
                         >
-                          Edit Course
-                        </button>
-                      ) : (
-                        <button
-                          type="submit"
-                          onClick={(e) => {
-                            setIsEditing(false);
-                            handleUpdate(e);
-                          }}
-                          className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
-                        >
-                          Update
-                        </button>
-                      )}
-                    </>
-                  )}
-                </form>
+                        Update
+                      </button>
+                    )}
+                  </>
+                )}
+              </form>
               </div>
-            </div>
           </div>
         </div>
-        <Footer />
-      </>
-    );
-  };
-  
-  export default CourseDetailsPage;
+      </div>
+      <Footer />
+    </>
+  );
+};
 
+
+export default CourseDetailsPage;
