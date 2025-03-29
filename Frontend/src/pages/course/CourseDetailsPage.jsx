@@ -381,13 +381,13 @@ const CourseDetailsPage = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 font-sans animate-fade-in">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
-          <header className="mb-12">
-            <div className="space-y-4">
+      <div className="min-h-screen bg-gray-50 font-sans animate-fade-in max-sm:w-full">
+        <div className="max-w-7xl mx-auto p-3 lg:p-8 max-sm:max-w-6xl">
+          <header className="mb-12 max-sm:mb-5 text-center md:text-left">
+            <div className="space-y-4 max-sm:space-y-1">
               <Link
                 to={`/category/${encodeURIComponent(course.category)}`}
-                className="inline-flex items-center text-orange-500 hover:text-orange-600 transition-colors duration-200"
+                className="inline-flex items-center text-orange-500 hover:text-orange-600 transition-colors duration-200 mx-auto md:mx-0"
                 >
                 <svg
                   className="w-4 h-4 mr-1"
@@ -416,14 +416,13 @@ const CourseDetailsPage = () => {
                       name: e.target.value,
                     }))
                   }
-                  className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent border border-orange-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent border border-orange-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 block mx-auto md:mx-0"
                   />
               ) : (
                 <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
                   {course.name}
                 </h1>
               )}
-
               {isEditing ? (
                 <textarea
                   name="overview"
@@ -437,16 +436,16 @@ const CourseDetailsPage = () => {
                   className="text-xl text-gray-600 font-medium border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               ) : (
-                <h2 className="text-xl text-gray-600 font-medium">
+                <h2 className="text-xl text-gray-600 font-medium text-justify">
                   {course.overview}
                 </h2>
               )}
             </div>
             </header>
   
-            <div className="grid lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-12">
-                <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md max-sm:max-w-[450px]">
+            <div className="lg:grid lg:grid-cols-3 gap-8 ">
+              <div className="lg:col-span-2 space-y-12 max-sm:space-y-6 max-sm:max-w-[100%] m-auto">
+                <div className="w-full max-w-[650px] h-[450px] overflow-hidden rounded-md shadow-md max-sm:max-w-[250px] max-sm:max-h-[150px] max-sm:m-auto">
                   <img 
                     // src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
                     src={
@@ -454,13 +453,13 @@ const CourseDetailsPage = () => {
                       `http://localhost:6001${course.nameImage}` 
                     }
                     alt={course.nameImage}
-                    className="w-full h-full max-sm:w-[70%] max-sm:h-[30%]   object-cover"
+                    className="w-full h-full max-sm:w-[100%] object-cover max-sm:object-contain m-auto"
                   />
                 </div>
   
                 {isEditing ? (
-                  <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                  <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 max-sm:text-justify">
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800 max-sm:text-justify max-sm:text-xl">
                       Course Overview
                     </h3>
                     {/* <p className="text-gray-600 leading-relaxed">
@@ -475,18 +474,18 @@ const CourseDetailsPage = () => {
                     />
                   </section>
                 ) : (
-                  <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                  <section className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300  m-auto">
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800 max-sm:text-xl">
                       Course Overview
                     </h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 leading-relaxed max-sm:text-sm">
                       {course.description}
                     </p>
                   </section>
                 )}
-  
-                <section className="space-y-6">
-                  <h3 className="text-3xl font-bold text-gray-800">Curriculum</h3>
+
+                <section className="space-y-6 m-auto max-sm:hidden block">
+                  <h3 className="text-3xl font-bold text-gray-800 max-sm:text-center">Curriculum</h3>
                   <div className="space-y-4">
                     {course?.curriculum?.map((module, idx) => (
                       <div
@@ -672,15 +671,15 @@ const CourseDetailsPage = () => {
                 </section>
   
                 {course.feedbacks && (
-                  <section className="space-y-6">
-                    <h3 className="text-3xl font-bold text-gray-800">
+                  <section className="space-y-6 m-auto max-sm:hidden">
+                   <h3 className=" text-3xl font-bold text-gray-800 max-sm:text-center max-sm:text-xl">
                       Student Feedback
                     </h3>
                     <div className="grid md:grid-cols-2 gap-6">
                       {course.feedbacks.map((feedback, i) => (
                         <div
                           key={i}
-                          className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+                          className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 max-sm:p-2"
                         >
                           <div className="flex items-start space-x-4">
                             <img
@@ -690,16 +689,16 @@ const CourseDetailsPage = () => {
                               className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
                             />
   
-                            <div>
+                            <div className="">
                               <p className="mt-3 font-medium text-gray-800">
                                 {feedback.name}
                               </p>
-                              <p className="text-gray-600 italic">
+                              <p className="text-gray-600 italic max-sm:w-40">
                                 "{feedback.comment}"
                               </p>
                             </div>
   
-                            <div className="flex items-center space-x-1 text-yellow-500">
+                            <div className="flex items-center space-x-1 text-yellow-500 transform max-sm:-translate-x-12">
                               {Array.from({ length: 5 }).map((_, index) => {
                                 const fullStars = Math.floor(feedback.rating);
                                 const hasHalfStar = feedback.rating % 1 !== 0;
@@ -716,13 +715,14 @@ const CourseDetailsPage = () => {
                         </div>
                       ))}
                     </div>
+                    
                   </section>
                 )}
               </div>
   
-              <div className="space-y-8 ">
-                <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-8">
-                  <div className="space-y-6">
+              <div className="space-y-8 mt-[-120px] max-sm:mt-0 order-2 lg:order-none max-sm:max-w-[100%]  m-auto">
+                <div className="bg-white rounded-2xl p-6 shadow-lg sticky  max-sm:static top-16 m-auto ">
+                  <div className="space-y-6 ">
                     <div className="text-center">
                       {selectedSession && (
                         <div className="price-display bg-gray-100 p-4 rounded-lg shadow-md">
@@ -745,15 +745,15 @@ const CourseDetailsPage = () => {
                     </div>
   
                     <div className="session-selector-container">
-                      <h2 className="text-2xl font-semibold mb-4">
+                      <h2 className="text-2xl font-semibold mb-4 max-sm:text-xl">
                         Choose a Session Duration
                       </h2>
   
-                      <div className="flex gap-4 mb-6">
+                      <div className="flex gap-4 mb-6 justify-center lg:justify-start max-sm:text-sm max-sm:grid max-sm:grid-cols-2">
                         {sessions.map((session, index) => (
                           <button
                             key={index}
-                            className={`p-2 border rounded ${
+                            className={`p-2 border rounded  ${
                               selectedSession?.duration === session.duration
                                 ? "bg-orange-500 text-white"
                                 : "bg-white text-black"
@@ -791,7 +791,7 @@ const CourseDetailsPage = () => {
                     )}
   
                     <div className="space-y-4">
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-3 justify-center lg:justify-start">
                         <svg
                           className="w-5 h-5 text-orange-600"
                           fill="none"
@@ -810,8 +810,8 @@ const CourseDetailsPage = () => {
                     </div>
   
                     {showEnrollModal && (
-                      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full">
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center max-md:w-full">
+                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl max-md:w-96 w-full">
                           {selectedSession && (
                             <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow">
                               <h3 className="text-lg font-semibold text-gray-700">
@@ -842,8 +842,7 @@ const CourseDetailsPage = () => {
                               className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100"
                             />
                           </div>
-  
-                          <div className="flex">
+                          <div className="flex ">
                             <div className="w-1/2 pr-4">
                               <label className="block mb-2">Select Tutor:</label>
                               <select
@@ -886,6 +885,9 @@ const CourseDetailsPage = () => {
                                   </option>
                                 )}
                               </select> */}
+                              <label className="block mb-2">
+                                Choose Time Slot:
+                              </label>
   
                               <select
                                 className="w-full p-2 border rounded mb-4"
@@ -953,7 +955,7 @@ const CourseDetailsPage = () => {
                               </button>
                             </div>
   
-                            <div className="w-1/2 pl-4 border-l">
+                            <div className="">
                               <EnrollmentCalendar
                                 availableDates={availableDates.map(
                                   (date) => date.split("T")[0]
@@ -970,10 +972,58 @@ const CourseDetailsPage = () => {
                     )}
                   </div>
                 </div>
+                {course.feedbacks && (
+                  <section className="space-y-6 m-auto sm:hidden">
+                   <h3 className=" text-3xl font-bold text-gray-800 max-sm:text-center max-sm:text-xl">
+                      Student Feedback
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {course.feedbacks.map((feedback, i) => (
+                        <div
+                          key={i}
+                          className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 max-sm:p-2"
+                        >
+                          <div className="flex items-start space-x-4">
+                            <img
+                              src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}` || `http://localhost:6001${feedback.profilePicture}`} //local
+                              // src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
+                              alt="Profile"
+                              className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
+                            />
+  
+                            <div className="">
+                              <p className="mt-3 font-medium text-gray-800">
+                                {feedback.name}
+                              </p>
+                              <p className="text-gray-600 italic max-sm:w-40">
+                                "{feedback.comment}"
+                              </p>
+                            </div>
+  
+                            <div className="flex items-center space-x-1 text-yellow-500 ">
+                              {Array.from({ length: 5 }).map((_, index) => {
+                                const fullStars = Math.floor(feedback.rating);
+                                const hasHalfStar = feedback.rating % 1 !== 0;
+                                if (index < fullStars) {
+                                  return <FaStar key={index} />;
+                                } else if (index === fullStars && hasHalfStar) {
+                                  return <FaStarHalfAlt key={index} />;
+                                } else {
+                                  return <FaRegStar key={index} />;
+                                }
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                  </section>
+                )}
   
                 <form
                   onSubmit={handleFeedbackSubmit}
-                  className="space-y-4 bg-white p-6 rounded-xl shadow-sm"
+                  className="space-y-4 bg-white p-6 rounded-xl shadow-sm  m-auto"
                 >
                 <h3 className="text-xl font-bold">Leave Your Feedback</h3>
                 <div className="flex space-x-1">
