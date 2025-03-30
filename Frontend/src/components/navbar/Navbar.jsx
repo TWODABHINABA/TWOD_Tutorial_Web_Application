@@ -14,15 +14,12 @@ import ExploreDropdown from "../exploredropdown/ExploreDropdown";
 import SearchBar from "../search/SearchBar";
 import authLogout from "../useLogout/UseLogout";
 
-
-
 const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
   const location = useLocation();
   const isActive = !ignoreActive && location.pathname === to;
   const [hovered, setHovered] = useState(false);
 
   return (
-
     <Link
       to={to}
       onMouseEnter={() => setHovered(true)}
@@ -44,9 +41,10 @@ const CustomNavbar = () => {
   const navigate = useNavigate();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const {handleLogout}=authLogout();
+  const {handleLogout} = authLogout();
 
   const isAuthenticated = localStorage.getItem("token");
+  
   return (
     <>
       <div className="h-[1px] bg-orange-400"></div>
@@ -64,9 +62,7 @@ const CustomNavbar = () => {
               </span>
             </NavbarBrand>
 
-            {/* SearchBar inside Navbar */}
-
-            {/* LEFT Links */}
+            {/* LEFT Links - Desktop View */}
             <div className="hidden md:flex gap-6 text-xl ml-20">
               <AnimatedNavbarLink to="/category/:categoryName" ignoreActive>
                 <ExploreDropdown />
@@ -75,7 +71,7 @@ const CustomNavbar = () => {
               <AnimatedNavbarLink to="/about">Our Tutors</AnimatedNavbarLink>
               <AnimatedNavbarLink to="/contact">Contact</AnimatedNavbarLink>
             </div>
-            <div className=" ">
+            <div className="hidden md:block">
               <SearchBar />
             </div>
           </div>
@@ -90,7 +86,6 @@ const CustomNavbar = () => {
             {isAuthenticated && (
               <AnimatedNavbarLink to="/purchased-course">
                 <FaGraduationCap size={20} color="orange" title="Purchased Course" />
-                
               </AnimatedNavbarLink>
             )}
             {!isAuthenticated ? (
@@ -118,7 +113,7 @@ const CustomNavbar = () => {
                 className="text-sm inline-flex items-center cursor-pointer bg-transparent border-none p-0 text-orange-500 hover:text-orange-600"
                 type="button"
               >
-                <MdLogin className="mr-1" />
+                <MdLogout className="mr-1" />
                 Log out
               </button>
             )}
@@ -126,6 +121,30 @@ const CustomNavbar = () => {
             {/* Mobile Toggle */}
             <NavbarToggle />
           </div>
+
+          {/* Mobile Navigation Menu - This is what we're adding */}
+          <NavbarCollapse>
+            {/* Mobile search bar */}
+            <div className="md:hidden py-2">
+              <SearchBar />
+            </div>
+            
+            {/* Mobile navigation links */}
+            <div className="flex flex-col space-y-4 py-2 md:hidden">
+              <Link to="/category/:categoryName" className="text-black hover:text-orange-500">
+                Explore
+              </Link>
+              <Link to="/pricing" className="text-black hover:text-orange-500">
+                Pricing
+              </Link>
+              <Link to="/about" className="text-black hover:text-orange-500">
+                Our Tutors
+              </Link>
+              <Link to="/contact" className="text-black hover:text-orange-500">
+                Contact
+              </Link>
+            </div>
+          </NavbarCollapse>
         </Navbar>
       </div>
 
