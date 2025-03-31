@@ -1,3 +1,8 @@
+/* Universal box-sizing for consistency */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body, html {
   margin: 0;
   padding: 0;
@@ -38,11 +43,14 @@ body, html {
   align-items: flex-start;
 }
 
-.contact-info {
+/* Ensure both columns adjust properly */
+.contact-info,
+.contact-form-container {
   flex: 1;
   min-width: 300px;
 }
 
+/* Contact Info Styles */
 .contact-info h2 {
   font-size: 2rem;
   color: #f97316; /* Orange-500 */
@@ -68,15 +76,15 @@ body, html {
   margin-bottom: 8px;
 }
 
+/* Form Container Styles */
 .contact-form-container {
-  flex: 1;
-  min-width: 300px;
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 20px;
 }
 
+/* Contact Form Styles */
 .contact-form {
   display: flex;
   flex-direction: column;
@@ -94,8 +102,10 @@ body, html {
   color: #fb923c; /* Orange-400 */
 }
 
+/* Make inputs and textarea fully responsive */
 .form-group input,
 .form-group textarea {
+  width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -123,8 +133,41 @@ body, html {
   background: #ea580c; /* Orange-600 */
 }
 
+/* Media Queries for Tablets and Mobile */
 @media (max-width: 768px) {
   .contact-content {
     flex-direction: column;
+    gap: 30px;
+  }
+
+  .contact-header h1 {
+    font-size: 2rem;
+  }
+
+  .contact-header p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-section {
+    padding: 30px 0px;
+  }
+
+  .contact-form-container,
+  .contact-info {
+    padding: 15px;
+  }
+  /* Increase the readability of form elements on very small devices */
+  .form-group input,
+  .form-group textarea {
+    font-size: 1rem;
+    padding: 12px;
+  }
+
+  /* Adjust button size for easier tap targets */
+  .submit-btn {
+    padding: 14px;
+    font-size: 1.1rem;
   }
 }
