@@ -12,6 +12,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [birthday, setBirthday] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
   const [adminExists, setAdminExists] = useState(false);
+  const [error, setError] = useState({ email: "", password: "" });
 
   const navigate = useNavigate();
 
@@ -28,11 +29,15 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
   const handleGoogleLogin = () => {
     // const password = prompt("Set a password for future logins:");
-    // if (!password) 
+    // if (!password)
     //   return alert("Password is required!");
 
-    // localStorage.setItem("googlePassword", password); 
-    window.open("https://twod-tutorial-web-application-3brq.onrender.com/auth", "_self" || "http://localhost:6001/auth", "_self");
+    // localStorage.setItem("googlePassword", password);
+    window.open(
+      "https://twod-tutorial-web-application-3brq.onrender.com/auth",
+      "_self" || "http://localhost:6001/auth",
+      "_self"
+    );
     // window.open("http://localhost:6001/auth", "_self"); // local
   };
 
@@ -79,18 +84,30 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError({ email: "", password: "" }); // Reset errors
+
     try {
       const userData = await api.post("/login", { email, password });
-      console.log(userData);
+
       if (userData.data.token && userData.data.role) {
         localStorage.setItem("role", userData.data.role);
-        localStorage.setItem("token", userData.data.token); // Save role
+        localStorage.setItem("token", userData.data.token);
       }
+
       alert("Login Successful");
       navigate("/user");
     } catch (error) {
-      alert("Error");
-      navigate("/");
+      if (error.response && error.response.data.message) {
+        if (error.response.data.message === "Invalid Email") {
+          setError({ email: "Invalid Email", password: "" });
+        } else if (error.response.data.message === "Invalid Password") {
+          setError({ email: "", password: "Incorrect Password" });
+        } else {
+          setError({ email: "", password: "Something went wrong. Try again." });
+        }
+      } else {
+        setError({ email: "", password: "Something went wrong. Try again." });
+      }
     }
   };
 
@@ -105,25 +122,43 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
         <form className="w-full" onSubmit={handleLogin}>
           <div className="space-y-6">
             <div className="flex flex-col gap-4">
-              <input
-                name="email"
-                type="email"
-                value={email}
-                placeholder="Enter your email"
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none"
-                required
-              />
-              <input
-                name="password"
-                type="password"
-                value={password}
-                placeholder="Enter your password"
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none"
-                required
-              />
+
+              <div>
+                <input
+                  name="email"
+                  type="email"
+                  value={email}
+                  placeholder="Enter your email"
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none border-2 ${
+                    error.email ? "border-red-500" : "border-gray-300"
+                  }`}
+                  required
+                />
+                {error.email && (
+                  <p className="text-red-500 text-sm mt-1">{error.email}</p>
+                )}
+              </div>
+
+
+              <div>
+                <input
+                  name="password"
+                  type="password"
+                  value={password}
+                  placeholder="Enter your password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-70 focus:outline-none border-2 ${
+                    error.password ? "border-red-500" : "border-gray-300"
+                  }`}
+                  required
+                />
+                {error.password && (
+                  <p className="text-red-500 text-sm mt-1">{error.password}</p>
+                )}
+              </div>
             </div>
+
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
               <button
                 type="button"
@@ -139,6 +174,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 Login
               </button>
             </div>
+
             <button
               onClick={handleGoogleLogin}
               className="w-full px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-colors mb-4"

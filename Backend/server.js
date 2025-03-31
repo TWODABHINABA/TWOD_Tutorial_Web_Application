@@ -3,6 +3,7 @@ const app = express();
 const db = require("./db");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const compression = require("compression");
 const personRoutes = require("./Routes/personRoutes");
 const courseRoutes = require("./Routes/courseRoutes");
 const tutorRoutes = require("./Routes/tutorRoutes");
@@ -58,6 +59,8 @@ app.use("/", courseRoutes);
 app.use("/", sessionRoutes);
 app.use("/", searchRoutes);
 app.use("/",googleRoutes);
+
+app.use(compression());
 app.listen(process.env.PORT, () =>
   console.log("Server is running on port 6001")
 );
