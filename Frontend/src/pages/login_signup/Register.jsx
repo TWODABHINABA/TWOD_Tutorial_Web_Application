@@ -89,11 +89,10 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
       alert("Login Successful");
       navigate("/user");
     } catch (error) {
-      alert("Error");
+      alert("Invalid email or password. Please double-check and try again.");
       navigate("/");
     }
   };
-
   return (
     <div className="relative bg-white p-6 rounded-lg shadow-lg z-10 max-w-lg w-full">
       <div className="flex flex-col items-center gap-2 w-full mb-8">
