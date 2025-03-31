@@ -8,8 +8,9 @@ import Foote from '../../components/footer/Footer';
 const Contact = () => {
   useEffect(() => {
     AOS.init({
-      duration: 800, 
-      once: true, 
+      duration: 800,
+      once: true,
+      disable: window.innerWidth < 768, // Disables AOS on mobile devices
     });
   }, []);
 
@@ -21,9 +22,7 @@ const Contact = () => {
         <div className="container">
           <header className="contact-header" data-aos="fade-down">
             <h1>Contact Us</h1>
-            <p>
-              Have questions or feedback? We’d love to hear from you.
-            </p>
+            <p>Have questions or feedback? We’d love to hear from you.</p>
           </header>
 
           <div className="contact-content">
@@ -63,7 +62,7 @@ const Contact = () => {
           </div>
         </div>
       </section>
-      <Foote/>
+      <Foote />
     </>
   );
 };

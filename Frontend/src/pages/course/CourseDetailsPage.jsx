@@ -974,10 +974,10 @@ const CourseDetailsPage = () => {
                 </div>
                 {course.feedbacks && (
                   <section className="space-y-6 m-auto sm:hidden">
-                   <h3 className=" text-3xl font-bold text-gray-800 max-sm:text-center max-sm:text-xl">
+                   <h3 className=" font-bold text-gray-800 max-sm:text-center max-sm:text-xl">
                       Student Feedback
                     </h3>
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="  ">
                       {course.feedbacks.map((feedback, i) => (
                         <div
                           key={i}
@@ -995,12 +995,12 @@ const CourseDetailsPage = () => {
                               <p className="mt-3 font-medium text-gray-800">
                                 {feedback.name}
                               </p>
-                              <p className="text-gray-600 italic max-sm:w-40">
+                              <p className="text-gray-600 italic max-sm:w-[120px] text-xs ">
                                 "{feedback.comment}"
                               </p>
                             </div>
-  
-                            <div className="flex items-center space-x-1 text-yellow-500 ">
+                            
+                            <div className="flex items-center text-yellow-500 ">
                               {Array.from({ length: 5 }).map((_, index) => {
                                 const fullStars = Math.floor(feedback.rating);
                                 const hasHalfStar = feedback.rating % 1 !== 0;

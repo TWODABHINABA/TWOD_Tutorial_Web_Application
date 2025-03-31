@@ -355,7 +355,7 @@ const ChatBot = () => {
   return (
     <>
       <button
-        className="fixed bottom-5 right-5 bg-orange-500 text-white px-4 py-3 rounded-full shadow-lg hover:bg-orange-600 transition duration-300"
+        className="max-sm:mb-10 max-sm:px-3 max-sm:py-2 max-sm:text-sm fixed bottom-5 right-5 bg-orange-500 text-white px-4 py-3 rounded-full shadow-lg hover:bg-orange-600 transition duration-300"
         onClick={toggleChat}
       >
         💬 Chat
