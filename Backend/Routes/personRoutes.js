@@ -107,23 +107,46 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+
+const isValidEmail = (email) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(email);
+const isValidPhone = (phone) => /^\d+$/.test(phone);
+const isValidBirthday = (birthday) => /^\d{4}-[A-Za-z]{3}-\d{2}$/.test(birthday);
+
 router.post("/register", upload.single("profilePicture"), async (req, res) => {
   const { name, phone, birthday, email, password, role } = req.body;
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
 
-  const existingUser = await Person.findOne({ email });
-  if (existingUser) {
-    return res.status(400).json({ message: "Email already exists" });
-  }
-
-  if (role === "admin") {
-    const adminExists = await Person.findOne({ role: "admin" });
-    if (adminExists) {
-      return res.status(400).json({ message: "An admin already exists!" });
-    }
-  }
-
   try {
+
+    const existingUser = await Person.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+
+    if (role === "admin") {
+      const adminExists = await Person.findOne({ role: "admin" });
+      if (adminExists) {
+        return res.status(400).json({ message: "An admin already exists!" });
+      }
+    }
+
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: "Invalid email format. Use '@something.com'." });
+    }
+    if (!isValidPhone(phone)) {
+      return res.status(400).json({ message: "Phone number must contain only digits." });
+    }
+    if (!isValidBirthday(birthday)) {
+      return res.status(400).json({ message: "Invalid date format. Use 'YYYY-MMM-DD'." });
+    }
+    if (password.length < 3) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long." });
+    }
+
+
+
     const newUser = new Person({
       name,
       phone,
@@ -133,70 +156,14 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
       profilePicture,
       role: role || "user",
     });
+
     await newUser.save();
-    res.status(200).json({ newUser });
+    res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
-    res.status(400).json(error, "Internal Server Error");
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
-
-// const isValidEmail = (email) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(email);
-// const isValidPhone = (phone) => /^\d+$/.test(phone);
-// // const isValidBirthday = (birthday) => /^\d{4}-[A-Za-z]{3}-\d{2}$/.test(birthday);
-
-// router.post("/register", upload.single("profilePicture"), async (req, res) => {
-//   const { name, phone, birthday, email, password, role } = req.body;
-//   const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
-
-//   try {
-//     // Check if email already exists
-//     const existingUser = await Person.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ message: "Email already exists" });
-//     }
-
-//     // Admin validation
-//     if (role === "admin") {
-//       const adminExists = await Person.findOne({ role: "admin" });
-//       if (adminExists) {
-//         return res.status(400).json({ message: "An admin already exists!" });
-//       }
-//     }
-
-//     // **Field Validations**
-//     if (!isValidEmail(email)) {
-//       return res.status(400).json({ message: "Invalid email format. Use '@something.com'." });
-//     }
-//     if (!isValidPhone(phone)) {
-//       return res.status(400).json({ message: "Phone number must contain only digits." });
-//     }
-//     // if (!isValidBirthday(birthday)) {
-//     //   return res.status(400).json({ message: "Invalid date format. Use 'YYYY-MMM-DD'." });
-//     // }
-//     if (password.length < 3) {
-//       return res.status(400).json({ message: "Password must be at least 6 characters long." });
-//     }
-
-
-
-//     const newUser = new Person({
-//       name,
-//       phone,
-//       birthday,
-//       email,
-//       password,
-//       profilePicture,
-//       role: role || "user",
-//     });
-
-//     await newUser.save();
-//     res.status(201).json({ message: "User registered successfully!" });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Internal Server Error" });
-//   }
-// });
 
 router.get("/check-admin", async (req, res) => {
   try {
