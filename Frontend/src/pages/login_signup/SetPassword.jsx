@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
+import Toast from "./Toast";
 
 // const SetPassword = ({ isOpen, onClose }) => {
 //   const [password, setPassword] = useState("");
@@ -86,6 +87,7 @@ const SetPassword = ({ isOpen, onClose }) => {
   const [error, setError] = useState(null);
   const [valid, setValid] = useState(false);
   const navigate = useNavigate();
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   if (!isOpen) return null; 
 
@@ -122,7 +124,8 @@ const SetPassword = ({ isOpen, onClose }) => {
     try {
       const response = await api.post("/set-password", { email, password });
       localStorage.setItem("token", response.data.token);
-      alert("Password set successfully!");
+      // alert("Password set successfully!");
+      setToast({ show: true, message: "Password set successfully!", type: "error" });
       onClose(); 
       navigate("/user"); 
     } catch (error) {
