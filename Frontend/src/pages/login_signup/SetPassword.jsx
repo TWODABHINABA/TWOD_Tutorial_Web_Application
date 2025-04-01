@@ -8,7 +8,7 @@ import Toast from "./Toast";
 //   const [error, setError] = useState(null);
 //   const navigate = useNavigate();
 
-//   if (!isOpen) return null; 
+//   if (!isOpen) return null;
 
 //   const isValidPassword = (password) => {
 //     const lengthValid = password.length >= 8 && password.length <= 20;
@@ -36,8 +36,8 @@ import Toast from "./Toast";
 //       const response = await api.post("/set-password", { email, password });
 //       localStorage.setItem("token", response.data.token);
 //       alert("Password set successfully!");
-//       onClose(); 
-//       navigate("/user"); 
+//       onClose();
+//       navigate("/user");
 //     } catch (error) {
 //       setError("Error setting password. Try again.");
 //     }
@@ -81,7 +81,6 @@ import Toast from "./Toast";
 //   );
 // };
 
-
 const SetPassword = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -89,7 +88,7 @@ const SetPassword = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
-  if (!isOpen) return null; 
+  if (!isOpen) return null;
 
   const isValidPassword = (password) => {
     const lengthValid = password.length >= 8 && password.length <= 20;
@@ -125,9 +124,13 @@ const SetPassword = ({ isOpen, onClose }) => {
       const response = await api.post("/set-password", { email, password });
       localStorage.setItem("token", response.data.token);
       // alert("Password set successfully!");
-      setToast({ show: true, message: "Password set successfully!", type: "error" });
-      onClose(); 
-      navigate("/user"); 
+      setToast({
+        show: true,
+        message: "Password set successfully!",
+        type: "error",
+      });
+      onClose();
+      navigate("/user");
     } catch (error) {
       setError("Error setting password. Try again.");
     }
@@ -135,6 +138,13 @@ const SetPassword = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false })}
+        />
+      )}
       <div className="bg-white p-6 rounded-2xl shadow-lg max-w-sm w-full relative animate-fadeIn">
         <button
           onClick={onClose}
@@ -147,7 +157,9 @@ const SetPassword = ({ isOpen, onClose }) => {
           Set Your Password
         </h2>
 
-        {error && <p className="text-red-500 text-sm text-center mb-2">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
           <input
@@ -161,20 +173,55 @@ const SetPassword = ({ isOpen, onClose }) => {
             }}
             required
             className={`p-2 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ${
-              error ? "border-red-500 focus:ring-red-500" :
-              valid ? "border-green-500 focus:ring-green-500" :
-              "border-gray-300 focus:ring-blue-400"
+              error
+                ? "border-red-500 focus:ring-red-500"
+                : valid
+                ? "border-green-500 focus:ring-green-500"
+                : "border-gray-300 focus:ring-blue-400"
             }`}
           />
 
           {/* Password Validation Message */}
           <p className="text-sm text-gray-600">
-            Password must be: 
-            <span className={password.length >= 8 ? "text-green-500" : "text-red-500"}> 8+ chars, </span>
-            <span className={/[A-Z]/.test(password) ? "text-green-500" : "text-red-500"}>1 uppercase, </span>
-            <span className={/[a-z]/.test(password) ? "text-green-500" : "text-red-500"}>1 lowercase, </span>
-            <span className={/\d/.test(password) ? "text-green-500" : "text-red-500"}>1 number, </span>
-            <span className={/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "text-green-500" : "text-red-500"}>1 special char.</span>
+            Password must be:
+            <span
+              className={
+                password.length >= 8 ? "text-green-500" : "text-red-500"
+              }
+            >
+              {" "}
+              8+ chars,{" "}
+            </span>
+            <span
+              className={
+                /[A-Z]/.test(password) ? "text-green-500" : "text-red-500"
+              }
+            >
+              1 uppercase,{" "}
+            </span>
+            <span
+              className={
+                /[a-z]/.test(password) ? "text-green-500" : "text-red-500"
+              }
+            >
+              1 lowercase,{" "}
+            </span>
+            <span
+              className={
+                /\d/.test(password) ? "text-green-500" : "text-red-500"
+              }
+            >
+              1 number,{" "}
+            </span>
+            <span
+              className={
+                /[!@#$%^&*(),.?":{}|<>]/.test(password)
+                  ? "text-green-500"
+                  : "text-red-500"
+              }
+            >
+              1 special char.
+            </span>
           </p>
 
           <button
@@ -189,6 +236,5 @@ const SetPassword = ({ isOpen, onClose }) => {
     </div>
   );
 };
-
 
 export default SetPassword;
