@@ -3,23 +3,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Toast from "./Toast";
 
-const Toast = ({ message, type, onClose }) => {
-  return (
-    <div
-      className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 p-3 rounded-lg text-white shadow-md transition-all ${
-        type === "success" ? "bg-green-500" : "bg-red-500"
-      }`}
-    >
-      {message}
-      <button
-        onClick={onClose}
-        className="ml-2 px-2 py-1 bg-white text-black rounded-md"
-      >
-        ✕
-      </button>
-    </div>
-  );
-};
 
 const SetPassword = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState("");
