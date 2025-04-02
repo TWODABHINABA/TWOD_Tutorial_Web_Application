@@ -42,7 +42,7 @@ const CategorySection = () => {
         const formattedData = response.data.map((cat) => ({
           title: cat.category, 
           courses: `${cat.courses.length} courses`, 
-          slug: cat.category.toLowerCase().replace(/\s+/g, "-"), 
+          slug: cat.category, 
           icon: "uil uil-folder" 
         }));
         setCategories(formattedData);
