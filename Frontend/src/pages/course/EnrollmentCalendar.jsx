@@ -2,25 +2,25 @@ import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
-const mobileArrowStyles = `
-  @media (max-width: 768px) {
-    /* Reduce arrow button width and remove extra spacing */
-    .react-calendar__navigation button {
-      width: 0 !important;
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-    /* Reduce label spacing if needed */
-    .react-calendar__navigation__label {
-      margin: 0 0 !important;
-      font-size: 0.8rem;
-    }
-    /* Optionally adjust arrow icon margins */
-    .react-calendar__navigation__arrow {
-      margin: 0 !important;
-    }
-  }
-`;
+// const mobileArrowStyles = `
+//   @media (max-width: 768px) {
+//     /* Reduce arrow button width and remove extra spacing */
+//     .react-calendar__navigation button {
+//       width: 0 !important;
+//       padding: 0 !important;
+//       margin: 0 !important;
+//     }
+//     /* Reduce label spacing if needed */
+//     .react-calendar__navigation__label {
+//       margin: 0 0 !important;
+//       font-size: 0.8rem;
+//     }
+//     /* Optionally adjust arrow icon margins */
+//     .react-calendar__navigation__arrow {
+//       margin: 0 !important;
+//     }
+//   }
+// `;
 export const formatDate = (date) => {
   const validDate = date instanceof Date ? date : new Date(date);
   return (
@@ -52,20 +52,20 @@ const EnrollmentCalendar = ({ availableDates, selectedDate, onChange }) => {
     }
     return false;
   };
-  const customFormatShortWeekday = (locale, date) => {
-    if (isMobile) {
-      // Abbreviated names for mobile
-      const mobileWeekdays = ["s","m", "t", "w", "th", "f", "sa"];
-      return mobileWeekdays[date.getDay()];
-    }
-    // Fallback for non-mobile: use default locale formatting for short weekday names
-    return date.toLocaleDateString(locale, { weekday: "short" });
-  };
+  // const customFormatShortWeekday = (locale, date) => {
+  //   if (isMobile) {
+  //     // Abbreviated names for mobile
+  //     const mobileWeekdays = ["s","m", "t", "w", "th", "f", "sa"];
+  //     return mobileWeekdays[date.getDay()];
+  //   }
+  //   // Fallback for non-mobile: use default locale formatting for short weekday names
+  //   return date.toLocaleDateString(locale, { weekday: "short" });
+  // };
 
   return (
     <>
-    <style>{mobileArrowStyles}</style>
-    <div className="p-4 bg-white rounded-lg max-md:rounded-none max-md:shadow-none shadow-md max-md:p-0 max-md:h-80 max-md:w-44 h-96 overflow-hidden">
+    {/* <style>{mobileArrowStyles}</style> */}
+    <div className="p-4 bg-white rounded-lg  shadow-md  max-md:h-80 max-md:w-72 h-96 overflow-hidden">
       <Calendar
         onChange={(date) => {
           console.log("Selected Date from Calendar:", date);
@@ -74,11 +74,11 @@ const EnrollmentCalendar = ({ availableDates, selectedDate, onChange }) => {
         value={selectedDate ? new Date(selectedDate) : null}
         tileDisabled={tileDisabled}
         className="react-calendar "
-        formatShortWeekday={customFormatShortWeekday} 
+        // formatShortWeekday={customFormatShortWeekday} 
         // nextLabel={null}
         // prevLabel={null}
-        next2Label={null}
-        prev2Label={null}
+        // next2Label={null}
+        // prev2Label={null}
       />
     </div>
     </>
