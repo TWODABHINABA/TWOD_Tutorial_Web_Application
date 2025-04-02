@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import EnrollmentCalendar from "./EnrollmentCalendar";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
+import Modal from "../../pages/login_signup/Modal"; 
 import { formatDate } from "./EnrollmentCalendar";
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -15,6 +16,7 @@ const CourseDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false); 
   const [tutors, setTutors] = useState([]);
   const [selectedTutor, setSelectedTutor] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
@@ -104,26 +106,30 @@ const CourseDetailsPage = () => {
       window.location.href = "/register";
     }
     try {
-      const response = await api.post(
-        `/courses/${courseId}/feedback`,
-        feedback
-      );
+      const response = await api.post(`/courses/${courseId}/feedback,feedback`);
       setCourse(response.data.course);
       setFeedback({ rating: "", comment: "" });
     } catch (err) {
       console.error("Error submitting feedback:", err);
     }
   };
-  const handleEnrollClick = async () => {
-    try {
-      const response = await api.get(`/courses/${courseId}/tutors`);
-      console.log("Fetched Tutors:", response.data);
-      setTutors(response.data);
-      setShowEnrollModal(true);
-    } catch (error) {
-      console.error("❌ Error fetching tutors:", error);
-    }
-  };
+  
+const handleEnrollClick = async () => {
+  // If user is not logged in, show register modal
+  if (!token) {
+    setShowRegisterModal(true);
+    return;
+  }
+   
+  try {
+    const response = await api.get(`/courses/${courseId}/tutors`);
+    console.log("Fetched Tutors:", response.data);
+    setTutors(response.data);
+    setShowEnrollModal(true);
+  } catch (error) {
+    console.error("❌ Error fetching tutors:", error);
+  }
+};
   const filterAvailableSlots = (slots, duration) => {
     if (!slots || slots.length === 0 || !duration) return [];
     console.log("Filtering slots for duration:", duration);
@@ -147,9 +153,7 @@ const CourseDetailsPage = () => {
         let nextStartTime = new Date(
           currentStartTime.getTime() + durationInMinutes * 60000
         );
-        console.log(
-          `Checking slot: ${currentStartTime.toLocaleTimeString()} - ${nextStartTime.toLocaleTimeString()}`
-        );
+        console.log(`Checking slot: ${currentStartTime.toLocaleTimeString()} - ${nextStartTime.toLocaleTimeString()}`);
         if (nextStartTime <= endTime) {
           filteredSlots.push({
             startTime: currentStartTime.toLocaleTimeString([], {
@@ -203,12 +207,9 @@ const CourseDetailsPage = () => {
     const formattedDate = date.toISOString().split("T")[0];
     try {
       console.log("Selected Date:", formattedDate);
-      const response = await api.get(
-        `/tutors/${selectedTutor}/available-slots`,
-        {
-          params: { date: formattedDate },
-        }
-      );
+      const response = await api.get(`/tutors/${selectedTutor}/available-slots`, {
+        params: { date: formattedDate }
+      });
       console.log("Raw Slots from Backend:", response.data);
       if (!selectedDuration) {
         console.error("No session duration selected");
@@ -228,10 +229,10 @@ const CourseDetailsPage = () => {
     const fetchAvailableSlots = async () => {
       if (!selectedDate) return;
       const formattedDate = selectedDate.toISOString().split("T")[0];
-      let endpoint =
-        selectedTutor === ""
-          ? `/tutors/no-preference/available-slots`
-          : `/tutors/${selectedTutor}/available-slots`;
+      
+      let endpoint = selectedTutor === ""
+        ? `/tutors/no-preference/available-slots`
+        : `/tutors/${selectedTutor}/available-slots`;
       try {
         const response = await api.get(endpoint, {
           params: { date: formattedDate },
@@ -770,9 +771,7 @@ const CourseDetailsPage = () => {
                       </div>
                     </div>
   
-                    {!token ? (
-                      <div></div>
-                    ) : (
+                    
                       <div className="space-y-4">
                         <button
                           onClick={handleEnrollClick}
@@ -788,7 +787,7 @@ const CourseDetailsPage = () => {
                           Preview Course
                         </button>
                       </div>
-                    )}
+                    
   
                     <div className="space-y-4">
                       <div className="flex items-center space-x-3 justify-center lg:justify-start">
@@ -874,7 +873,7 @@ const CourseDetailsPage = () => {
                                   availableTimeSlots.map((slot, index) => (
                                     <option
                                       key={index}
-                                      value={`${slot.startTime}-${slot.endTime}`}
+                                      value={${slot.startTime}-${slot.endTime}}
                                     >
                                       {slot.startTime} - {slot.endTime}
                                     </option>
@@ -995,12 +994,12 @@ const CourseDetailsPage = () => {
                               <p className="mt-3 font-medium text-gray-800">
                                 {feedback.name}
                               </p>
-                              <p className="text-gray-600 italic max-sm:w-[120px] text-xs ">
+                              <p className="text-gray-600 italic max-sm:w-40">
                                 "{feedback.comment}"
                               </p>
                             </div>
-                            
-                            <div className="flex items-center text-yellow-500 ">
+  
+                            <div className="flex items-center space-x-1 text-yellow-500 ">
                               {Array.from({ length: 5 }).map((_, index) => {
                                 const fullStars = Math.floor(feedback.rating);
                                 const hasHalfStar = feedback.rating % 1 !== 0;
@@ -1088,6 +1087,13 @@ const CourseDetailsPage = () => {
           </div>
         </div>
       </div>
+       {/* Add the Modal component at the end of your JSX */}
+       {showRegisterModal && (
+        <Modal
+          initialAction="Sign Up"
+          onClose={() => setShowRegisterModal(false)}
+        />
+      )}
       <Footer />
     </>
   );
