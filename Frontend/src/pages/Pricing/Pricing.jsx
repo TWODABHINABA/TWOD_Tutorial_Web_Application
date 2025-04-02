@@ -5,11 +5,19 @@ import "aos/dist/aos.css";
 import CustomNavbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import api from "../../components/User-management/api";
-
+import { ClipLoader } from "react-spinners";
 
 const PricingPage = () => {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchSessions = async () => {
     try {
@@ -31,15 +39,23 @@ const PricingPage = () => {
     AOS.init({ duration: 800, once: true });
   }, []);
 
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={80} color="#FFA500" />
+      </div>
+    );
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
       <CustomNavbar />
 
       <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col flex-grow">
-        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8" data-aos="fade-up">
+        <h1
+          className="text-4xl font-bold text-center text-gray-800 mb-8"
+          data-aos="fade-up"
+        >
           Pricing Plans
         </h1>
-
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {sessions.map((plan, index) => (
@@ -50,15 +66,24 @@ const PricingPage = () => {
                 plan.popular ? "border-yellow-500" : "border-gray-300"
               }`}
             >
-              {plan.duration==="1 Hour Session" && (
-                <span className="text-sm text-white bg-yellow-500 px-3 py-1 rounded-full mb-2 inline-block" data-aos="fade-down">
+              {plan.duration === "1 Hour Session" && (
+                <span
+                  className="text-sm text-white bg-yellow-500 px-3 py-1 rounded-full mb-2 inline-block"
+                  data-aos="fade-down"
+                >
                   Most Popular
                 </span>
               )}
-              <h3 className="text-xl font-semibold text-gray-800" data-aos="fade-right">
+              <h3
+                className="text-xl font-semibold text-gray-800"
+                data-aos="fade-right"
+              >
                 {plan.duration}
               </h3>
-              <p className="text-2xl font-bold text-blue-600 mt-2" data-aos="fade-left">
+              <p
+                className="text-2xl font-bold text-blue-600 mt-2"
+                data-aos="fade-left"
+              >
                 ${plan.price}
               </p>
               <p className="text-gray-600 mt-2" data-aos="fade-right">
@@ -71,7 +96,6 @@ const PricingPage = () => {
                   </li>
                 ))}
               </ul>
-              
 
               <button
                 onClick={() => navigate("/booking")}

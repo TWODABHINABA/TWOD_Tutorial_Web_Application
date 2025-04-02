@@ -358,7 +358,7 @@ const handleEnrollClick = async () => {
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen">
-        <ClipLoader size={80} color="#3498db" />
+        <ClipLoader size={80} color="#FFA500" />
       </div>
     );
   if (error) return <p>Error: {error}</p>;

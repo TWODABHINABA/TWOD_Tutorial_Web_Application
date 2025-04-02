@@ -1,31 +1,35 @@
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Toast from "./Toast";
-
+import { ClipLoader } from "react-spinners";
 
 const SetPassword = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [valid, setValid] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [toast, setToast] = useState({ show: false, message: "" });
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!isOpen) return null;
 
   const isValidPassword = (password) => {
-    const lengthValid = password.length >= 8 && password.length <= 20;
-    const uppercaseValid = /[A-Z]/.test(password);
-    const lowercaseValid = /[a-z]/.test(password);
-    const digitValid = /\d/.test(password);
-    const specialCharValid = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
     return (
-      lengthValid &&
-      uppercaseValid &&
-      lowercaseValid &&
-      digitValid &&
-      specialCharValid
+      password.length >= 8 &&
+      password.length <= 20 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /\d/.test(password) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(password)
     );
   };
 
@@ -44,34 +48,41 @@ const SetPassword = ({ isOpen, onClose }) => {
     try {
       const response = await api.post("/set-password", { email, password });
       localStorage.setItem("token", response.data.token);
-      setToast({
-        show: true,
-        message: "Password set successfully!",
-        type: "success",
-      });
-      setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
-      onClose();
-      navigate("/user");
+
+      setToast({ show: true, message: "Password set successfully!" });
+
+      // ⏳ Delay closing modal and navigating AFTER toast disappears
+      setTimeout(() => {
+        setToast({ show: false });
+        setTimeout(() => {
+          onClose(); // Close modal AFTER toast is fully gone
+          navigate("/user");
+        }, 500); // Small buffer time to ensure smooth UI transition
+      }, 1500); // Close toast after 1.5s (slightly longer than Toast's auto-close time)
     } catch (error) {
       setError("Error setting password. Try again.");
-      setToast({
-        show: true,
-        message: "Error setting password",
-        type: "error",
-      });
-      setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
+
+      setToast({ show: true, message: "Error setting password" });
+
+      setTimeout(() => setToast({ show: false }), 1500);
     }
   };
 
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={80} color="#FFA500" />
+      </div>
+    );
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
       {toast.show && (
         <Toast
           message={toast.message}
-          type={toast.type}
           onClose={() => setToast({ show: false })}
         />
       )}
+
       <div className="bg-white p-6 rounded-2xl shadow-lg max-w-sm w-full relative animate-fadeIn">
         <button
           onClick={onClose}

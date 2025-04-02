@@ -211,7 +211,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   };
 
   return (
-    <div className="relative bg-white p-6  rounded-lg shadow-lg z-10 max-w-lg w-full mt-10">
+    <div className="relative bg-white p-6 h-90  rounded-lg shadow-lg z-10 max-w-lg w-full mt-10 mb-5">
       <div className="flex flex-col items-center gap-2 w-full mb-8 ">
         <h1 className="text-3xl font-bold text-gray-800">{action}</h1>
         <div className="w-10 h-1 bg-orange-500 rounded-full"></div>

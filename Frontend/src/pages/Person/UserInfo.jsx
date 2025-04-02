@@ -4,6 +4,7 @@ import Navbar from "../../components/navbar/Navbar";
 import api from "../../components/User-management/api";
 import Footer from "../../components/footer/Footer";
 import authLogout from "../../components/useLogout/UseLogout";
+import { ClipLoader } from "react-spinners";
 // import "./UserInfo.css";
 
 const UserInfo = () => {
@@ -12,8 +13,16 @@ const UserInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [updatedUser, setUpdatedUser] = useState({});
   const navigate = useNavigate();
-  const {handleLogout}=authLogout();
+  const { handleLogout } = authLogout();
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer); // Cleanup on unmount
+  }, []); // Empty dependency array ensures it runs only once
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -87,6 +96,13 @@ const UserInfo = () => {
     }
   };
 
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={80} color="#FFA500" />
+      </div>
+    );
+
   if (error) return <p className="error-message">Error: {error}</p>;
   return (
     <>
@@ -100,8 +116,9 @@ const UserInfo = () => {
                   src={
                     updatedUser.profilePicture instanceof File
                       ? URL.createObjectURL(updatedUser.profilePicture)
-                      : `https://twod-tutorial-web-application-3brq.onrender.com${user.profilePicture}` || `http://localhost:6001${user.profilePicture}`
-                        
+                      : `https://twod-tutorial-web-application-3brq.onrender.com${user.profilePicture}` ||
+                        `http://localhost:6001${user.profilePicture}`
+
                     // :`https://twod-tutorial-web-application-3brq.onrender.com${user.profilePicture}`
                   }
                   alt="Profile"
@@ -225,8 +242,6 @@ const UserInfo = () => {
             </div>
           </div>
         )}
-
-        
       </div>
       <Footer />
     </>

@@ -12,9 +12,6 @@ const personSchema = new mongoose.Schema({
   },
   birthday: {
     type: Date,
-    sparse: true,
-    // unique: true,
-    // required:true
   },
   email: {
     type: String,

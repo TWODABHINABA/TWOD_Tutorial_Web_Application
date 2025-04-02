@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 
+import { ClipLoader } from "react-spinners";
+
 const CancelPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -10,6 +12,14 @@ const CancelPage = () => {
   const [loading, setLoading] = useState(true);
   const [courseId, setCourseId] = useState(null);
   const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []); 
 
   useEffect(() => {
     const fetchTransactionDetails = async () => {
@@ -51,6 +61,13 @@ const CancelPage = () => {
 
     fetchTransactionDetails();
   }, [transactionId, navigate]);
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={80} color="#FF0000" />
+      </div>
+    );
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-red-100 text-center p-5">
