@@ -12,7 +12,7 @@ const privacyPolicy = () => {
             <div className="container mx-auto p-6">
                 <h1 className="text-3xl font-bold">Privacy Policy</h1>
                 <p className="mt-4 text-gray-700">
-                    Welcome to **Tutor**. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our platform to book and attend tutoring sessions.
+                    Welcome to **Tutor**. Your privacy is important to us. Tx   his Privacy Policy explains how we collect, use, and protect your personal information when you use our platform to book and attend tutoring sessions.
                 </p>
             </div>
             <br></br>
@@ -31,7 +31,7 @@ const privacyPolicy = () => {
                 <ul className="list-disc pl-6 mt-2 text-gray-700">
                     <li>Your **full name**</li>
                     <li>Your **email address**</li>
-                    <li>Your **phone number** (if required for communication)</li>
+                    <li>Your **phone number**</li>
                     <li>Your **profile photo** (optional)</li>
                 </ul>
 
