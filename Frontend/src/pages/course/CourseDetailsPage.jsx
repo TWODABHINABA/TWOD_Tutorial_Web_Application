@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import EnrollmentCalendar from "./EnrollmentCalendar";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
+import Modal from "../../pages/login_signup/Modal"; 
 import { formatDate } from "./EnrollmentCalendar";
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -15,6 +16,7 @@ const CourseDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false); 
   const [tutors, setTutors] = useState([]);
   const [selectedTutor, setSelectedTutor] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
@@ -104,26 +106,30 @@ const CourseDetailsPage = () => {
       window.location.href = "/register";
     }
     try {
-      const response = await api.post(
-        `/courses/${courseId}/feedback`,
-        feedback
-      );
+      const response = await api.post(`/courses/${courseId}/feedback,feedback`);
       setCourse(response.data.course);
       setFeedback({ rating: "", comment: "" });
     } catch (err) {
       console.error("Error submitting feedback:", err);
     }
   };
-  const handleEnrollClick = async () => {
-    try {
-      const response = await api.get(`/courses/${courseId}/tutors`);
-      console.log("Fetched Tutors:", response.data);
-      setTutors(response.data);
-      setShowEnrollModal(true);
-    } catch (error) {
-      console.error("❌ Error fetching tutors:", error);
-    }
-  };
+  
+const handleEnrollClick = async () => {
+  // If user is not logged in, show register modal
+  if (!token) {
+    setShowRegisterModal(true);
+    return;
+  }
+   
+  try {
+    const response = await api.get(`/courses/${courseId}/tutors`);
+    console.log("Fetched Tutors:", response.data);
+    setTutors(response.data);
+    setShowEnrollModal(true);
+  } catch (error) {
+    console.error("❌ Error fetching tutors:", error);
+  }
+};
   const filterAvailableSlots = (slots, duration) => {
     if (!slots || slots.length === 0 || !duration) return [];
     console.log("Filtering slots for duration:", duration);
@@ -147,9 +153,7 @@ const CourseDetailsPage = () => {
         let nextStartTime = new Date(
           currentStartTime.getTime() + durationInMinutes * 60000
         );
-        console.log(
-          `Checking slot: ${currentStartTime.toLocaleTimeString()} - ${nextStartTime.toLocaleTimeString()}`
-        );
+        console.log(`Checking slot: ${currentStartTime.toLocaleTimeString()} - ${nextStartTime.toLocaleTimeString()}`);
         if (nextStartTime <= endTime) {
           filteredSlots.push({
             startTime: currentStartTime.toLocaleTimeString([], {
@@ -203,12 +207,9 @@ const CourseDetailsPage = () => {
     const formattedDate = date.toISOString().split("T")[0];
     try {
       console.log("Selected Date:", formattedDate);
-      const response = await api.get(
-        `/tutors/${selectedTutor}/available-slots`,
-        {
-          params: { date: formattedDate },
-        }
-      );
+      const response = await api.get(`/tutors/${selectedTutor}/available-slots`, {
+        params: { date: formattedDate }
+      });
       console.log("Raw Slots from Backend:", response.data);
       if (!selectedDuration) {
         console.error("No session duration selected");
@@ -228,10 +229,10 @@ const CourseDetailsPage = () => {
     const fetchAvailableSlots = async () => {
       if (!selectedDate) return;
       const formattedDate = selectedDate.toISOString().split("T")[0];
-      let endpoint =
-        selectedTutor === ""
-          ? `/tutors/no-preference/available-slots`
-          : `/tutors/${selectedTutor}/available-slots`;
+      
+      let endpoint = selectedTutor === ""
+        ? `/tutors/no-preference/available-slots`
+        : `/tutors/${selectedTutor}/available-slots`;
       try {
         const response = await api.get(endpoint, {
           params: { date: formattedDate },
@@ -357,7 +358,7 @@ const CourseDetailsPage = () => {
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen">
-        <ClipLoader size={80} color="#3498db" />
+        <ClipLoader size={80} color="#FFA500" />
       </div>
     );
   if (error) return <p>Error: {error}</p>;
@@ -718,10 +719,73 @@ const CourseDetailsPage = () => {
                     
                   </section>
                 )}
+                 <form
+                  onSubmit={handleFeedbackSubmit}
+                  className="space-y-4 bg-white p-6 rounded-xl shadow-sm max-sm:hidden m-auto"
+                >
+                <h3 className="text-xl font-bold">Leave Your Feedback</h3>
+                <div className="flex space-x-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setFeedback({ ...feedback, rating: star })}
+                      className={`w-8 h-8 ${
+                        feedback.rating >= star
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  value={feedback.comment}
+                  onChange={(e) =>
+                    setFeedback({ ...feedback, comment: e.target.value })
+                  }
+                  placeholder="Write your feedback..."
+                  className="w-full p-2 border rounded-lg"
+                  required
+                ></textarea>
+
+                <button
+                  type="submit"
+                  className="text-orange-500 hover:text-white border border-orange-500 transition-colors py-2 px-4 rounded-lg hover:bg-orange-500"
+                  >
+                  Submit Feedback
+                </button>
+                {isRoleAdmin === "admin" && (
+                  <>
+                    {!isEditing ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                        className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                        >
+                        Edit Course
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        onClick={(e) => {
+                          setIsEditing(false);
+                          handleUpdate(e);
+                        }}
+                        className="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-500"
+                        >
+                        Update
+                      </button>
+                    )}
+                  </>
+                )}
+              </form>
               </div>
   
-              <div className="space-y-8 mt-[-120px] max-sm:mt-0 order-2 lg:order-none max-sm:max-w-[100%]  m-auto">
-                <div className="bg-white rounded-2xl p-6 shadow-lg sticky  max-sm:static top-16 m-auto ">
+              <div className="space-y-8 mt-[-120px] max-sm:mt-0 order-2 lg:order-none max-sm:max-w-[100%]  m-auto ">
+                <div className="bg-white rounded-2xl p-6 shadow-lg fixed  max-sm:static top-24 right-4 sm:w-2/6 m-auto ">
                   <div className="space-y-6 ">
                     <div className="text-center">
                       {selectedSession && (
@@ -770,9 +834,7 @@ const CourseDetailsPage = () => {
                       </div>
                     </div>
   
-                    {!token ? (
-                      <div></div>
-                    ) : (
+                    
                       <div className="space-y-4">
                         <button
                           onClick={handleEnrollClick}
@@ -788,7 +850,7 @@ const CourseDetailsPage = () => {
                           Preview Course
                         </button>
                       </div>
-                    )}
+                    
   
                     <div className="space-y-4">
                       <div className="flex items-center space-x-3 justify-center lg:justify-start">
@@ -810,8 +872,8 @@ const CourseDetailsPage = () => {
                     </div>
   
                     {showEnrollModal && (
-                      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center max-md:w-full">
-                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl max-md:w-96 w-full">
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center max-md:w-full max-sm:p-2">
+                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl max-md:w-96 w-full max-h-[90vh] overflow-y-auto">
                           {selectedSession && (
                             <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow">
                               <h3 className="text-lg font-semibold text-gray-700">
@@ -842,8 +904,8 @@ const CourseDetailsPage = () => {
                               className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-100"
                             />
                           </div>
-                          <div className="flex ">
-                            <div className="w-1/2 pr-4">
+                          <div className="flex max-sm:flex-col">
+                            <div className="w-full sm:w-1/2 sm:pr-4">
                               <label className="block mb-2">Select Tutor:</label>
                               <select
                                 className="w-full p-2 border rounded mb-4"
@@ -874,7 +936,7 @@ const CourseDetailsPage = () => {
                                   availableTimeSlots.map((slot, index) => (
                                     <option
                                       key={index}
-                                      value={`${slot.startTime}-${slot.endTime}`}
+                                      value={${slot.startTime}-${slot.endTime}}
                                     >
                                       {slot.startTime} - {slot.endTime}
                                     </option>
@@ -885,7 +947,16 @@ const CourseDetailsPage = () => {
                                   </option>
                                 )}
                               </select> */}
-                              <label className="block mb-2">
+                                        <div className="block sm:hidden mb-4">
+            <EnrollmentCalendar
+              availableDates={availableDates.map(
+                (date) => date.split("T")[0]
+              )} // Format to 'YYYY-MM-DD'
+              selectedDate={selectedDate}
+              onChange={(date) => handleDateSelection(new Date(date))}
+            />
+          </div>
+                              <label className=" block mb-2">
                                 Choose Time Slot:
                               </label>
   
@@ -955,7 +1026,7 @@ const CourseDetailsPage = () => {
                               </button>
                             </div>
   
-                            <div className="">
+                            <div className="hidden sm:block sm:w-1/2">
                               <EnrollmentCalendar
                                 availableDates={availableDates.map(
                                   (date) => date.split("T")[0]
@@ -973,34 +1044,31 @@ const CourseDetailsPage = () => {
                   </div>
                 </div>
                 {course.feedbacks && (
-                  <section className="space-y-6 m-auto sm:hidden">
-                   <h3 className=" font-bold text-gray-800 max-sm:text-center max-sm:text-xl">
+                  <section className="sm:hidden m-auto p-4 space-y-6">
+                   <h3 className="font-bold text-gray-800 text-center text-xl">
                       Student Feedback
                     </h3>
                     <div className="  ">
                       {course.feedbacks.map((feedback, i) => (
                         <div
                           key={i}
-                          className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 max-sm:p-2"
+                          className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
                         >
-                          <div className="flex items-start space-x-4">
+                          <div className="flex flex-col items-center space-y-2">
                             <img
                               src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}` || `http://localhost:6001${feedback.profilePicture}`} //local
                               // src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
                               alt="Profile"
-                              className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
+                              className="w-12 h-12 rounded-full bg-orange-100"
                             />
   
                             <div className="">
-                              <p className="mt-3 font-medium text-gray-800">
+                              <div className="flex items-center justify-between">
+
+                              <p className="font-medium text-gray-800">
                                 {feedback.name}
                               </p>
-                              <p className="text-gray-600 italic max-sm:w-[120px] text-xs ">
-                                "{feedback.comment}"
-                              </p>
-                            </div>
-                            
-                            <div className="flex items-center text-yellow-500 ">
+                              <div className="flex items-center space-x-1 text-yellow-500 ">
                               {Array.from({ length: 5 }).map((_, index) => {
                                 const fullStars = Math.floor(feedback.rating);
                                 const hasHalfStar = feedback.rating % 1 !== 0;
@@ -1013,6 +1081,13 @@ const CourseDetailsPage = () => {
                                 }
                               })}
                             </div>
+                              </div>
+                              <p className="text-gray-600 italic max-sm:w-40">
+                                "{feedback.comment}"
+                              </p>
+                            </div>
+  
+                            
                           </div>
                         </div>
                       ))}
@@ -1023,7 +1098,7 @@ const CourseDetailsPage = () => {
   
                 <form
                   onSubmit={handleFeedbackSubmit}
-                  className="space-y-4 bg-white p-6 rounded-xl shadow-sm  m-auto"
+                  className="space-y-4 bg-white p-6 rounded-xl shadow-sm  m-auto sm:hidden"
                 >
                 <h3 className="text-xl font-bold">Leave Your Feedback</h3>
                 <div className="flex space-x-1">
@@ -1088,6 +1163,13 @@ const CourseDetailsPage = () => {
           </div>
         </div>
       </div>
+       {/* Add the Modal component at the end of your JSX */}
+       {showRegisterModal && (
+        <Modal
+          initialAction="Sign Up"
+          onClose={() => setShowRegisterModal(false)}
+        />
+      )}
       <Footer />
     </>
   );

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../components/User-management/api";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
+import { ClipLoader } from "react-spinners";
 
 export default function ManageSessionPricing() {
   const [sessions, setSessions] = useState([]);
@@ -13,7 +14,14 @@ export default function ManageSessionPricing() {
     duration: "",
     price: "",
   });
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
 
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchSessions = async () => {
     try {
@@ -30,7 +38,6 @@ export default function ManageSessionPricing() {
     fetchSessions();
   }, []);
 
-
   const handleAddSession = () => {
     if (!newDuration || !newPrice)
       return alert("Please enter both duration and price");
@@ -44,7 +51,6 @@ export default function ManageSessionPricing() {
     setNewPrice("");
     setNewFeatures([]);
   };
-
 
   const handleSaveAllSessions = async () => {
     if (sessions.length === 0)
@@ -68,7 +74,6 @@ export default function ManageSessionPricing() {
     setEditedSession({ ...sessions[index] });
   };
 
-
   const handleSaveEdit = (index) => {
     const updatedSessions = [...sessions];
     updatedSessions[index] = editedSession;
@@ -76,13 +81,18 @@ export default function ManageSessionPricing() {
     setEditIndex(null);
   };
 
-
   const handleDeleteSession = (index) => {
     if (!window.confirm("Are you sure you want to delete this session?"))
       return;
     const updatedSessions = sessions.filter((_, i) => i !== index);
     setSessions(updatedSessions);
   };
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={80} color="#FFA500" />
+      </div>
+    );
 
   return (
     <>
@@ -91,7 +101,6 @@ export default function ManageSessionPricing() {
         <h1 className="text-4xl font-extrabold text-gray-800 mb-8 text-center">
           Manage Session Pricing
         </h1>
-
 
         <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">
