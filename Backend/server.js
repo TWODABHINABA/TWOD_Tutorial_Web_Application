@@ -10,6 +10,7 @@ const tutorRoutes = require("./Routes/tutorRoutes");
 const sessionRoutes = require("./Routes/sessionRoutes");
 const searchRoutes = require("./Routes/searchRoutes");
 const googleRoutes=require("./Routes/googleRoutes");
+const contactRoutes=require("./Routes/contactRoutes");
 const path = require("path");
 // const paypalRoutes = require('./Routes/paypal');
 app.use(express.json());
@@ -58,7 +59,8 @@ app.use("/", personRoutes);
 app.use("/", courseRoutes);
 app.use("/", sessionRoutes);
 app.use("/", searchRoutes);
-app.use("/",googleRoutes);
+app.use("/", googleRoutes);
+app.use("/", contactRoutes)
 
 app.use(compression());
 app.listen(process.env.PORT, () =>
