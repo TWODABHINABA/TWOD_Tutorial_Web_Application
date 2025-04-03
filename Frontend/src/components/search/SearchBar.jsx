@@ -57,7 +57,7 @@ const SearchBar = () => {
     return () => clearTimeout(timer);
   }, [query]);
 
-  console.log("CATEGORY COURSE TYPEEEEEEEEE", results.categories);
+  // console.log("CATEGORY COURSE TYPEEEEEEEEE", results.categories);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -100,7 +100,9 @@ const SearchBar = () => {
         case "tutor":
           // Navigate to tutor profile page
           if (item._id) {
-            navigate(`/tutors/${item._id}`);
+            // console.log('hello')
+            navigate(`/tutors/${item.name}`);
+            // console.log(`/tutor/${item._id}`);
           } else {
             console.error("Tutor ID not found in search result:", item);
           }

@@ -1,13 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import api from "../../components/User-management/api";
+import { useParams } from "react-router-dom";
 
 const About = () => {
   const [tutors, setTutors] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
+  const {tutorName} = useParams()
+  const tutorRef = useRef(null)
+
+  console.log(tutorName)
+  const getExpanded = (id)=>{
+    setExpanded((prev)=>({
+      ...prev,
+      [id]:!prev[id], //toggle 
+    }));
+  }
+
+  //code for tutor search
+  useEffect(() => {
+    if (tutorName && tutors.length > 0) {
+      const matchedTutor = tutors.find((t) => 
+        t.name.toLowerCase() === decodeURIComponent(tutorName).toLowerCase()
+      );
+  
+      if (matchedTutor) {
+        setTimeout(() => {
+          const tutorElement = document.getElementById(matchedTutor._id);
+          if (tutorElement) {
+            tutorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 500);
+      }
+    }
+  }, [tutorName, tutors]);
+
+  
 
   useEffect(() => {
     const fetchTutors = async () => {
@@ -48,6 +79,8 @@ const About = () => {
             {tutors.map((tutor) => (
               <div
                 key={tutor._id}
+                id = {tutor._id}
+                // ref={tutorRef}
                 className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 duration-300 p-6 flex flex-col justify-between"
               >
                 <div className="flex flex-col items-center">
@@ -65,14 +98,14 @@ const About = () => {
                   </h2>
 
                   <p className="text-gray-600 text-center mt-4 px-2">
-                    {expanded
+                    {expanded[tutor._id]
                       ? tutor.description
                       : tutor.description.substring(0, 100) + "..."}
                     <button
-                      onClick={() => setExpanded(!expanded)}
+                      onClick={() => getExpanded(tutor._id)}
                       className="text-blue-500 ml-2"
                     >
-                      {expanded ? "Read Less" : "Read More"}
+                      {expanded[tutor._id] ? "Read Less" : "Read More"}
                     </button>
                   </p>
                   <div className="mt-4 w-full">

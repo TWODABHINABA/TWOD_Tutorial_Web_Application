@@ -36,6 +36,7 @@ function App() {
         <Route path="/user" element={<UserInfo />} />
         <Route path="/pricing" element={<Pricing/>}/>
         <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
+        <Route path="/tutors/:tutorName" element={<About/>}/>
         {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
         <Route path="/courses/:courseId" element={<CourseDetailsPage />} />
         <Route path="/add-course" element={<AddCourse />} />
