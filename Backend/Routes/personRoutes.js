@@ -7,6 +7,9 @@ const router = express.Router();
 const Person = require("../Models/person");
 const { error } = require("console");
 const authMiddleware = require("../Auth/Authentication");
+const speakeasy = require("speakeasy");
+const twilio = require("twilio");
+const bcrypt = require("bcrypt");
 const passport = require("passport");
 // const cookieSession = require("cookie-session");
 const cookieSession = require("express-session");
@@ -14,6 +17,11 @@ require("../passport");
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+
+const client = new twilio(accountSid, authToken);
 
 router.use(passport.initialize());
 
@@ -54,9 +62,9 @@ router.get("/auth/callback/success", async (req, res) => {
       `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(
         user.email
       )}` ||
-      `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(
-        user.email
-      )}`
+        `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(
+          user.email
+        )}`
       // `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
     );
   }
@@ -65,9 +73,9 @@ router.get("/auth/callback/success", async (req, res) => {
     `https://twod-tutorial-web-application-phi.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
       user.name
     )}&email=${encodeURIComponent(user.email)}` ||
-    `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
-      user.name
-    )}&email=${encodeURIComponent(user.email)}`
+      `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
+        user.name
+      )}&email=${encodeURIComponent(user.email)}`
   );
 });
 
@@ -95,7 +103,6 @@ router.get("/auth/callback/failure", (req, res) => {
   res.send("Error");
 });
 
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -107,22 +114,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-
-const isValidEmail = (email) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(email);
+const isValidEmail = (email) =>
+  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(email);
 const isValidPhone = (phone) => /^\d+$/.test(phone);
-const isValidBirthday = (birthday) => /^\d{4}-[A-Za-z]{3}-\d{2}$/.test(birthday);
+const isValidBirthday = (birthday) =>
+  /^\d{4}-[A-Za-z]{3}-\d{2}$/.test(birthday);
 
 router.post("/register", upload.single("profilePicture"), async (req, res) => {
   const { name, phone, birthday, email, password, role } = req.body;
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
-
     const existingUser = await Person.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
-
 
     if (role === "admin") {
       const adminExists = await Person.findOne({ role: "admin" });
@@ -131,21 +137,26 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
       }
     }
 
-
     if (!isValidEmail(email)) {
-      return res.status(400).json({ message: "Invalid email format. Use '@something.com'." });
+      return res
+        .status(400)
+        .json({ message: "Invalid email format. Use '@something.com'." });
     }
     if (!isValidPhone(phone)) {
-      return res.status(400).json({ message: "Phone number must contain only digits." });
+      return res
+        .status(400)
+        .json({ message: "Phone number must contain only digits." });
     }
     if (!isValidBirthday(birthday)) {
-      return res.status(400).json({ message: "Invalid date format. Use 'YYYY-MMM-DD'." });
+      return res
+        .status(400)
+        .json({ message: "Invalid date format. Use 'YYYY-MMM-DD'." });
     }
     if (password.length < 3) {
-      return res.status(400).json({ message: "Password must be at least 6 characters long." });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long." });
     }
-
-
 
     const newUser = new Person({
       name,
@@ -228,7 +239,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
 router.get("/me", authMiddleware, async (req, res) => {
   if (req.isAuthenticated()) {
     console.log(req.user);
@@ -307,6 +317,146 @@ router.delete("/delete/:id", authMiddleware, async (req, res) => {
     res.json({ message: "Account deleted" });
   } catch (error) {
     res.status(400).json({ message: "Error deleting Account" });
+  }
+});
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await Person.findOne({ email });
+
+    if (!user || !user.phone) {
+      return res
+        .status(404)
+        .json({ message: "User not found or phone number not registered" });
+    }
+
+    // Get last two digits of phone number
+    const maskedPhone = `******${user.phone.slice(-2)}`;
+
+    res.json({ maskedPhone });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+const formatPhoneNumber = (phone) => {
+  if (!phone.startsWith("+")) {
+    return `+91${phone}`; // Assuming India (+91), change as needed
+  }
+  return phone;
+};
+router.post("/verify-phone", async (req, res) => {
+  try {
+    const { email, phone } = req.body;
+    const user = await Person.findOne({ email });
+
+    if (!user || user.phone !== phone) {
+      return res.status(400).json({ message: "Invalid phone number" });
+    }
+
+    // Format the phone number correctly
+    const formattedPhone = formatPhoneNumber(phone);
+
+    // Generate OTP
+    const otp = speakeasy.totp({
+      secret: process.env.OTP_SECRET || "secret",
+      encoding: "base32",
+      step: 60, // OTP valid for 60 seconds
+    });
+
+    // Save OTP in database
+    user.resetOTP = otp;
+    user.otpExpires = Date.now() + 5 * 60 * 1000; // OTP valid for 5 mins
+    await user.save();
+
+    console.log("Twilio number",process.env.TWILIO_PHONE_NUMBER)
+    console.log("+91 number",formattedPhone)
+    // Send OTP via Twilio
+    await client.messages.create({
+      body: `Your OTP for verification is: ${otp}. It is valid for 5 minutes.`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: formattedPhone, // Ensure it's properly formatted
+    });
+
+    res.json({ message: "OTP sent successfully to your phone" });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+// router.post("/verify-phone", async (req, res) => {
+//   try {
+//     const { email, phone } = req.body;
+//     const user = await Person.findOne({ email });
+
+//     if (!user || user.phone !== phone) {
+//       return res.status(400).json({ message: "Invalid phone number" });
+//     }
+
+//     // Generate OTP
+//     const otp = speakeasy.totp({
+//       secret: process.env.OTP_SECRET || "secret",
+//       encoding: "base32",
+//       step: 60, // OTP valid for 60 seconds
+//     });
+
+//     // Save OTP in database
+//     user.resetOTP = otp;
+//     user.otpExpires = Date.now() + 5 * 60 * 1000; // OTP valid for 5 mins
+//     await user.save();
+
+//     console.log("Generated OTP:", otp); // Remove in production
+
+//     res.json({ message: "OTP sent successfully" });
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// });
+
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const user = await Person.findOne({ email });
+
+    if (!user || !user.resetOTP || Date.now() > user.otpExpires) {
+      return res.status(400).json({ message: "OTP expired or invalid" });
+    }
+
+    if (user.resetOTP !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    res.json({ message: "OTP verified successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    const user = await Person.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({ message: "New Password must be different from the older one" });
+    }
+
+    // Hash new password
+    console.log(newPassword);
+    user.password = newPassword;
+    user.resetOTP = null;
+    user.otpExpires = null;
+    await user.save();
+
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
   }
 });
 module.exports = router;

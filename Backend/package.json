@@ -39,7 +39,9 @@
     "passport-local": "^1.0.0",
     "paypal-rest-sdk": "^1.8.1",
     "router": "^2.0.0",
+    "speakeasy": "^2.0.0",
     "stripe": "^17.6.0",
+    "twilio": "^5.5.1",
     "weaviate-ts-client": "^2.2.0"
   }
 }
