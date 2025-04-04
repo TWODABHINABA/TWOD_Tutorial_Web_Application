@@ -2,15 +2,27 @@ import CustomNavbar from '../../components/navbar/Navbar';
 import Foote from '../../components/footer/Footer';
 import { Link } from 'react-router-dom';
 import "./privacyPolicy.css"
-
+const styles = {
+    base: {
+      fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+      fontSize: '1.2rem'
+    },
+    h1: {
+      color: 'rgb(255 90 31)'
+    },
+    h2: {
+      fontSize: '1.5em',
+      color: 'rgb(255 90 31)'
+    }
+  };
 const privacyPolicy = () => {
 
     return (
-        <div className='w-full'>
+        <div style={styles.base} className='w-full'>
             <CustomNavbar />
             <br></br>
             <div className="container mx-auto p-6">
-                <h1 className="text-3xl font-bold">Privacy Policy</h1>
+                <h1 style={styles.h1} className="text-3xl font-bold">Privacy Policy</h1>
                 <p className="mt-4 text-gray-700">
                     Welcome to **Tutor**. Your privacy is important to us. Tx   his Privacy Policy explains how we collect, use, and protect your personal information when you use our platform to book and attend tutoring sessions.
                 </p>
@@ -18,7 +30,7 @@ const privacyPolicy = () => {
             <br></br>
             <div className="container mx-auto p-6">
 
-                <h2 className="font-semibold">Information We Collect</h2>
+                <h2 style={styles.h2} className="font-semibold">Information We Collect</h2>
                 <p className="text-gray-700 mt-2">
                     When you use <b>**Tutor**</b>, we collect different types of information to provide a seamless and secure experience.
                 </p>
@@ -72,7 +84,7 @@ const privacyPolicy = () => {
 
 
             <div className="container mx-auto p-6">
-                <h2 className="font-semibold">How We Use Your Information</h2>
+                <h2 style={styles.h2} className="font-semibold">How We Use Your Information</h2>
                 <p className="text-gray-700 mt-2">
                     We collect your information to provide a seamless learning experience, improve our platform, and ensure secure transactions. Below are the primary ways we use your data:
                 </p>
@@ -129,7 +141,7 @@ const privacyPolicy = () => {
             <br></br>
 
             <div className="container mx-auto p-6">
-                <h2 className="font-semibold">Sharing Your Information</h2>
+                <h2 style={styles.h2} className="font-semibold">Sharing Your Information</h2>
                 <p className="text-gray-700 mt-2">
                     We value your privacy and do not sell your personal data. However, we may share your information in the following circumstances:
                 </p>
@@ -174,7 +186,7 @@ const privacyPolicy = () => {
             <br></br>
             <br></br>
             <div className="container mx-auto p-6">
-                <h2 className="font-semibold">Children&apos;s Privacy</h2>
+                <h2 style={styles.h2} className="font-semibold">Children&apos;s Privacy</h2>
                 <p className="text-gray-700 mt-2">
                     Protecting children&apos;s privacy is important to us. Our platform is not intended for children under the age of 13, and we do not knowingly collect personal data from them.
                 </p>
@@ -214,7 +226,7 @@ const privacyPolicy = () => {
             <br></br><br></br><br></br>
 
             <div className="container mx-auto p-6">
-                <h2 className="font-semibold">Parental Control & Consent</h2>
+                <h2 style={styles.h2} className="font-semibold">Parental Control & Consent</h2>
                 <p className="text-gray-700 mt-2">
                     We recognize the importance of parental control in managing children&apos;s online activities. Parents have full control over their child&apos;s access to our platform.
                 </p>
@@ -254,7 +266,7 @@ const privacyPolicy = () => {
             <br></br><br></br><br></br>
 
             <div className="container mx-auto p-6">
-                <h2 className="font-semibold">Data Security</h2>
+                <h2 style={styles.h2} className="font-semibold">Data Security</h2>
                 <p className="text-gray-700 mt-2">
                     We implement strict security measures to protect your personal information from unauthorized access, alteration, or disclosure.
                 </p>
@@ -294,7 +306,7 @@ const privacyPolicy = () => {
             <br></br><br></br><br></br>
 
             <div className="container mx-auto p-6">
-                <h2 className="font-semibold">Your Rights & Choices</h2>
+                <h2 style={styles.h2} className="font-semibold">Your Rights & Choices</h2>
                 <p className="text-gray-700 mt-2">
                     You have rights over your personal data and choices regarding how we collect, use, and share your information.
                 </p>
