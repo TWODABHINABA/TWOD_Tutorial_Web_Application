@@ -23,6 +23,9 @@ import AddTutor from './pages/addTutor/AddTutor'
 import AddAvailability from './pages/addAvailibility/AddAvailability'
 import SessionAdmin from './pages/sessionTiming/SessionAdmin'
 import PurchasedCourse from './pages/purchasedCourse/PurchasedCourse'
+import PrivacyPolicy from './pages/footerPages/PrivacyPoilcy'
+import TermsAndConditions from './pages/footerPages/TermsAndConditions'
+
 function App() {
   // const isAdmin=localStorage.getItem("role");
   return (
@@ -48,7 +51,8 @@ function App() {
         <Route path="/add-availability" element={<AddAvailability />} />
         <Route path="/add-session-time" element={<SessionAdmin />} />
         <Route path="/purchased-course" element={<PurchasedCourse />} />
-        
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
       </Routes>
       
     </Router>

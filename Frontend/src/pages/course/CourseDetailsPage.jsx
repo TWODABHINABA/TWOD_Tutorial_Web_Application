@@ -459,7 +459,7 @@ const CourseDetailsPage = () => {
                     `http://localhost:6001${course.nameImage}`
                   }
                   alt={course.nameImage}
-                  className="w-full h-full max-sm:w-[100%] object-cover max-sm:object-contain m-auto"
+                  className="w-full h-full max-sm:w-[100%] max-sm:object-contain m-auto"
                 />
               </div>
 

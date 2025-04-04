@@ -103,17 +103,7 @@ const Card = ({ course }) => {
           {course.name}
         </motion.span>
         <p className="text-sm text-gray-700">{course.overview}</p>
-        <div className="mt-4">
-          <span className="text-xl font-bold text-violet-500">
-            ${course.discountPrice}
-          </span>
-          <span className="text-sm text-black line-through ml-2">
-            ${course.price}
-          </span>
-        </div>
-        <p className="mt-2 text-xs text-gray-500">
-          Duration: {course.duration}
-        </p>
+        
       </div>
       <button
         onClick={handleCourseClick}

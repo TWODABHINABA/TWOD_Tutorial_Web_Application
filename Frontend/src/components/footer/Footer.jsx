@@ -1,4 +1,7 @@
+
+
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   BsDribbble,
   BsFacebook,
@@ -10,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 const CustomFooter = () => {
   const navigate = useNavigate();
-  const isAuthenticated = localStorage.getItem("token");
+  const isAuthenticated = localStorage.getItem("token");  
   useEffect(() => {
     // const isAuthenticated = localStorage.getItem("token");
   }, [isAuthenticated]);
@@ -82,12 +85,12 @@ const CustomFooter = () => {
               </h3>
               <ul>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">
+                  <a href="/" className="hover:text-[#D35400] text-white">
                     TUTOR
                   </a>
                 </li>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">
+                  <a href="/category/:categoryName" className="hover:text-[#D35400] text-white">
                     Online Tutorials
                   </a>
                 </li>
@@ -99,12 +102,12 @@ const CustomFooter = () => {
               </h3>
               <ul>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">
+                  <a href="https://github.com" target="_new" className="hover:text-[#D35400] text-white">
                     Github
                   </a>
                 </li>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">
+                  <a href="https://discord.com/" target = "_new" className="hover:text-[#D35400] text-white">
                     Discord
                   </a>
                 </li>
@@ -116,14 +119,17 @@ const CustomFooter = () => {
               </h3>
               <ul>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">
+                <Link to="/privacy-policy" className="hover:text-[#D35400] text-white">
+                    
                     Privacy Policy
-                  </a>
+                </Link>
                 </li>
                 <li className="mb-1">
-                  <a href="#" className="hover:text-[#D35400] text-white">
+                <Link to="/terms-and-conditions" className="hover:text-[#D35400] text-white">
+                    
                     Terms &amp; Conditions
-                  </a>
+
+                </Link>
                 </li>
               </ul>
             </div>
@@ -136,19 +142,19 @@ const CustomFooter = () => {
             &copy; 2025 TUTOR™. All Rights Reserved.
           </p>
           <div className="flex mt-4 sm:mt-0 space-x-6">
-            <a href="#" className="text-white hover:text-[#D35400]">
+            <a href="https://www.facebook.com/" target="_new" className="text-white hover:text-[#D35400]">
               <BsFacebook size={20} />
             </a>
-            <a href="#" className="text-white hover:text-[#D35400]">
+            <a href="https://www.instagram.com/" target="_new" className="text-white hover:text-[#D35400]">
               <BsInstagram size={20} />
             </a>
-            <a href="#" className="text-white hover:text-[#D35400]">
+            <a href="https://x.com/" target="_new" className="text-white hover:text-[#D35400]">
               <BsTwitter size={20} />
             </a>
-            <a href="#" className="text-white hover:text-[#D35400]">
+            <a href="https://github.com/" target="_new" className="text-white hover:text-[#D35400]">
               <BsGithub size={20} />
             </a>
-            <a href="#" className="text-white hover:text-[#D35400]">
+            <a href="https://dribbble.com/" target="_new" className="text-white hover:text-[#D35400]">
               <BsDribbble size={20} />
             </a>
           </div>
