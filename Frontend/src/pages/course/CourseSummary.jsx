@@ -131,12 +131,12 @@ const CourseSummaryPage = () => {
           <div className="bg-white shadow-lg rounded-lg p-6 max-w-3xl mx-auto">
             <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
               <div>
-                <dt className="text-sm font-medium text-gray-500">Course</dt>
-                <dd className="mt-1 text-gray-900">{course.name}</dd>
+                <dt className="text-sm font-medium text-gray-500">Subject</dt>
+                <dd className="mt-1 text-gray-700">{course.courseType}</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">Overview</dt>
-                <dd className="mt-1 text-gray-700">{course.overview}</dd>
+                <dt className="text-sm font-medium text-gray-500">Course</dt>
+                <dd className="mt-1 text-gray-900">{course.name}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Session</dt>
@@ -163,15 +163,11 @@ const CourseSummaryPage = () => {
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">
-                  Time Slot
-                </dt>
+                <dt className="text-sm font-medium text-gray-500">Time Slot</dt>
                 <dd className="mt-1 text-gray-900">{selectedTimeSlot}</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">
-                  Duration
-                </dt>
+                <dt className="text-sm font-medium text-gray-500">Duration</dt>
                 <dd className="mt-1 text-gray-900">{selectedDuration}</dd>
               </div>
             </dl>
@@ -276,7 +272,6 @@ const CourseSummaryPage = () => {
                     </button>
                   )}
                 </div>
-                
               </div>
             ) : (
               <p className="text-center text-gray-500">

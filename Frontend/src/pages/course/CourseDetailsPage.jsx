@@ -9,7 +9,7 @@ import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import Modal from "../../pages/login_signup/Modal";
 import { formatDate } from "./EnrollmentCalendar";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -21,6 +21,7 @@ const CourseDetailsPage = () => {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [tutors, setTutors] = useState([]);
   const [selectedTutor, setSelectedTutor] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
@@ -34,7 +35,6 @@ const CourseDetailsPage = () => {
   const [updatedCourse, setUpdatedCourse] = useState({});
   const isRoleAdmin = localStorage.getItem("role");
   const navigate = useNavigate();
-
 
   const handleCourseSummary = () => {
     if (
@@ -50,19 +50,19 @@ const CourseDetailsPage = () => {
       alert("Authentication error: Please log in first.");
       return;
     }
-      // Changed: Navigate to the '/course-summary' page.
-      // Optionally, pass along selected details via the state object.
-      navigate('/course-summary', {
-        state: {
-          course,
-          selectedSession,
-          selectedTutor,
-          selectedDate,
-          selectedTimeSlot,
-          selectedDuration,
-        },
-      });
-// Changed: This path should correspond to your summary page route
+    // Changed: Navigate to the '/course-summary' page.
+    // Optionally, pass along selected details via the state object.
+    navigate("/course-summary", {
+      state: {
+        course,
+        selectedSession,
+        selectedTutor,
+        selectedDate,
+        selectedTimeSlot,
+        selectedDuration,
+      },
+    });
+    // Changed: This path should correspond to your summary page route
   };
 
   console.log(courseId);
@@ -72,6 +72,7 @@ const CourseDetailsPage = () => {
         const response = await api.get(`/courses/${courseId}`);
         setCourse(response.data);
         console.log(response.data);
+        setSelectedSubject(response.data.courseType)
         setUpdatedCourse({
           name: response.data.name,
           overview: response.data.overview,
@@ -221,9 +222,28 @@ const CourseDetailsPage = () => {
       console.error("Error fetching available dates:", error);
     }
   };
+  // useEffect(() => {
+  //   const fetchAvailableDates = async () => {
+  //     let endpoint = "/tutors/no-preference/available-dates";
+  //     try {
+  //       const response = await api.get(endpoint);
+  //       console.log("Available Dates (No Preference):", response.data);
+  //       setAvailableDates(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching available dates:", error);
+  //     }
+  //   };
+  //   if (selectedTutor === "") {
+  //     fetchAvailableDates();
+  //   }
+  // }, [selectedTutor]);
+
   useEffect(() => {
     const fetchAvailableDates = async () => {
-      let endpoint = "/tutors/no-preference/available-dates";
+      if (!selectedSubject) return;
+
+      let endpoint = `/tutors/no-preference/available-dates?subject=${selectedSubject}`;
+
       try {
         const response = await api.get(endpoint);
         console.log("Available Dates (No Preference):", response.data);
@@ -232,10 +252,12 @@ const CourseDetailsPage = () => {
         console.error("Error fetching available dates:", error);
       }
     };
+
     if (selectedTutor === "") {
       fetchAvailableDates();
     }
-  }, [selectedTutor]);
+  }, [selectedTutor, selectedSubject]); 
+
   const handleDateSelection = async (date) => {
     setSelectedDate(date);
     setAvailableTimeSlots([]);
@@ -1055,11 +1077,11 @@ const CourseDetailsPage = () => {
                               ))}
                             </select>
                             <button
-            onClick={handleCourseSummary} // New handler to navigate to the summary page
-            className="w-full py-2 bg-green-500 text-white rounded mt-4"
-          >
-            Course Summary
-          </button>
+                              onClick={handleCourseSummary} // New handler to navigate to the summary page
+                              className="w-full py-2 bg-green-500 text-white rounded mt-4"
+                            >
+                              Course Summary
+                            </button>
                             {/* <button
                               onClick={handleEnrollNow}
                               className="w-full py-2 bg-green-500 text-white rounded mt-4"

@@ -228,15 +228,63 @@ router.post("/tutors/:tutorId/availability", async (req, res) => {
 
 
 
+// router.get("/tutors/:tutorId/available-dates", async (req, res) => {
+//   try {
+//     const { tutorId } = req.params;
+
+//     let availableDates = new Set(); // Using Set to store unique dates
+
+//     if (tutorId === "no-preference") {
+//       // Fetch all tutors
+//       const tutors = await Tutor.find();
+//       tutors.forEach((tutor) => {
+//         tutor.availability.forEach(({ date }) => {
+//           availableDates.add(date);
+//         });
+//       });
+//     } else {
+//       // Fetch specific tutor
+//       const tutor = await Tutor.findById(tutorId);
+//       if (!tutor) {
+//         return res.status(404).json({ error: "Tutor not found" });
+//       }
+//       tutor.availability.forEach(({ date }) => {
+//         availableDates.add(date);
+//       });
+//     }
+
+//     // Convert set to array and filter for next 2 months
+//     const today = new Date();
+//     const twoMonthsLater = new Date();
+//     twoMonthsLater.setMonth(twoMonthsLater.getMonth() + 2);
+
+//     availableDates = [...availableDates].filter((date) => {
+//       const dateObj = new Date(date);
+//       return dateObj >= today && dateObj <= twoMonthsLater;
+//     });
+
+//     res.json(availableDates);
+//   } catch (error) {
+//     res.status(500).json({ error: "Failed to fetch available dates" });
+//   }
+// });
+
+
 router.get("/tutors/:tutorId/available-dates", async (req, res) => {
   try {
     const { tutorId } = req.params;
+    const { subject } = req.query; // Get subject from query parameters
 
     let availableDates = new Set(); // Using Set to store unique dates
 
     if (tutorId === "no-preference") {
-      // Fetch all tutors
-      const tutors = await Tutor.find();
+      if (!subject) {
+        return res.status(400).json({ error: "Subject is required for no preference" });
+      }
+
+      // Fetch tutors who teach the selected subject
+      const tutors = await Tutor.find({ subjects: subject });
+
       tutors.forEach((tutor) => {
         tutor.availability.forEach(({ date }) => {
           availableDates.add(date);
@@ -253,7 +301,7 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
       });
     }
 
-    // Convert set to array and filter for next 2 months
+    // Convert set to array and filter for the next 2 months
     const today = new Date();
     const twoMonthsLater = new Date();
     twoMonthsLater.setMonth(twoMonthsLater.getMonth() + 2);
@@ -268,6 +316,7 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch available dates" });
   }
 });
+
 
 
 
