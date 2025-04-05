@@ -827,7 +827,7 @@ const CourseDetailsPage = () => {
               </form>
             </div>
 
-            <div className="space-y-8 mt-[-120px] max-sm:mt-0 order-2 lg:order-none max-sm:max-w-[100%]  m-auto ">
+            <div className="space-y-8 mt-[-120px] max-sm:mt-0 order-2 lg:order-none pt-5 max-sm:max-w-[100%]  m-auto ">
               <div className="bg-white rounded-2xl p-6 shadow-lg fixed  max-sm:static top-24 right-4 sm:w-2/6 m-auto ">
                 <div className="space-y-6 ">
                   <div className="text-center">
