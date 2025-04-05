@@ -31,6 +31,12 @@ const personSchema = new mongoose.Schema({
     enum: ["admin", "user"],
     default: "user",
   },
+  resetOTP: { 
+    type: String 
+  },
+  otpExpires: { 
+    type: Date 
+  },
   purchasedCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "course" }],
 });
 
