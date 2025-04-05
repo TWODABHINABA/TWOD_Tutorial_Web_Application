@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Toast from "./Toast";
+import ForgotPasswordFlow from "./ForgotPasswordFlow";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [action, setAction] = useState(initialAction);
@@ -17,6 +19,10 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [valid, setValid] = useState({});
   const [errors, setErrors] = useState({});
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [isForgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -62,12 +68,12 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
   const isValidEmail = (email) =>
     /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-  const isValidPhone = (phone) =>{ 
-    const isNumber=/^\d+$/.test(phone);
-    const isLength=phone.length>=10;
+  const isValidPhone = (phone) => {
+    const isNumber = /^\d+$/.test(phone);
+    const isLength = phone.length >= 10;
 
-    return (isNumber && isLength);
-  }
+    return isNumber && isLength;
+  };
   const isValidBirthday = (birthday) => /^\d{4}-\d{2}-\d{2}$/.test(birthday);
   // const isValidPassword = (password) => password.length >= 6;
 
@@ -102,7 +108,9 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
         break;
       case "phone":
         isValid = isValidPhone(value);
-        error = isValid ? "" : "Phone number must contain only digits and be at least 10 characters long.";
+        error = isValid
+          ? ""
+          : "Phone number must contain only digits and be at least 10 characters long.";
         break;
       case "birthday":
         isValid = isValidBirthday(value);
@@ -123,6 +131,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    console.log("Validation Errors:", errors);
+    console.log("Validation Status:", valid);
 
     if (
       Object.values(errors).some((err) => err !== "") ||
@@ -169,15 +179,14 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
       });
       setAction("Login");
     } catch (err) {
-      console.error(
-        "Registration failed:",
-        err.response?.data?.message || err.message
-      );
-      setToast({ show: true, message: "Registration failed!", type: "error" });
+      console.error("Registration failed:", err.response?.data || err.message);
+      setToast({
+        show: true,
+        message: err.response?.data?.message || "Registration failed!",
+        type: "error",
+      });
     }
   };
-
-
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -248,22 +257,50 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 )}
               </div>
 
-              <div>
+              <div className="relative w-full">
                 <input
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   placeholder="Enter your password"
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
+                  className={`w-full px-6 py-3 pr-12 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
                     error.password ? "border-red-500" : "border-gray-300"
                   } border`}
                   required
                 />
+
                 {error.password && (
                   <p className="text-red-500 text-sm mt-1">{error.password}</p>
                 )}
+
+                <button
+                  type="button"
+                  className="absolute right-3 top-7 transform -translate-y-1/2 text-gray-600"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="w-6 h-6" />
+                  ) : (
+                    <EyeIcon className="w-6 h-6" />
+                  )}
+                </button>
               </div>
+            </div>
+            <div className="relative">
+              <button
+                onClick={() => setForgotPasswordOpen(true)}
+                className="bg-blue-500 text-white p-3 rounded-lg shadow"
+              >
+                Forgot Password?
+              </button>
+
+              {isForgotPasswordOpen && (
+                <ForgotPasswordFlow
+                  isOpen={isForgotPasswordOpen}
+                  setIsOpen={setForgotPasswordOpen}
+                />
+              )}
             </div>
 
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
@@ -300,21 +337,22 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
               {[
                 {
                   label: "Enter your name",
+                  field: "name",
                   value: name,
                   setter: setName,
-                  field: "name",
                 },
                 {
                   label: "Enter your Phone Number",
                   value: phone,
                   setter: setPhone,
+
                   field: "phone",
                 },
                 {
                   label: "Enter your Date of Birth (YYYY-MM-DD)",
+                  field: "birthday",
                   value: birthday,
                   setter: setBirthday,
-                  field: "birthday",
                 },
                 {
                   label: "Enter your email",
@@ -322,16 +360,10 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   setter: setEmail,
                   field: "email",
                 },
-                {
-                  label: "Enter your password",
-                  value: password,
-                  setter: setPassword,
-                  field: "password",
-                },
               ].map(({ label, value, setter, field }) => (
                 <div key={field} className="relative">
                   <input
-                    type={field === "password" ? "password" : "text"}
+                    type="text"
                     value={value}
                     placeholder={label}
                     onChange={(e) => {
@@ -348,71 +380,138 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                     required
                   />
                   {valid[field] && (
-                    <span className="absolute right-3 top-3 text-green-500 animate-pulse">
-                      ✔
-                    </span>
+                    <span className="absolute right-3 top-3 text-green-500 animate-pulse"></span>
                   )}
                   {errors[field] && (
                     <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
                   )}
-
-       
-                  {field === "password" && (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-gray-700 font-medium">
-                        Password Strength:
-                      </p>
-                      <ul className="list-disc pl-6">
-                        <li
-                          className={`${
-                            password.length >= 8
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          Minimum 8 characters
-                        </li>
-                        <li
-                          className={`${
-                            /[A-Z]/.test(password)
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          At least one uppercase letter
-                        </li>
-                        <li
-                          className={`${
-                            /[a-z]/.test(password)
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          At least one lowercase letter
-                        </li>
-                        <li
-                          className={`${
-                            /\d/.test(password)
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          At least one number
-                        </li>
-                        <li
-                          className={`${
-                            /[!@#$%^&*(),.?":{}|<>]/.test(password)
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          At least one special character
-                        </li>
-                      </ul>
-                    </div>
-                  )}
                 </div>
               ))}
+
+
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  field="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    // setter(e.target.value);
+                    handleValidation("password", e.target.value);
+                  }}
+                  className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
+                    errors.password
+                      ? "border-red-500"
+                      : valid.password
+                      ? "border-green-500"
+                      : "border-gray-300"
+                  } border`}
+                  required
+                />
+                {/* {valid.password && (
+                  <span className="absolute right-3 top-3 text-green-500 animate-pulse">
+                    ✔
+                  </span>
+                )}
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                )} */}
+                <div className="mt-4 space-y-2">
+                  <p className="text-gray-700 font-medium">
+                    Password Strength:
+                  </p>
+                  <ul className="list-disc pl-6">
+                    <li
+                      className={`${
+                        password.length >= 8 ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      Minimum 8 characters
+                    </li>
+                    <li
+                      className={`${
+                        /[A-Z]/.test(password)
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      At least one uppercase letter
+                    </li>
+                    <li
+                      className={`${
+                        /[a-z]/.test(password)
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      At least one lowercase letter
+                    </li>
+                    <li
+                      className={`${
+                        /\d/.test(password) ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      At least one number
+                    </li>
+                    <li
+                      className={`${
+                        /[!@#$%^&*(),.?":{}|<>]/.test(password)
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      At least one special character
+                    </li>
+                  </ul>
+                </div>
+                <button
+                  type="button"
+                  className="absolute right-4 top-3 text-gray-600"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="w-6 h-6" />
+                  ) : (
+                    <EyeIcon className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+
+
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onPaste={(e) => e.preventDefault()} // Prevent pasting
+                  className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
+                    confirmPassword && password !== confirmPassword
+                      ? "border-red-500"
+                      : confirmPassword && password === confirmPassword
+                      ? "border-green-500"
+                      : "border-gray-300"
+                  } border`}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-4 top-3 text-gray-600"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeSlashIcon className="w-6 h-6" />
+                  ) : (
+                    <EyeIcon className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+
+
+              {confirmPassword && password !== confirmPassword && (
+                <p className="text-red-500 text-sm">Passwords do not match.</p>
+              )}
 
               {!adminExists && (
                 <div className="mb-4">
@@ -423,15 +522,13 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                     name="role"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full p-3 bg-white bg-opacity-80 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-                    required
+                    className="w-full p-3 bg-white border rounded-lg focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                   </select>
                 </div>
               )}
-
 
               <div className="mb-4">
                 <label className="block text-lg font-semibold text-gray-800">
@@ -442,23 +539,22 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   name="profilePicture"
                   onChange={handleFileChange}
                   accept="image/*"
-                  className="w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+                  className="w-full p-3 bg-white border rounded-lg focus:ring-2 focus:ring-orange-500"
                 />
               </div>
             </div>
-
 
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
               <button
                 type="button"
                 onClick={() => setAction("Login")}
-                className="text-gray-600 hover:text-orange-500 transition-colors"
+                className="text-gray-600 hover:text-orange-500"
               >
                 Already have an account? Login
               </button>
               <button
                 type="submit"
-                className="w-full md:w-auto px-2.5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors"
+                className="w-full md:w-auto px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
               >
                 Sign Up
               </button>
@@ -466,7 +562,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
             <button
               onClick={handleGoogleLogin}
-              className="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-all mb-4"
+              className="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold"
             >
               Sign Up with Google
             </button>
@@ -479,123 +575,173 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
 export default Register;
 
-// <form className="w-full" onSubmit={handleRegister}>
-//   <div className="space-y-6">
-//     <div className="flex flex-col gap-4">
-//       {[
-//         {
-//           label: "Enter your name",
-//           value: name,
-//           setter: setName,
-//           field: "name",
-//         },
-//         {
-//           label: "Enter your Phone Number",
-//           value: phone,
-//           setter: setPhone,
-//           field: "phone",
-//         },
-//         {
-//           label: "Enter your Date of Birth (YYYY-MM-DD)",
-//           value: birthday,
-//           setter: setBirthday,
-//           field: "birthday",
-//         },
-//         {
-//           label: "Enter your email",
-//           value: email,
-//           setter: setEmail,
-//           field: "email",
-//         },
-//         {
-//           label: "Enter your password",
-//           value: password,
-//           setter: setPassword,
-//           field: "password",
-//         },
-//       ].map(({ label, value, setter, field }) => (
-//         <div key={field} className="relative">
-//           <input
-//             type={field === "password" ? "password" : "text"}
-//             value={value}
-//             placeholder={label}
-//             onChange={(e) => {
-//               setter(e.target.value);
-//               handleValidation(field, e.target.value);
-//             }}
-//             className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
-//               errors[field]
-//                 ? "border-red-500"
-//                 : valid[field]
-//                 ? "border-green-500"
-//                 : "border-gray-300"
-//             } border`}
-//             required
-//           />
-//           {valid[field] && (
-//             <span className="absolute right-3 top-3 text-green-500 animate-pulse">
-//               ✔
-//             </span>
-//           )}
-//           {errors[field] && (
-//             <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
-//           )}
-//         </div>
-//       ))}
+{
+  /* <form
+  className="w-full max-w-lg mx-auto p-6 bg-white rounded-lg shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto"
+  onSubmit={handleRegister}
+>
+  <div className="space-y-6">
+    <div className="flex flex-col gap-4">
+      {[
+        {
+          label: "Enter your name",
+          value: name,
+          setter: setName,
+          field: "name",
+        },
+        {
+          label: "Enter your Phone Number",
+          value: phone,
+          setter: setPhone,
+          field: "phone",
+        },
+        {
+          label: "Enter your Date of Birth (YYYY-MM-DD)",
+          value: birthday,
+          setter: setBirthday,
+          field: "birthday",
+        },
+        {
+          label: "Enter your email",
+          value: email,
+          setter: setEmail,
+          field: "email",
+        },
+        {
+          label: "Enter your password",
+          value: password,
+          setter: setPassword,
+          field: "password",
+        },
+      ].map(({ label, value, setter, field }) => (
+        <div key={field} className="relative">
+          <input
+            type={field === "password" ? "password" : "text"}
+            value={value}
+            placeholder={label}
+            onChange={(e) => {
+              setter(e.target.value);
+              handleValidation(field, e.target.value);
+            }}
+            className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
+              errors[field]
+                ? "border-red-500"
+                : valid[field]
+                ? "border-green-500"
+                : "border-gray-300"
+            } border`}
+            required
+          />
+          {valid[field] && (
+            <span className="absolute right-3 top-3 text-green-500 animate-pulse">
+              ✔
+            </span>
+          )}
+          {errors[field] && (
+            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+          )}
 
-//       {!adminExists && (
-//         <div className="mb-4">
-//           <label className="block text-lg font-medium text-gray-800">
-//             Role
-//           </label>
-//           <select
-//             name="role"
-//             value={role}
-//             onChange={(e) => setRole(e.target.value)}
-//             className="w-full p-3 bg-white bg-opacity-80 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-//             required
-//           >
-//             <option value="user">User</option>
-//             <option value="admin">Admin</option>
-//           </select>
-//         </div>
-//       )}
+          {label === "Enter your password" && (
+            <div className="mt-4 space-y-2">
+              <p className="text-gray-700 font-medium">Password Strength:</p>
+              <ul className="list-disc pl-6">
+                <li
+                  className={`${
+                    password.length >= 8 ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  Minimum 8 characters
+                </li>
+                <li
+                  className={`${
+                    /[A-Z]/.test(password) ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  At least one uppercase letter
+                </li>
+                <li
+                  className={`${
+                    /[a-z]/.test(password) ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  At least one lowercase letter
+                </li>
+                <li
+                  className={`${
+                    /\d/.test(password) ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  At least one number
+                </li>
+                <li
+                  className={`${
+                    /[!@#$%^&*(),.?":{}|<>]/.test(password)
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  At least one special character
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
+      ))}
 
-//       <div className="mb-4">
-//         <label className="block text-lg font-semibold text-gray-800">
-//           Select Picture
-//         </label>
-//         <input
-//           type="file"
-//           name="profilePicture"
-//           onChange={handleFileChange}
-//           accept="image/*"
-//           className="w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-//         />
-//       </div>
-//     </div>
+      {!adminExists && (
+        <div className="mb-4">
+          <label className="block text-lg font-medium text-gray-800">
+            Role
+          </label>
+          <select
+            name="role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full p-3 bg-white bg-opacity-80 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+            required
+          >
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      )}
 
-//     <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
-//       <button
-//         type="button"
-//         onClick={() => setAction("Login")}
-//         className="text-gray-600 hover:text-orange-500 transition-colors"
-//       >
-//         Already have an account? Login
-//       </button>
-//       <button
-//         type="submit"
-//         className="w-full md:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors"
-//       >
-//         Sign Up
-//       </button>
-//     </div>
+      <div className="mb-4">
+        <label className="block text-lg font-semibold text-gray-800">
+          Select Picture
+        </label>
+        <input
+          type="file"
+          name="profilePicture"
+          onChange={handleFileChange}
+          accept="image/*"
+          className="w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+        />
+      </div>
+    </div>
 
-//     <button
-//       onClick={handleGoogleLogin}
-//       className="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-all mb-4"
-//     >
-//       Sign Up with Google
-//     </button>
-//   </div>
-// </form>
+    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
+      <button
+        type="button"
+        onClick={() => setAction("Login")}
+        className="text-gray-600 hover:text-orange-500 transition-colors"
+      >
+        Already have an account? Login
+      </button>
+      <button
+        type="submit"
+        className="w-full md:w-auto px-2.5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors"
+      >
+        Sign Up
+      </button>
+    </div>
+
+    <button
+      onClick={handleGoogleLogin}
+      className="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-all mb-4"
+    >
+      Sign Up with Google
+    </button>
+  </div>
+</form>; */
+}

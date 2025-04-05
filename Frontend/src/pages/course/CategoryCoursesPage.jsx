@@ -81,7 +81,7 @@ const CategoryCoursesPage = () => {
                       : "https://via.placeholder.com/300x200?text=No+Image"
                   }
                   alt={cat.category}
-                  className="w-full h-40 object-cover"
+                  className="w-full h-40 "
                 />
                 <div className="p-4 flex justify-between items-center">
                   <h3 className="text-lg font-semibold text-orange-800">
@@ -130,7 +130,7 @@ const CategoryCoursesPage = () => {
                             : "https://via.placeholder.com/300x200?text=No+Image"
                         }
                         alt={course.name}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-48"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-60 group-hover:from-gray-900 transition-all duration-300"></div>
                       <div className="absolute bottom-0 left-0 right-0 p-4">
