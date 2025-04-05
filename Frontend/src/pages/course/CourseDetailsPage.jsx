@@ -9,6 +9,8 @@ import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import Modal from "../../pages/login_signup/Modal";
 import { formatDate } from "./EnrollmentCalendar";
+import { useNavigate } from 'react-router-dom';
+
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
@@ -31,6 +33,38 @@ const CourseDetailsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [updatedCourse, setUpdatedCourse] = useState({});
   const isRoleAdmin = localStorage.getItem("role");
+  const navigate = useNavigate();
+
+
+  const handleCourseSummary = () => {
+    if (
+      !selectedDate ||
+      !selectedTimeSlot ||
+      !selectedDuration ||
+      !selectedSession
+    ) {
+      alert("Please select all options before enrolling.");
+      return;
+    }
+    if (!token) {
+      alert("Authentication error: Please log in first.");
+      return;
+    }
+      // Changed: Navigate to the '/course-summary' page.
+      // Optionally, pass along selected details via the state object.
+      navigate('/course-summary', {
+        state: {
+          course,
+          selectedSession,
+          selectedTutor,
+          selectedDate,
+          selectedTimeSlot,
+          selectedDuration,
+        },
+      });
+// Changed: This path should correspond to your summary page route
+  };
+
   console.log(courseId);
   useEffect(() => {
     const fetchCourse = async () => {
@@ -1020,13 +1054,18 @@ const CourseDetailsPage = () => {
                                 </option>
                               ))}
                             </select>
-
                             <button
+            onClick={handleCourseSummary} // New handler to navigate to the summary page
+            className="w-full py-2 bg-green-500 text-white rounded mt-4"
+          >
+            Course Summary
+          </button>
+                            {/* <button
                               onClick={handleEnrollNow}
                               className="w-full py-2 bg-green-500 text-white rounded mt-4"
                             >
                               Confirm & Pay
-                            </button>
+                            </button> */}
                             <button
                               onClick={() => setShowEnrollModal(false)}
                               className="w-full py-2 mt-2 border border-gray-400 text-gray-600 rounded"
