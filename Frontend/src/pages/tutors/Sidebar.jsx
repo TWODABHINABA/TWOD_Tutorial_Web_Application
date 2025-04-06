@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { TbSquareRoot } from "react-icons/tb";
+import { FaChalkboardTeacher } from "react-icons/fa";
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import {
   FiBarChart,
   FiChevronDown,
@@ -23,9 +26,21 @@ export const Example = () => {
 };
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(true);
-  const [selected, setSelected] = useState("Dashboard");
-
+  const [selected, setSelected] = useState("");
+  useEffect(() => {
+    if (location.pathname.includes("tutor-dashboard")) {
+      setSelected("Dashboard");
+    } else if (location.pathname.includes("tutor-controls")) {
+      setSelected("controls");
+    } 
+    // else if (location.pathname.includes("view-site")) {
+    //   setSelected("View Site");
+    // } 
+    // add other conditions for other routes if needed
+  }, [location.pathname]);
   return (
     <motion.nav
       layout
@@ -38,6 +53,7 @@ const Sidebar = () => {
 
       <div className="space-y-1">
         <Option
+          onClick={() => navigate('/tutor-dashboard')}
           Icon={FiHome}
           title="Dashboard"
           selected={selected}
@@ -45,26 +61,28 @@ const Sidebar = () => {
           open={open}
         />
         <Option
-          Icon={FiDollarSign}
-          title="Sales"
+          onClick={() => navigate('/tutor-controls')}
+          Icon={FaChalkboardTeacher}
+          title="controls"
           selected={selected}
           setSelected={setSelected}
           open={open}
-          // notifs={3}
         />
         <Option
           Icon={FiMonitor}
-          title="View Site"
+          title="Request"
           selected={selected}
           setSelected={setSelected}
           open={open}
+          onClick={() => navigate('/tutor-requests')}
         />
-        <Option
+        {/* <Option
           Icon={FiShoppingCart}
           title="Products"
           selected={selected}
           setSelected={setSelected}
           open={open}
+          // onClick={() => navigate('/tutor-controls')}
         />
         <Option
           Icon={FiTag}
@@ -72,6 +90,7 @@ const Sidebar = () => {
           selected={selected}
           setSelected={setSelected}
           open={open}
+          onClick={() => navigate('/tutor-requests')}
         />
         <Option
           Icon={FiBarChart}
@@ -79,7 +98,7 @@ const Sidebar = () => {
           selected={selected}
           setSelected={setSelected}
           open={open}
-        />
+        /> */}
         <Option
           Icon={FiUsers}
           title="Members"
@@ -94,11 +113,16 @@ const Sidebar = () => {
   );
 };
 
-const Option = ({ Icon, title, selected, setSelected, open, notifs }) => {
+const Option = ({ Icon, title, selected, setSelected, open, notifs, onClick }) => {
   return (
     <motion.button
       layout
-      onClick={() => setSelected(title)}
+      onClick={() => {
+        setSelected(title);
+        if (typeof onClick === "function") {
+          onClick();
+        }
+      }}
       className={`relative flex h-10 w-full items-center rounded-md transition-colors ${
         selected === title
           ? "bg-orange-400 text-white"
@@ -141,14 +165,24 @@ const Option = ({ Icon, title, selected, setSelected, open, notifs }) => {
   );
 };
 
+
 const TitleSection = ({ open }) => {
   return (
     <div className="mb-3 border-b border-orange-300 pb-3">
       <div className="flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-orange-100">
         <div className="flex items-center gap-2">
-          <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
+        <motion.div
+              layout
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.125 }}
+            >
+              
+              <h1 className="mr-1 transition-transform duration-300 hover:scale-110">
                           <TbSquareRoot className="text-4xl text-orange-600" />
                         </h1>
+            </motion.div>
+        
           {open && (
             <motion.div
               layout
@@ -156,6 +190,7 @@ const TitleSection = ({ open }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.125 }}
             >
+              
               <span className="block text-xl font-bold text-orange-500">TUTOR</span>
             </motion.div>
           )}

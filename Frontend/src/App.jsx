@@ -28,6 +28,10 @@ import TermsAndConditions from './pages/footerPages/TermsAndConditions'
 import ForgotPasswordFlow from './pages/login_signup/ForgotPasswordFlow'
 import CourseSummary from './pages/course/CourseSummary'
 import Dashboard from './pages/tutors/Dashboard'
+import Controls from './pages/tutors/Controls'
+import TutorAddCourse from './pages/tutors/TutorAddCourse'
+import TutorAddAvailability from './pages/tutors/TutorAddAvailability'
+import Requests from './pages/tutors/Requests'
 function App() {
   // const isAdmin=localStorage.getItem("role");
   return (
@@ -58,6 +62,10 @@ function App() {
         <Route path="/forgot-password-page" element={<ForgotPasswordFlow/>} />
         <Route path="/course-summary" element={<CourseSummary/>}/>
         <Route path='/tutor-dashboard' element={<Dashboard/>}/>
+        <Route path='/tutor-controls' element={<Controls/>}/>
+        <Route path='/tutor-add-course' element={<TutorAddCourse/>}/>
+        <Route path='/tutor-add-availability' element={<TutorAddAvailability/>}/>
+        <Route path='tutor-requests' element={<Requests/>}/>
       </Routes>
     </Router>
   )
