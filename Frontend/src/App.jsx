@@ -27,6 +27,7 @@ import PrivacyPolicy from './pages/footerPages/PrivacyPoilcy'
 import TermsAndConditions from './pages/footerPages/TermsAndConditions'
 import ForgotPasswordFlow from './pages/login_signup/ForgotPasswordFlow'
 import CourseSummary from './pages/course/CourseSummary'
+import Dashboard from './pages/tutors/Dashboard'
 function App() {
   // const isAdmin=localStorage.getItem("role");
   return (
@@ -56,8 +57,8 @@ function App() {
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/forgot-password-page" element={<ForgotPasswordFlow/>} />
         <Route path="/course-summary" element={<CourseSummary/>}/>
+        <Route path='/tutor-dashboard' element={<Dashboard/>}/>
       </Routes>
-      
     </Router>
   )
 }
