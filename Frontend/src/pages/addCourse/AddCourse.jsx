@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Navbar from "../../components/navbar/Navbar";
-
+import Footer from "../../components/footer/Footer";
 const AddCourse = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -329,6 +329,7 @@ const AddCourse = () => {
         </button>
       </form>
     </div>
+    <Footer/>
     </>
   );
 };
