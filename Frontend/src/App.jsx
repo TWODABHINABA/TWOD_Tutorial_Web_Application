@@ -65,7 +65,7 @@ function App() {
         <Route path='/tutor-controls' element={<Controls/>}/>
         <Route path='/tutor-add-course' element={<TutorAddCourse/>}/>
         <Route path='/tutor-add-availability' element={<TutorAddAvailability/>}/>
-        <Route path='tutor-requests' element={<Requests/>}/>
+        <Route path='/tutor-requests' element={<Requests/>}/>
       </Routes>
     </Router>
   )
