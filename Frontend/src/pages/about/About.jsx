@@ -8,120 +8,109 @@ const About = () => {
   const [tutors, setTutors] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
-  const {tutorName} = useParams()
-  const tutorRef = useRef(null)
-
-  console.log(tutorName)
-  const getExpanded = (id)=>{
-    setExpanded((prev)=>({
-      ...prev,
-      [id]:!prev[id], //toggle 
-    }));
-  }
-
-  //code for tutor search
-  useEffect(() => {
-    if (tutorName && tutors.length > 0) {
-      const matchedTutor = tutors.find((t) => 
-        t.name.toLowerCase() === decodeURIComponent(tutorName).toLowerCase()
-      );
-  
-      if (matchedTutor) {
-        setTimeout(() => {
-          const tutorElement = document.getElementById(matchedTutor._id);
-          if (tutorElement) {
-            tutorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-        }, 500);
-      }
-    }
-  }, [tutorName, tutors]);
-
-  
+  const [expandedId, setExpandedId] = useState(null);
+  const { tutorName } = useParams();
+  const cardRefs = useRef({});
 
   useEffect(() => {
     const fetchTutors = async () => {
       try {
-        const response = await api.get("/tutors"); // Axios handles JSON parsing
-        setTutors(response.data); // Use response.data directly
+        const response = await api.get("/tutors");
+        setTutors(response.data);
       } catch (err) {
         setError(err.response?.data?.error || "Failed to fetch tutors");
       } finally {
         setLoading(false);
       }
     };
-
     fetchTutors();
   }, []);
 
-  if (loading)
-    return <p className="text-center text-gray-500 mt-10">Loading...</p>;
+  useEffect(() => {
+    if (tutorName && cardRefs.current[tutorName]) {
+      setTimeout(() => {
+        const tutorElement = cardRefs.current[tutorName];
+        tutorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        
+        tutorElement.classList.add("border-4", "border-orange-500", "shadow-2xl");
+
+        // Remove highlight after 2 seconds
+        setTimeout(() => {
+          tutorElement.classList.remove("border-4", "border-orange-500", "shadow-2xl");
+        }, 2000);
+      }, 500); // Small delay ensures scrolling happens after the component updates
+    }
+  }, [tutorName, tutors]); // Now listens to tutorName changes too!
+
+  if (loading) return <p className="text-center text-gray-500 mt-10">Loading...</p>;
   if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
 
-  console.log(tutors);
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#FAF3E0] animate-fade-in py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#FAF3E0] py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <header className="mb-12 text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r text-orange-400 bg-clip-text ">
-              Our Tutors
-            </h1>
-            <p className="text-gray-600 mt-3">
-              Meet our experienced and passionate tutors.
-            </p>
+            <h1 className="text-4xl font-bold text-orange-400">Our Tutors</h1>
+            <p className="text-gray-600 mt-3">Meet our experienced and passionate tutors.</p>
           </header>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-
             {tutors.map((tutor) => (
               <div
                 key={tutor._id}
-                id = {tutor._id}
-                // ref={tutorRef}
-                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 duration-300 p-6 flex flex-col justify-between"
+                ref={(el) => (cardRefs.current[tutor.name] = el)}
+                id={tutor._id}
+                className={`relative bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl transition-all p-6 flex flex-col justify-between cursor-pointer ${
+                  expandedId === tutor._id ? "h-auto" : "h-[500px]"
+                }`}
               >
-                <div className="flex flex-col items-center">
+                {/* Profile Picture */}
+                <div className="flex flex-col items-center text-center">
                   <img
-                    // src={tutor.profilePicture}
-                    src={
-                      `https://twod-tutorial-web-application-3brq.onrender.com${tutor.profilePicture}` ||
-                      `http://localhost:6001${tutor.profilePicture}`
-                    }
+                    src={`https://twod-tutorial-web-application-3brq.onrender.com${tutor.profilePicture}` || `http://localhost:6001${tutor.profilePicture}`}
                     alt={tutor.name}
-                    className="w-28 h-28 rounded-full object-cover mb-4 border-4 border-orange-500"
+                    className="w-32 h-32 rounded-full object-cover mb-4 border-4 border-orange-500 shadow-lg"
                   />
-                  <h2 className="text-2xl font-semibold text-orange-500">
-                    {tutor.name}
-                  </h2>
+                  <h2 className="text-2xl font-bold text-orange-500">{tutor.name}</h2>
 
-                  <p className="text-gray-600 text-center mt-4 px-2">
-                    {expanded[tutor._id]
-                      ? tutor.description
-                      : tutor.description.substring(0, 100) + "..."}
-                    <button
-                      onClick={() => getExpanded(tutor._id)}
-                      className="text-blue-500 ml-2"
-                    >
-                      {expanded[tutor._id] ? "Read Less" : "Read More"}
-                    </button>
-                  </p>
+                  {/* Description Section */}
+                  <div
+                    className="text-gray-600 mt-4 px-4 transition-all duration-300 text-base"
+                    style={{
+                      maxHeight: expandedId === tutor._id ? "none" : "120px",
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    {tutor.description}
+                    {expandedId !== tutor._id && (
+                      <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-[#FAF3E0]"></div>
+                    )}
+                  </div>
+
+                  {/* Read More Button */}
+                  <button
+                    onClick={() => setExpandedId(expandedId === tutor._id ? null : tutor._id)}
+                    className="text-blue-500 mt-2 font-medium hover:underline"
+                  >
+                    {expandedId === tutor._id ? "Read Less" : "Read More"}
+                  </button>
+
+                  {/* Expertise Section */}
                   <div className="mt-4 w-full">
-                    <h3 className="text-sm font-bold text-orange-500 text-center">
-                      Areas of Expertise:
-                    </h3>
-                    <ul className="mt-2 space-y-1">
+                    <h3 className="text-sm font-bold text-orange-500">Areas of Expertise:</h3>
+                    <div className="mt-2 flex flex-wrap justify-center gap-2">
                       {tutor.subjects.map((area, index) => (
-                        <li
+                        <span
                           key={index}
-                          className="text-xs text-gray-600 text-center"
+                          className="px-3 py-1 bg-gradient-to-r from-orange-300 to-orange-500 text-white text-xs rounded-full shadow-md"
                         >
-                          • {area}
-                        </li>
+                          {area}
+                        </span>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
               </div>
