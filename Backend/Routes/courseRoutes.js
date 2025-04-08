@@ -271,50 +271,96 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     const formattedPrice = parseFloat(amount.replace(/,/g, "")).toFixed(2);
     console.log(formattedPrice);
 
+    // if (!tutorId) {
+    //   const tutors = await Tutor.find({ subjects: course.courseType });
+
+    //   if (tutors.length === 0) {
+    //     return res
+    //       .status(400)
+    //       .json({ error: "No tutors available for this course" });
+    //   }
+
+    //   const today = new Date();
+    //   const nextMonth = new Date();
+    //   nextMonth.setMonth(today.getMonth() + 1);
+
+    //   let availableTutorsWithDates = [];
+
+    //   tutors.forEach((tutor) => {
+    //     tutor.availability.forEach((entry) => {
+    //       const entryDate = new Date(entry.date);
+    //       if (entryDate >= today && entryDate <= nextMonth) {
+    //         availableTutorsWithDates.push({
+    //           tutorId: tutor._id,
+    //           date: entry.date,
+    //           timeSlots: entry.timeSlots,
+    //         });
+    //       }
+    //     });
+    //   });
+
+    //   if (availableTutorsWithDates.length === 0) {
+    //     return res
+    //       .status(400)
+    //       .json({ error: "No available tutors in the next month" });
+    //   }
+
+    //   const selectedTutorData =
+    //     availableTutorsWithDates[
+    //       Math.floor(Math.random() * availableTutorsWithDates.length)
+    //     ];
+    //   tutorId = selectedTutorData.tutorId;
+
+    //   console.log(
+    //     `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
+    //   );
+    // }
+
     if (!tutorId) {
       const tutors = await Tutor.find({ subjects: course.courseType });
-
+    
       if (tutors.length === 0) {
-        return res
-          .status(400)
-          .json({ error: "No tutors available for this course" });
+        return res.status(400).json({ error: "No tutors available for this course" });
       }
-
+    
       const today = new Date();
       const nextMonth = new Date();
       nextMonth.setMonth(today.getMonth() + 1);
-
+    
       let availableTutorsWithDates = [];
-
+    
       tutors.forEach((tutor) => {
         tutor.availability.forEach((entry) => {
           const entryDate = new Date(entry.date);
-          if (entryDate >= today && entryDate <= nextMonth) {
-            availableTutorsWithDates.push({
-              tutorId: tutor._id,
-              date: entry.date,
-              timeSlots: entry.timeSlots,
+          if (entryDate.toISOString().split("T")[0] === selectedDate) {
+            entry.subjects.forEach((subjectEntry) => {
+              if (subjectEntry.subjectName === course.courseType) {
+                if (subjectEntry.timeSlots.includes(selectedTime)) {
+                  availableTutorsWithDates.push({
+                    tutorId: tutor._id,
+                    date: entry.date,
+                    timeSlots: subjectEntry.timeSlots,
+                  });
+                }
+              }
             });
           }
         });
       });
-
+    
       if (availableTutorsWithDates.length === 0) {
-        return res
-          .status(400)
-          .json({ error: "No available tutors in the next month" });
+        return res.status(400).json({ error: "No available tutors for the selected date and time slot" });
       }
-
+    
       const selectedTutorData =
-        availableTutorsWithDates[
-          Math.floor(Math.random() * availableTutorsWithDates.length)
-        ];
+        availableTutorsWithDates[Math.floor(Math.random() * availableTutorsWithDates.length)];
       tutorId = selectedTutorData.tutorId;
-
+    
       console.log(
         `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
       );
     }
+    
 
     const transaction = new Transaction({
       courseId: course._id,
