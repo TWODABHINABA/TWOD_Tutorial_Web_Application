@@ -325,18 +325,19 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
           .json({ error: "No tutors available for this course" });
       }
 
+      const today = new Date();
+      const nextMonth = new Date();
+      nextMonth.setMonth(today.getMonth() + 1);
       let availableTutorsWithDates = [];
 
       tutors.forEach((tutor) => {
         tutor.availability.forEach((entry) => {
           const entryDate = new Date(entry.date);
-          if (entryDate.toISOString().split("T")[0] === selectedDate) {
-            // ✅ Ensure correct date
+          if (entryDate >= today && entryDate <= nextMonth) {
             const subjectEntry = entry.subjects.find(
               (sub) => sub.subjectName === course.courseType
             );
             if (subjectEntry && subjectEntry.timeSlots.includes(selectedTime)) {
-              // ✅ Ensure correct time slot
               availableTutorsWithDates.push({
                 tutorId: tutor._id,
                 date: entry.date,

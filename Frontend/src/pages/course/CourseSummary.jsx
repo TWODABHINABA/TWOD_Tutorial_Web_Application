@@ -130,13 +130,12 @@ const CourseSummaryPage = () => {
       selectedTutor === "No Preference" ? null : selectedTutor;
 
     try {
-      console.log({
+      console.log("Sending Enrollment Data:", {
         tutorId: tutorIdToSend,
         selectedDate,
         selectedTime: selectedTimeSlot,
         duration: selectedDuration,
       });
-
       const { data } = await api.post(
         `/courses/${course._id}/enroll`,
         {
