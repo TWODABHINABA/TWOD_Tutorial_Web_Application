@@ -5,6 +5,7 @@ const multer = require("multer");
 const path = require("path");
 const router = express.Router();
 const Person = require("../Models/person");
+const Tutor = require("../Models/tutors");
 const { error } = require("console");
 const authMiddleware = require("../Auth/Authentication");
 const speakeasy = require("speakeasy");
@@ -187,55 +188,94 @@ router.get("/check-admin", async (req, res) => {
 
 router.use("/uploads", express.static("uploads"));
 
-// router.post("/login", async (req, res) => {
-//   const { email, password } = req.body;
-//   try {
-//     const loginUser = await Person.findOne({ email });
-//     const isPasswordMatch = await loginUser.comparePassword(password);
-//     if (!loginUser) {
-//       return res.status(400).json("Invalid Email");
-//     } else if (!isPasswordMatch) {
-//       return res.status(400).json("Invalid Password");
-//     }
-//     const token = jwt.sign(
-//       { id: loginUser._id, role: loginUser.role },
-//       JWT_SECRET,
-//       {
-//         expiresIn: "1h",
-//       }
-//     );
-//     res.json({ token, role: loginUser.role });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error logging in" });
-//   }
-// });
-
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  try {
-    const loginUser = await Person.findOne({ email });
+  console.log("🔹 Login request received:", { email, password });
 
-    if (!loginUser) {
-      return res.status(400).json({ message: "Invalid Email" });
+  try {
+    let loginUser = await Tutor.findOne({ email });
+    console.log("🔹 Tutor found:", loginUser);
+
+    if (loginUser) {
+      const isMatch = await bcrypt.compare(password, loginUser.password);
+      console.log("🔹 Password match:", isMatch);
+
+      if (!isMatch) {
+        console.log("❌ Incorrect password");
+        return res.status(400).json({ message: "Invalid Password" });
+      }
+
+      if (loginUser.isFirstLogin) {
+        console.log("🛑 First login - Redirecting to set password");
+        return res.status(403).json({
+          message: "Set a new password",
+          redirectTo: "/set-password-tutor",
+        });
+      }
+
+      const token = jwt.sign(
+        { id: loginUser._id, role: loginUser.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      console.log("✅ Tutor login successful!");
+      return res.json({ token, role: loginUser.role });
     }
 
-    const isPasswordMatch = await loginUser.comparePassword(password);
+    loginUser = await Person.findOne({ email });
+    console.log("🔹 Person found:", loginUser);
+
+    if (!loginUser) {
+      console.log("❌ Email not found");
+      return res.status(400).json({ message: "Email not found" });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, loginUser.password);
+    console.log("🔹 Password match:", isPasswordMatch);
 
     if (!isPasswordMatch) {
+      console.log("❌ Incorrect password");
       return res.status(400).json({ message: "Invalid Password" });
     }
 
     const token = jwt.sign(
       { id: loginUser._id, role: loginUser.role },
-      JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
     );
 
+    console.log("✅ Person login successful!");
     res.json({ token, role: loginUser.role });
   } catch (error) {
+    console.error("🔥 Login Error:", error);
     res.status(500).json({ message: "Error logging in" });
+  }
+});
+
+// Route to handle setting a new password for tutors
+router.post("/set-password-tutor", async (req, res) => {
+  const { email, password } = req.body; // ✅ Match frontend variable names
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updatedTutor = await Tutor.findOneAndUpdate(
+      { email },
+      { password: hashedPassword, isFirstLogin: false },
+      { new: true } // ✅ Return updated tutor
+    );
+
+    if (!updatedTutor) {
+      return res.status(400).json({ message: "Tutor not found" });
+    }
+
+    res.json({
+      message: "Password updated successfully! Please log in again.",
+    });
+  } catch (error) {
+    console.error("Set Password Error:", error);
+    res.status(500).json({ message: "Error updating password" });
   }
 });
 
@@ -244,31 +284,27 @@ router.get("/me", authMiddleware, async (req, res) => {
     console.log(req.user);
     try {
       const id = req.user.id;
-      const user = await Person.findById(id).select("-password");
+      let user = await Person.findById(id).select("-password"); // Try fetching from Person schema
+
+      if (!user) {
+        user = await Tutor.findById(id).select("-password"); // If not found, fetch from Tutor schema
+      }
+
       if (!user) {
         console.log("EROOOOOOOOOOOOOOOOOORORORORORORORORO");
         return res.status(404).json({ message: "User not found" });
       }
+
       console.log(user);
       res.json(user);
     } catch (error) {
-      res.status(500).json(error, "Not Found");
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Server error" });
     }
   } else {
     res.status(401).json({ message: "Not authenticated" });
   }
 });
-
-// router.get("/:id", authMiddleware, async (req, res) => {
-//   try {
-//     const userid = req.params.id;
-//     const user = await Person.findById(userid).select("-password");
-//     console.log(user);
-//     res.json(user);
-//   } catch (error) {
-//     res.status(500).json(error, "Not Found");
-//   }
-// });
 
 router.put(
   "/update/:id",
@@ -283,16 +319,26 @@ router.put(
       if (req.body.phone) updates.phone = req.body.phone;
       if (req.body.birthday) updates.birthday = req.body.birthday;
       if (req.body.email) updates.email = req.body.email;
+      if (req.body.description) updates.description = req.body.description;
+      if (req.body.subjects) updates.subjects = req.body.subjects.split(","); // Convert to array
 
       if (req.file) {
         updates.profilePicture = "/uploads/" + req.file.filename;
       }
 
-      const updatedUser = await Person.findByIdAndUpdate(
+      let updatedUser = await Person.findByIdAndUpdate(
         id,
         { $set: updates },
         { new: true }
       );
+
+      if (!updatedUser) {
+        updatedUser = await Tutor.findByIdAndUpdate(
+          id,
+          { $set: updates },
+          { new: true }
+        );
+      }
 
       if (!updatedUser) {
         return res.status(404).json({ error: "User Not Found" });
@@ -305,6 +351,7 @@ router.put(
     }
   }
 );
+
 
 router.delete("/delete/:id", authMiddleware, async (req, res) => {
   try {
@@ -370,8 +417,8 @@ router.post("/verify-phone", async (req, res) => {
     user.otpExpires = Date.now() + 5 * 60 * 1000; // OTP valid for 5 mins
     await user.save();
 
-    console.log("Twilio number",process.env.TWILIO_PHONE_NUMBER)
-    console.log("+91 number",formattedPhone)
+    console.log("Twilio number", process.env.TWILIO_PHONE_NUMBER);
+    console.log("+91 number", formattedPhone);
     // Send OTP via Twilio
     await client.messages.create({
       body: `Your OTP for verification is: ${otp}. It is valid for 5 minutes.`,
@@ -385,35 +432,6 @@ router.post("/verify-phone", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
-
-// router.post("/verify-phone", async (req, res) => {
-//   try {
-//     const { email, phone } = req.body;
-//     const user = await Person.findOne({ email });
-
-//     if (!user || user.phone !== phone) {
-//       return res.status(400).json({ message: "Invalid phone number" });
-//     }
-
-//     // Generate OTP
-//     const otp = speakeasy.totp({
-//       secret: process.env.OTP_SECRET || "secret",
-//       encoding: "base32",
-//       step: 60, // OTP valid for 60 seconds
-//     });
-
-//     // Save OTP in database
-//     user.resetOTP = otp;
-//     user.otpExpires = Date.now() + 5 * 60 * 1000; // OTP valid for 5 mins
-//     await user.save();
-
-//     console.log("Generated OTP:", otp); // Remove in production
-
-//     res.json({ message: "OTP sent successfully" });
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// });
 
 router.post("/verify-otp", async (req, res) => {
   try {
@@ -444,7 +462,9 @@ router.post("/reset-password", async (req, res) => {
     }
     const isSamePassword = await bcrypt.compare(newPassword, user.password);
     if (isSamePassword) {
-      return res.status(400).json({ message: "New Password must be different from the older one" });
+      return res
+        .status(400)
+        .json({ message: "New Password must be different from the older one" });
     }
 
     // Hash new password
@@ -460,3 +480,115 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 module.exports = router;
+
+// router.post("/login", async (req, res) => {
+//   const { email, password } = req.body;
+//   try {
+//     const loginUser = await Person.findOne({ email });
+
+//     if (!loginUser) {
+//       const loginUser = await Tutor.findOne({ email });
+//       if (!loginUser)
+//         return res.status(400).json({ message: "Email not found" });
+//       const isMatch = await bcrypt.compare(password, loginUser.password);
+//       if (!isMatch)
+//         return res.status(400).json({ message: "Invalid Password" });
+//       if (loginUser.isFirstLogin) {
+//         return res
+//           .status(401)
+//           .json({
+//             message: "Set a new password",
+//             redirectTo: "/set-password-tutor",
+//           });
+//       }
+//     } else {
+//       const isPasswordMatch = await loginUser.comparePassword(password);
+
+//       if (!isPasswordMatch) {
+//         return res.status(400).json({ message: "Invalid Password" });
+//       }
+//     }
+//     const token = jwt.sign(
+//       { id: loginUser._id, role: loginUser.role },
+//       JWT_SECRET,
+//       {
+//         expiresIn: "1h",
+//       }
+//     );
+
+//     res.json({ token, role: loginUser.role });
+//   } catch (error) {
+//     res.status(500).json({ message: "Error logging in" });
+//   }
+// });
+
+// router.post("/set-password-tutor", async (req, res) => {
+//   const { email, newPassword } = req.body;
+//   const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+//   await Tutor.findOneAndUpdate(
+//     { email },
+//     { password: hashedPassword, isFirstLogin: false }
+//   );
+
+//   res.json({ message: "Password updated successfully!" });
+// });
+
+// router.get("/me", authMiddleware, async (req, res) => {
+//   if (req.isAuthenticated()) {
+//     console.log(req.user);
+//     try {
+//       const id = req.user.id;
+//       const user = await Person.findById(id).select("-password");
+//       if(!user){
+//         const user=await Tutor.findById(id).select("-password");
+//       }
+//       if (!user) {
+//         console.log("EROOOOOOOOOOOOOOOOOORORORORORORORORO");
+//         return res.status(404).json({ message: "User not found" });
+//       }
+//       console.log(user);
+//       res.json(user);
+//     } catch (error) {
+//       res.status(500).json(error, "Not Found");
+//     }
+//   } else {
+//     res.status(401).json({ message: "Not authenticated" });
+//   }
+// });
+
+// router.put(
+//   "/update/:id",
+//   authMiddleware,
+//   upload.single("profilePicture"),
+//   async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const updates = {};
+
+//       if (req.body.name) updates.name = req.body.name;
+//       if (req.body.phone) updates.phone = req.body.phone;
+//       if (req.body.birthday) updates.birthday = req.body.birthday;
+//       if (req.body.email) updates.email = req.body.email;
+
+//       if (req.file) {
+//         updates.profilePicture = "/uploads/" + req.file.filename;
+//       }
+
+//       const updatedUser = await Person.findByIdAndUpdate(
+//         id,
+//         { $set: updates },
+//         { new: true }
+//       );
+
+//       if (!updatedUser) {
+//         return res.status(404).json({ error: "User Not Found" });
+//       }
+
+//       res.status(200).json(updatedUser);
+//     } catch (err) {
+//       console.error("Error Updating Data", err);
+//       res.status(500).json({ error: "Internal Server Error" });
+//     }
+//   }
+// );

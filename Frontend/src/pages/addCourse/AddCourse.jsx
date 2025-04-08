@@ -26,7 +26,7 @@ const AddCourse = () => {
   console.log(token);
 
   useEffect(() => {
-    if (role !== "admin") {
+    if (role !== "tutor" && role !== "admin") {
       navigate("/");
     }
   }, [role, navigate]);

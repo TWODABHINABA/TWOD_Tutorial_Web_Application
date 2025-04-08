@@ -1,16 +1,19 @@
-import { useState ,useEffect} from "react";
+import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Toast from "./Toast";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { ClipLoader } from "react-spinners";
 
-const SetPassword = ({ isOpen, onClose }) => {
+const SetPasswordTutor = () => {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [valid, setValid] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "" });
-  const navigate = useNavigate();
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -19,13 +22,9 @@ const SetPassword = ({ isOpen, onClose }) => {
 
     return () => clearTimeout(timer);
   }, []);
-
-  if (!isOpen) return null;
-
   const isValidPassword = (password) => {
     return (
       password.length >= 8 &&
-      password.length <= 20 &&
       /[A-Z]/.test(password) &&
       /[a-z]/.test(password) &&
       /\d/.test(password) &&
@@ -36,7 +35,7 @@ const SetPassword = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const urlParams = new URLSearchParams(window.location.search);
-    const email = urlParams.get("email");
+    const email = urlParams.get("email"); // Get email from query params
 
     if (!isValidPassword(password)) {
       setError(
@@ -46,22 +45,30 @@ const SetPassword = ({ isOpen, onClose }) => {
     }
 
     try {
-      const response = await api.post("/set-password", { email, password });
-      localStorage.setItem("token", response.data.token);
+      const response = await api.post("/set-password-tutor", {
+        email,
+        password,
+      });
 
-      setToast({ show: true, message: "Password set successfully!" });
+      setToast({
+        show: true,
+        message: "Password set successfully!",
+        type: "success",
+      });
 
- 
       setTimeout(() => {
-        setToast({ show: false });
+        setToast({
+          show: false,
+          message: "Redirecting to Login Page please Login Again",
+          type: "success",
+        });
+
         setTimeout(() => {
-          onClose();
-          navigate("/user");
-        }, 500); 
-      }, 1500); 
+          navigate("/");
+        }, 500);
+      }, 1500);
     } catch (error) {
       setError("Error setting password. Try again.");
-
       setToast({ show: true, message: "Error setting password" });
 
       setTimeout(() => setToast({ show: false }), 1500);
@@ -74,23 +81,18 @@ const SetPassword = ({ isOpen, onClose }) => {
         <ClipLoader size={80} color="#FFA500" />
       </div>
     );
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
       {toast.show && (
         <Toast
           message={toast.message}
+          type={toast.type}
           onClose={() => setToast({ show: false })}
         />
       )}
 
       <div className="bg-white p-6 rounded-2xl shadow-lg max-w-sm w-full relative animate-fadeIn">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-lg"
-        >
-          ✕
-        </button>
-
         <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
           Set Your Password
         </h2>
@@ -101,13 +103,13 @@ const SetPassword = ({ isOpen, onClose }) => {
 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter New Password"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               setValid(isValidPassword(e.target.value));
-              setError(null);
+              setError("");
             }}
             required
             className={`p-2 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ${
@@ -118,6 +120,17 @@ const SetPassword = ({ isOpen, onClose }) => {
                 : "border-gray-300 focus:ring-blue-400"
             }`}
           />
+          <button
+            type="button"
+            className="absolute right-8 top-[77px] transform -translate-y-1/2 text-gray-600"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <EyeSlashIcon className="w-6 h-6" />
+            ) : (
+              <EyeIcon className="w-6 h-6" />
+            )}
+          </button>
 
           <p className="text-sm text-gray-600">
             Password must be:
@@ -174,4 +187,4 @@ const SetPassword = ({ isOpen, onClose }) => {
   );
 };
 
-export default SetPassword;
+export default SetPasswordTutor;

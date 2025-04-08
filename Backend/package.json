@@ -38,6 +38,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "paypal-rest-sdk": "^1.8.1",
+    "resend": "^4.2.0",
     "router": "^2.0.0",
     "speakeasy": "^2.0.0",
     "stripe": "^17.6.0",

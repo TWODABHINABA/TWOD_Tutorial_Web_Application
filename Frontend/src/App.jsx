@@ -32,6 +32,7 @@ import Controls from './pages/tutors/Controls'
 import TutorAddCourse from './pages/tutors/TutorAddCourse'
 import TutorAddAvailability from './pages/tutors/TutorAddAvailability'
 import Requests from './pages/tutors/Requests'
+import SetPasswordTutor from './pages/login_signup/SetPasswordTutor'
 function App() {
   // const isAdmin=localStorage.getItem("role");
   return (
@@ -51,6 +52,7 @@ function App() {
         <Route path="/add-course" element={<AddCourse />} />
         <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/set-password" element={<SetPasswordWrapper />} />
+        <Route path="/set-password-tutor" element={<SetPasswordTutor />} />
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/cancel" element={<CancelPage />} />
         <Route path="/add-tutor" element={<AddTutor />} />

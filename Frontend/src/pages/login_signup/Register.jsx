@@ -188,25 +188,81 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     }
   };
 
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setError({ email: "", password: "" });
+
+  //   try {
+  //     const userData = await api.post("/login", { email, password });
+
+  //     if (userData.data.token && userData.data.role) {
+  //       localStorage.setItem("role", userData.data.role);
+  //       localStorage.setItem("token", userData.data.token);
+  //     }
+
+  //     setToast({ show: true, message: "Login Successful!", type: "success" });
+  //     setTimeout(() => {
+  //       navigate("/user");
+  //     }, 2000);
+  //   } catch (error) {
+  //     if (error.response && error.response.data.message) {
+  //       if (error.response.data.message === "Invalid Email") {
+  //         setError({ email: "Invalid Email", password: "" });
+  //       } else if (error.response.data.message === "Invalid Password") {
+  //         setError({ email: "", password: "Incorrect Password" });
+  //       } else {
+  //         setError({ email: "", password: "Something went wrong. Try again." });
+  //       }
+  //     } else {
+  //       setError({ email: "", password: "Something went wrong. Try again." });
+  //     }
+  //   }
+  // };
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError({ email: "", password: "" });
+    setError({ email: "", password: "" }); 
 
     try {
-      const userData = await api.post("/login", { email, password });
+      const response = await api.post("/login", { email, password });
 
-      if (userData.data.token && userData.data.role) {
-        localStorage.setItem("role", userData.data.role);
-        localStorage.setItem("token", userData.data.token);
+      if (response.data.redirectTo) {
+        setToast({ show: true, message: "Login Successful!", type: "success" });
+
+        setTimeout(() => {
+          navigate(
+            response.data.redirectTo + `?email=${encodeURIComponent(email)}`
+          );
+        }, 3000); 
       }
+
+
+      if (response.data.token && response.data.role) {
+        localStorage.setItem("role", response.data.role);
+        localStorage.setItem("token", response.data.token);
+      }
+
 
       setToast({ show: true, message: "Login Successful!", type: "success" });
       setTimeout(() => {
-        navigate("/user");
+        navigate("/user"); 
       }, 2000);
     } catch (error) {
-      if (error.response && error.response.data.message) {
-        if (error.response.data.message === "Invalid Email") {
+      if (error.response) {
+        if (error.response.status === 403 && error.response.data.redirectTo) {
+          setToast({
+            show: true,
+            message: "Login Successful!",
+            type: "success",
+          });
+
+          setTimeout(() => {
+            navigate(
+              error.response.data.redirectTo +
+                `?email=${encodeURIComponent(email)}`
+            );
+          }, 3000); // ⏳ Increased delay to ensure the toast appears
+        } else if (error.response.data.message === "Invalid Email") {
           setError({ email: "Invalid Email", password: "" });
         } else if (error.response.data.message === "Invalid Password") {
           setError({ email: "", password: "Incorrect Password" });
@@ -214,7 +270,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
           setError({ email: "", password: "Something went wrong. Try again." });
         }
       } else {
-        setError({ email: "", password: "Something went wrong. Try again." });
+        setError({ email: "", password: "Network error. Please try again." });
       }
     }
   };
@@ -388,7 +444,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 </div>
               ))}
 
-
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -478,7 +533,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 </button>
               </div>
 
-
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
@@ -507,7 +561,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   )}
                 </button>
               </div>
-
 
               {confirmPassword && password !== confirmPassword && (
                 <p className="text-red-500 text-sm">Passwords do not match.</p>
