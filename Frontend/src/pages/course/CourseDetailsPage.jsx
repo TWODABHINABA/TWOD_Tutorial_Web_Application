@@ -1396,6 +1396,7 @@ const CourseDetailsPage = () => {
   const handleEnrollClick = async () => {
     // If user is not logged in, show register modal
     if (!token) {
+      sessionStorage.setItem("redirectAfterLogin", window.location.pathname + window.location.search);
       setShowRegisterModal(true);
       return;
     }
