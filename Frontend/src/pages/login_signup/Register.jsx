@@ -244,9 +244,21 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
 
       setToast({ show: true, message: "Login Successful!", type: "success" });
-      setTimeout(() => {
-        navigate("/user"); 
-      }, 2000);
+      // Get the stored redirect path
+    const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/user";
+    
+    // Clean up
+    sessionStorage.removeItem("redirectAfterLogin");
+    setTimeout(() => {
+      // If we're already on the target page, perhaps just refresh or update state
+      if (window.location.pathname === redirectPath.split('?')[0]) {
+        // Maybe refresh the component or update state to reflect logged-in status
+        window.location.reload(); // Simple approach, or use a more elegant state update
+      } else {
+        // Navigate to the stored path
+        navigate(redirectPath);
+      }
+    }, 2000);
     } catch (error) {
       if (error.response) {
         if (error.response.status === 403 && error.response.data.redirectTo) {
