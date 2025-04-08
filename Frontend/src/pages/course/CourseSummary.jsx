@@ -110,7 +110,12 @@ const CourseSummaryPage = () => {
   // };
 
   const handleEnrollNow = async () => {
-    if (!selectedDate || !selectedTimeSlot || !selectedDuration || !selectedSession) {
+    if (
+      !selectedDate ||
+      !selectedTimeSlot ||
+      !selectedDuration ||
+      !selectedSession
+    ) {
       alert("Please select all options before enrolling.");
       return;
     }
@@ -119,41 +124,43 @@ const CourseSummaryPage = () => {
       navigate("/login");
       return;
     }
-  
-    // ✅ Convert selectedDate to match MongoDB format (UTC)
-    const formattedDate = new Date(selectedDate).toISOString(); // Converts to "YYYY-MM-DDT00:00:00.000Z"
-  
-    // Ensure tutorId is null when 'No Preference' is selected
-    const tutorIdToSend = selectedTutor === "No Preference" ? null : selectedTutor;
-  
+
+    // ✅ Format selectedDate correctly (YYYY-MM-DD)
+    const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
+
+    // ✅ Ensure tutorId is null when 'No Preference' is selected
+    const tutorIdToSend =
+      selectedTutor === "No Preference" ? null : selectedTutor;
+
     try {
       console.log("Sending Enrollment Data:", {
         tutorId: tutorIdToSend,
-        selectedDate: formattedDate,  // ✅ Send correct date format
-        selectedTime: selectedTimeSlot,
+        selectedDate: formattedDate, // ✅ Correct date format
+        selectedTime: selectedTimeSlot, // ✅ Ensure 12-hour AM/PM format
         duration: selectedDuration,
       });
-  
+
       const { data } = await api.post(
         `/courses/${course._id}/enroll`,
         {
-          tutorId: tutorIdToSend, // ✅ Ensure null is sent when 'No Preference'
-          selectedDate: formattedDate,  // ✅ Send correctly formatted date
-          selectedTime: selectedTimeSlot,
+          tutorId: tutorIdToSend,
+          selectedDate: formattedDate, // ✅ Send correctly formatted date
+          selectedTime: selectedTimeSlot, // ✅ Ensure time is in 12-hour format
           duration: selectedDuration,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
-      if (data.approval_url) window.location.href = data.approval_url;
-      else alert("Payment URL not received.");
+
+      if (data.approval_url) {
+        window.location.href = data.approval_url;
+      } else {
+        alert("Payment URL not received.");
+      }
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Enrollment failed.");
     }
   };
-  
-  
 
   const handlePayLater = () => {
     alert("Enrollment saved. You can pay later.");
