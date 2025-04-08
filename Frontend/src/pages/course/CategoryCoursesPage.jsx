@@ -10,11 +10,19 @@ const CategoryCoursesPage = () => {
   const coursesRef = useRef(null);
   const { categoryName } = useParams();
 
+  const sortedCategories = [...categories].sort();
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await api.get("/categories");
-        setCategories(response.data);
+
+// Sort alphabetically by category title
+const sorted = response.data.sort((a, b) =>
+  a.category.localeCompare(b.category)
+);
+
+setCategories(sorted);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }

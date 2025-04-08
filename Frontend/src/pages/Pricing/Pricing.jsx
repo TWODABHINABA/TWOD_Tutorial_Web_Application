@@ -97,13 +97,14 @@ const PricingPage = () => {
                 ))}
               </ul>
 
-              <button
+          { /*    <button
                 onClick={() => navigate("/booking")}
                 className="mt-auto w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
                 data-aos="fade-up"
               >
                 Enroll Now
-              </button>
+              </button> */}
+            
             </div>
           ))}
         </div>
