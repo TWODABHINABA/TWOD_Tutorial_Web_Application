@@ -246,6 +246,52 @@ router.get("/categories", async (req, res) => {
   }
 });
 
+
+const convertTo24HourFormat = (time12h) => {
+  const [time, modifier] = time12h.split(" ");
+  let [hours, minutes] = time.split(":");
+
+  if (modifier === "PM" && hours !== "12") {
+    hours = String(parseInt(hours) + 12);
+  } else if (modifier === "AM" && hours === "12") {
+    hours = "00";
+  }
+
+  return `${hours}:${minutes}`;
+};
+
+const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
+  const selectedStartTime = convertTo24HourFormat(selectedTime.split("-")[0].trim()); // "19:30"
+  const selectedEndTime = convertTo24HourFormat(selectedTime.split("-")[1].trim()); // "20:30"
+
+  const tutors = await Tutor.find({
+    "availability.date": selectedDate, // Match date
+    "availability.subjects.subjectName": subject, // Match subject
+  });
+
+  for (const tutor of tutors) {
+    for (const subjectEntry of tutor.availability) {
+      if (subjectEntry.date.toISOString().split("T")[0] === selectedDate) {
+        for (const subj of subjectEntry.subjects) {
+          if (subj.subjectName === subject) {
+            for (const slot of subj.timeSlots) {
+              if (
+                slot.startTime <= selectedStartTime &&
+                slot.endTime >= selectedEndTime
+              ) {
+                return tutor; // ✅ Found matching tutor
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return null; // No available tutor
+};
+
+// Updated Enrollment Route
 router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
   try {
     let { tutorId, selectedDate, selectedTime, duration } = req.body;
@@ -271,76 +317,17 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     const formattedPrice = parseFloat(amount.replace(/,/g, "")).toFixed(2);
     console.log(formattedPrice);
 
-    
-
     if (!tutorId) {
-      const tutors = await Tutor.find({ subjects: course.courseType });
-    
-      if (tutors.length === 0) {
-        return res.status(400).json({ error: "No tutors available for this course" });
+      // Auto-assign a tutor
+      const assignedTutor = await findAvailableTutor(course.courseType, selectedDate, selectedTime);
+
+      if (!assignedTutor) {
+        return res.status(400).json({ error: "No tutors available for the selected date and time." });
       }
-    
-      const today = new Date();
-      const nextMonth = new Date();
-      nextMonth.setMonth(today.getMonth() + 1);
-    
-      let availableTutorsWithDates = [];
-    
-      tutors.forEach((tutor) => {
-        tutor.availability.forEach((entry) => {
-          const entryDate = new Date(entry.date);
-          if (entryDate >= today && entryDate <= nextMonth) {
-            const subjectEntry = entry.subjects.find(
-              (sub) => sub.subjectName === course.courseType
-            );
-    
-            if (subjectEntry) {
-              // ✅ Extract start & end time from selectedTime (format: "07:30 PM-08:30 PM")
-              const [selectedStart, selectedEnd] = selectedTime.split("-").map((t) => {
-                let [time, period] = t.trim().split(" ");
-                let [hours, minutes] = time.split(":").map(Number);
-                if (period === "PM" && hours !== 12) hours += 12;
-                if (period === "AM" && hours === 12) hours = 0;
-                return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-              });
-              
-    
-              // ✅ Check if selected time falls within the available time slot
-              if (subjectEntry.timeSlots.some((slot) =>
-                selectedStart >= slot.startTime && selectedEnd <= slot.endTime
-              )) {
-                availableTutorsWithDates.push({
-                  tutorId: tutor._id,
-                  date: entry.date,
-                  timeSlots: subjectEntry.timeSlots,
-                });
-              }
-            }
-          }
-        });
-      });
-    
-      if (availableTutorsWithDates.length === 0) {
-        const alternativeDates = tutors.flatMap((tutor) =>
-          tutor.availability
-            .filter((entry) => entry.subjects.some((sub) => sub.subjectName === course.courseType))
-            .map((entry) => entry.date)
-        );
-        return res.status(400).json({
-          error: "No available tutors for the selected date and time slot",
-          suggestedDates: [...new Set(alternativeDates)].sort(),
-        });
-      }
-      
-    
-      // Randomly select a tutor from the filtered list
-      const selectedTutorData = availableTutorsWithDates[Math.floor(Math.random() * availableTutorsWithDates.length)];
-      tutorId = selectedTutorData.tutorId;
-    
+
+      tutorId = assignedTutor._id;
       console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
     }
-    
-    
 
     const transaction = new Transaction({
       courseId: course._id,
@@ -358,14 +345,8 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        return_url:
-          `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}` ||
-          `http://localhost:5173/success?transactionId=${transaction._id}`,
-        cancel_url:
-          `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` ||
-          `http://localhost:5173/cancel?transactionId=${transaction._id}`,
-        // return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
-        // cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+        return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
+        cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -394,9 +375,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
         console.error("Error creating payment:", error);
         return res.status(500).json({ error: "Payment creation failed" });
       } else {
-        const approvalUrl = payment.links.find(
-          (link) => link.rel === "approval_url"
-        );
+        const approvalUrl = payment.links.find((link) => link.rel === "approval_url");
         if (approvalUrl) {
           return res.json({ approval_url: approvalUrl.href });
         } else {
@@ -409,6 +388,171 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
+//   try {
+//     let { tutorId, selectedDate, selectedTime, duration } = req.body;
+//     const course = await Course.findById(req.params.id);
+
+//     if (!course) {
+//       return res.status(404).json({ message: "Course not found" });
+//     }
+
+//     const globalPricing = await GlobalSessionPricing.findOne();
+//     if (!globalPricing) {
+//       return res.status(404).json({ message: "Session pricing not found" });
+//     }
+
+//     const selectedSession = globalPricing.sessions.find(
+//       (session) => session.duration === duration
+//     );
+//     if (!selectedSession) {
+//       return res.status(400).json({ message: "Invalid session duration" });
+//     }
+
+//     let amount = selectedSession.price;
+//     const formattedPrice = parseFloat(amount.replace(/,/g, "")).toFixed(2);
+//     console.log(formattedPrice);
+
+    
+
+//     if (!tutorId) {
+//       const tutors = await Tutor.find({ subjects: course.courseType });
+    
+//       if (tutors.length === 0) {
+//         return res.status(400).json({ error: "No tutors available for this course" });
+//       }
+    
+//       const today = new Date();
+//       const nextMonth = new Date();
+//       nextMonth.setMonth(today.getMonth() + 1);
+    
+//       let availableTutorsWithDates = [];
+    
+//       tutors.forEach((tutor) => {
+//         tutor.availability.forEach((entry) => {
+//           const entryDate = new Date(entry.date);
+//           if (entryDate >= today && entryDate <= nextMonth) {
+//             const subjectEntry = entry.subjects.find(
+//               (sub) => sub.subjectName === course.courseType
+//             );
+    
+//             if (subjectEntry) {
+//               // ✅ Extract start & end time from selectedTime (format: "07:30 PM-08:30 PM")
+//               const [selectedStart, selectedEnd] = selectedTime.split("-").map((t) => {
+//                 let [time, period] = t.trim().split(" ");
+//                 let [hours, minutes] = time.split(":").map(Number);
+//                 if (period === "PM" && hours !== 12) hours += 12;
+//                 if (period === "AM" && hours === 12) hours = 0;
+//                 return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+//               });
+              
+    
+//               // ✅ Check if selected time falls within the available time slot
+//               if (subjectEntry.timeSlots.some((slot) =>
+//                 selectedStart >= slot.startTime && selectedEnd <= slot.endTime
+//               )) {
+//                 availableTutorsWithDates.push({
+//                   tutorId: tutor._id,
+//                   date: entry.date,
+//                   timeSlots: subjectEntry.timeSlots,
+//                 });
+//               }
+//             }
+//           }
+//         });
+//       });
+    
+//       if (availableTutorsWithDates.length === 0) {
+//         const alternativeDates = tutors.flatMap((tutor) =>
+//           tutor.availability
+//             .filter((entry) => entry.subjects.some((sub) => sub.subjectName === course.courseType))
+//             .map((entry) => entry.date)
+//         );
+//         return res.status(400).json({
+//           error: "No available tutors for the selected date and time slot",
+//           suggestedDates: [...new Set(alternativeDates)].sort(),
+//         });
+//       }
+      
+    
+//       // Randomly select a tutor from the filtered list
+//       const selectedTutorData = availableTutorsWithDates[Math.floor(Math.random() * availableTutorsWithDates.length)];
+//       tutorId = selectedTutorData.tutorId;
+    
+//       console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
+//     }
+    
+    
+
+//     const transaction = new Transaction({
+//       courseId: course._id,
+//       user: req.user.id,
+//       amount: formattedPrice,
+//       tutorId,
+//       selectedDate,
+//       selectedTime,
+//       duration,
+//       status: "pending",
+//     });
+//     await transaction.save();
+
+//     const paymentJson = {
+//       intent: "sale",
+//       payer: { payment_method: "paypal" },
+//       redirect_urls: {
+//         return_url:
+//           `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}` ||
+//           `http://localhost:5173/success?transactionId=${transaction._id}`,
+//         cancel_url:
+//           `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` ||
+//           `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+//         // return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
+//         // cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+//       },
+//       transactions: [
+//         {
+//           item_list: {
+//             items: [
+//               {
+//                 name: `Course Enrollment: ${course.name}`,
+//                 sku: course._id.toString(),
+//                 price: formattedPrice,
+//                 currency: "USD",
+//                 quantity: 1,
+//               },
+//             ],
+//           },
+//           amount: {
+//             currency: "USD",
+//             total: formattedPrice,
+//           },
+//           description: `Enrollment for course ${course.name}, Duration: ${duration}.`,
+//         },
+//       ],
+//     };
+
+//     paypal.payment.create(paymentJson, (error, payment) => {
+//       if (error) {
+//         console.error("Error creating payment:", error);
+//         return res.status(500).json({ error: "Payment creation failed" });
+//       } else {
+//         const approvalUrl = payment.links.find(
+//           (link) => link.rel === "approval_url"
+//         );
+//         if (approvalUrl) {
+//           return res.json({ approval_url: approvalUrl.href });
+//         } else {
+//           return res.status(500).json({ error: "No approval URL found" });
+//         }
+//       }
+//     });
+//   } catch (err) {
+//     console.error("Error processing enrollment:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 router.get("/success", authMiddleware, async (req, res) => {
   try {
