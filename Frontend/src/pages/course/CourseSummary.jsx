@@ -120,26 +120,26 @@ const CourseSummaryPage = () => {
       return;
     }
   
+    // ✅ Convert selectedDate to match MongoDB format (UTC)
+    const formattedDate = new Date(selectedDate).toISOString(); // Converts to "YYYY-MM-DDT00:00:00.000Z"
+  
     // Ensure tutorId is null when 'No Preference' is selected
     const tutorIdToSend = selectedTutor === "No Preference" ? null : selectedTutor;
-  
-    // ✅ Ensure selectedTimeSlot is properly formatted before sending
-    const formattedTimeSlot = selectedTimeSlot.replace(/\s/g, ""); // Remove extra spaces
   
     try {
       console.log("Sending Enrollment Data:", {
         tutorId: tutorIdToSend,
-        selectedDate,
-        selectedTime: formattedTimeSlot, // ✅ Use formatted time slot
+        selectedDate: formattedDate,  // ✅ Send correct date format
+        selectedTime: selectedTimeSlot,
         duration: selectedDuration,
       });
   
       const { data } = await api.post(
         `/courses/${course._id}/enroll`,
         {
-          tutorId: tutorIdToSend,
-          selectedDate,
-          selectedTime: formattedTimeSlot,
+          tutorId: tutorIdToSend, // ✅ Ensure null is sent when 'No Preference'
+          selectedDate: formattedDate,  // ✅ Send correctly formatted date
+          selectedTime: selectedTimeSlot,
           duration: selectedDuration,
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -152,6 +152,7 @@ const CourseSummaryPage = () => {
       alert(err.response?.data?.message || "Enrollment failed.");
     }
   };
+  
   
 
   const handlePayLater = () => {
