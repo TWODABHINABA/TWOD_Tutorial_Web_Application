@@ -69,6 +69,47 @@ const CourseSummaryPage = () => {
     setShowTutorModal(false);
   };
 
+  // const handleEnrollNow = async () => {
+  //   if (
+  //     !selectedDate ||
+  //     !selectedTimeSlot ||
+  //     !selectedDuration ||
+  //     !selectedSession
+  //   ) {
+  //     alert("Please select all options before enrolling.");
+  //     return;
+  //   }
+  //   if (!token) {
+  //     alert("Please log in first.");
+  //     navigate("/login");
+  //     return;
+  //   }
+  //   try {
+  //     console.log({
+  //       tutorId: selectedTutor,
+  //       selectedDate,
+  //       selectedTime: selectedTimeSlot,
+  //       duration: selectedDuration,
+  //     });
+  //     const { data } = await api.post(
+  //       `/courses/${course._id}/enroll`,
+  //       {
+  //         tutorId: selectedTutor,
+  //         selectedDate,
+  //         selectedTime: selectedTimeSlot,
+  //         duration: selectedDuration,
+  //       },
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+  //     if (data.approval_url) window.location.href = data.approval_url;
+  //     else alert("Payment URL not received.");
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert(err.response?.data?.message || "Enrollment failed.");
+  //   }
+  // };
+
+
   const handleEnrollNow = async () => {
     if (
       !selectedDate ||
@@ -84,17 +125,22 @@ const CourseSummaryPage = () => {
       navigate("/login");
       return;
     }
+  
+    // Ensure tutorId is either a valid ID or null
+    const tutorIdToSend = selectedTutor || null;
+  
+    console.log({
+      tutorId: tutorIdToSend,
+      selectedDate,
+      selectedTime: selectedTimeSlot,
+      duration: selectedDuration,
+    });
+  
     try {
-      console.log({
-        tutorId: selectedTutor,
-        selectedDate,
-        selectedTime: selectedTimeSlot,
-        duration: selectedDuration,
-      });
       const { data } = await api.post(
         `/courses/${course._id}/enroll`,
         {
-          tutorId: selectedTutor,
+          tutorId: tutorIdToSend, // Fix: Ensure it's null, not an empty string
           selectedDate,
           selectedTime: selectedTimeSlot,
           duration: selectedDuration,
@@ -108,6 +154,7 @@ const CourseSummaryPage = () => {
       alert(err.response?.data?.message || "Enrollment failed.");
     }
   };
+  
 
   const handlePayLater = () => {
     alert("Enrollment saved. You can pay later.");
