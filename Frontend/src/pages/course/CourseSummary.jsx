@@ -85,6 +85,12 @@ const CourseSummaryPage = () => {
       return;
     }
     try {
+      console.log({
+        tutorId: selectedTutor,
+        selectedDate,
+        selectedTime: selectedTimeSlot,
+        duration: selectedDuration,
+      });
       const { data } = await api.post(
         `/courses/${course._id}/enroll`,
         {
