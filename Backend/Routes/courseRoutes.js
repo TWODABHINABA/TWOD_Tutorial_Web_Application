@@ -318,49 +318,54 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
 
     if (!tutorId) {
       const tutors = await Tutor.find({ subjects: course.courseType });
-    
+
       if (tutors.length === 0) {
-        return res.status(400).json({ error: "No tutors available for this course" });
+        return res
+          .status(400)
+          .json({ error: "No tutors available for this course" });
       }
-    
-      const today = new Date();
-      const nextMonth = new Date();
-      nextMonth.setMonth(today.getMonth() + 1);
-    
+
       let availableTutorsWithDates = [];
-    
+
       tutors.forEach((tutor) => {
         tutor.availability.forEach((entry) => {
           const entryDate = new Date(entry.date);
           if (entryDate.toISOString().split("T")[0] === selectedDate) {
-            entry.subjects.forEach((subjectEntry) => {
-              if (subjectEntry.subjectName === course.courseType) {
-                if (subjectEntry.timeSlots.includes(selectedTime)) {
-                  availableTutorsWithDates.push({
-                    tutorId: tutor._id,
-                    date: entry.date,
-                    timeSlots: subjectEntry.timeSlots,
-                  });
-                }
-              }
-            });
+            // ✅ Ensure correct date
+            const subjectEntry = entry.subjects.find(
+              (sub) => sub.subjectName === course.courseType
+            );
+            if (subjectEntry && subjectEntry.timeSlots.includes(selectedTime)) {
+              // ✅ Ensure correct time slot
+              availableTutorsWithDates.push({
+                tutorId: tutor._id,
+                date: entry.date,
+                timeSlots: subjectEntry.timeSlots,
+              });
+            }
           }
         });
       });
-    
+
       if (availableTutorsWithDates.length === 0) {
-        return res.status(400).json({ error: "No available tutors for the selected date and time slot" });
+        return res
+          .status(400)
+          .json({
+            error: "No available tutors for the selected date and time slot",
+          });
       }
-    
+
+      // Randomly select a tutor from the filtered list
       const selectedTutorData =
-        availableTutorsWithDates[Math.floor(Math.random() * availableTutorsWithDates.length)];
+        availableTutorsWithDates[
+          Math.floor(Math.random() * availableTutorsWithDates.length)
+        ];
       tutorId = selectedTutorData.tutorId;
-    
+
       console.log(
         `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
       );
     }
-    
 
     const transaction = new Transaction({
       courseId: course._id,
@@ -379,9 +384,11 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       payer: { payment_method: "paypal" },
       redirect_urls: {
         return_url:
-        `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}` || `http://localhost:5173/success?transactionId=${transaction._id}`,
+          `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}` ||
+          `http://localhost:5173/success?transactionId=${transaction._id}`,
         cancel_url:
-        `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` || `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+          `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` ||
+          `http://localhost:5173/cancel?transactionId=${transaction._id}`,
         // return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
         // cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
       },
@@ -503,7 +510,7 @@ router.get("/cancel", authMiddleware, async (req, res) => {
 
     return res.redirect(
       `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` ||
-      `http://localhost:5173/cancel?transactionId=${transaction._id}`
+        `http://localhost:5173/cancel?transactionId=${transaction._id}`
       // `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`
     );
   } catch (err) {

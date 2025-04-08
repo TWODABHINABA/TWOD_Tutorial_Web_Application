@@ -109,7 +109,6 @@ const CourseSummaryPage = () => {
   //   }
   // };
 
-
   const handleEnrollNow = async () => {
     if (
       !selectedDate ||
@@ -125,28 +124,30 @@ const CourseSummaryPage = () => {
       navigate("/login");
       return;
     }
-  
-    // Ensure tutorId is either a valid ID or null
-    const tutorIdToSend = selectedTutor || null;
-  
-    console.log({
-      tutorId: tutorIdToSend,
-      selectedDate,
-      selectedTime: selectedTimeSlot,
-      duration: selectedDuration,
-    });
-  
+
+    // Ensure tutorId is null when 'No Preference' is selected
+    const tutorIdToSend =
+      selectedTutor === "No Preference" ? null : selectedTutor;
+
     try {
+      console.log({
+        tutorId: tutorIdToSend,
+        selectedDate,
+        selectedTime: selectedTimeSlot,
+        duration: selectedDuration,
+      });
+
       const { data } = await api.post(
         `/courses/${course._id}/enroll`,
         {
-          tutorId: tutorIdToSend, // Fix: Ensure it's null, not an empty string
+          tutorId: tutorIdToSend, // ✅ Ensure null is sent when 'No Preference'
           selectedDate,
           selectedTime: selectedTimeSlot,
           duration: selectedDuration,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       if (data.approval_url) window.location.href = data.approval_url;
       else alert("Payment URL not received.");
     } catch (err) {
@@ -154,7 +155,6 @@ const CourseSummaryPage = () => {
       alert(err.response?.data?.message || "Enrollment failed.");
     }
   };
-  
 
   const handlePayLater = () => {
     alert("Enrollment saved. You can pay later.");
