@@ -110,12 +110,7 @@ const CourseSummaryPage = () => {
   // };
 
   const handleEnrollNow = async () => {
-    if (
-      !selectedDate ||
-      !selectedTimeSlot ||
-      !selectedDuration ||
-      !selectedSession
-    ) {
+    if (!selectedDate || !selectedTimeSlot || !selectedDuration || !selectedSession) {
       alert("Please select all options before enrolling.");
       return;
     }
@@ -124,29 +119,32 @@ const CourseSummaryPage = () => {
       navigate("/login");
       return;
     }
-
+  
     // Ensure tutorId is null when 'No Preference' is selected
-    const tutorIdToSend =
-      selectedTutor === "No Preference" ? null : selectedTutor;
-
+    const tutorIdToSend = selectedTutor === "No Preference" ? null : selectedTutor;
+  
+    // ✅ Ensure selectedTimeSlot is properly formatted before sending
+    const formattedTimeSlot = selectedTimeSlot.replace(/\s/g, ""); // Remove extra spaces
+  
     try {
       console.log("Sending Enrollment Data:", {
         tutorId: tutorIdToSend,
         selectedDate,
-        selectedTime: selectedTimeSlot,
+        selectedTime: formattedTimeSlot, // ✅ Use formatted time slot
         duration: selectedDuration,
       });
+  
       const { data } = await api.post(
         `/courses/${course._id}/enroll`,
         {
-          tutorId: tutorIdToSend, // ✅ Ensure null is sent when 'No Preference'
+          tutorId: tutorIdToSend,
           selectedDate,
-          selectedTime: selectedTimeSlot,
+          selectedTime: formattedTimeSlot,
           duration: selectedDuration,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+  
       if (data.approval_url) window.location.href = data.approval_url;
       else alert("Payment URL not received.");
     } catch (err) {
@@ -154,6 +152,7 @@ const CourseSummaryPage = () => {
       alert(err.response?.data?.message || "Enrollment failed.");
     }
   };
+  
 
   const handlePayLater = () => {
     alert("Enrollment saved. You can pay later.");

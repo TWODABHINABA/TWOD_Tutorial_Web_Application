@@ -318,18 +318,17 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
 
     if (!tutorId) {
       const tutors = await Tutor.find({ subjects: course.courseType });
-
+    
       if (tutors.length === 0) {
-        return res
-          .status(400)
-          .json({ error: "No tutors available for this course" });
+        return res.status(400).json({ error: "No tutors available for this course" });
       }
-
+    
       const today = new Date();
       const nextMonth = new Date();
       nextMonth.setMonth(today.getMonth() + 1);
+    
       let availableTutorsWithDates = [];
-
+    
       tutors.forEach((tutor) => {
         tutor.availability.forEach((entry) => {
           const entryDate = new Date(entry.date);
@@ -337,36 +336,44 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
             const subjectEntry = entry.subjects.find(
               (sub) => sub.subjectName === course.courseType
             );
-            if (subjectEntry && subjectEntry.timeSlots.includes(selectedTime)) {
-              availableTutorsWithDates.push({
-                tutorId: tutor._id,
-                date: entry.date,
-                timeSlots: subjectEntry.timeSlots,
+    
+            if (subjectEntry) {
+              // ✅ Extract start & end time from selectedTime (format: "07:30 PM-08:30 PM")
+              const [selectedStart, selectedEnd] = selectedTime.split("-").map((t) => {
+                let [time, period] = t.trim().split(" ");
+                let [hours, minutes] = time.split(":").map(Number);
+                if (period === "PM" && hours !== 12) hours += 12;
+                if (period === "AM" && hours === 12) hours = 0;
+                return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
               });
+    
+              // ✅ Check if selected time falls within the available time slot
+              if (subjectEntry.timeSlots.some((slot) =>
+                selectedStart >= slot.startTime && selectedEnd <= slot.endTime
+              )) {
+                availableTutorsWithDates.push({
+                  tutorId: tutor._id,
+                  date: entry.date,
+                  timeSlots: subjectEntry.timeSlots,
+                });
+              }
             }
           }
         });
       });
-
+    
       if (availableTutorsWithDates.length === 0) {
-        return res
-          .status(400)
-          .json({
-            error: "No available tutors for the selected date and time slot",
-          });
+        return res.status(400).json({ error: "No available tutors for the selected date and time slot" });
       }
-
+    
       // Randomly select a tutor from the filtered list
-      const selectedTutorData =
-        availableTutorsWithDates[
-          Math.floor(Math.random() * availableTutorsWithDates.length)
-        ];
+      const selectedTutorData = availableTutorsWithDates[Math.floor(Math.random() * availableTutorsWithDates.length)];
       tutorId = selectedTutorData.tutorId;
-
-      console.log(
-        `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
-      );
+    
+      console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
     }
+    
+    
 
     const transaction = new Transaction({
       courseId: course._id,
