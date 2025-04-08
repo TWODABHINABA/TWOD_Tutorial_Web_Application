@@ -73,14 +73,6 @@
 // export default Toast;
 
 
-
-
-
-
-
-
-
-
 import { useEffect, useState } from "react";
 
 const Toast = ({ message, type, onClose }) => {
@@ -114,7 +106,7 @@ const Toast = ({ message, type, onClose }) => {
       gap-4 text-gray-900 text-lg font-semibold border-2 ${borderColor}`}
       style={{ zIndex: 1000 }}
       >
-      <div className="relative w-16 h-16 flex items-center justify-center">
+      <div className="relative w-20 sm:w-16 h-16 flex items-center justify-center">
         <div className={`absolute inset-0 rounded-full animate-ping ${bgColor}`} />
         <div className={`absolute inset-0 rounded-full ${bgColor}`} />
 
