@@ -665,6 +665,13 @@ const AddAvailability = () => {
   const navigate = useNavigate();
   // const loggedInTutorId = "TUTOR_ID_HERE"; // ✅ Replace with actual logged-in tutor ID
 
+  const role=localStorage.getItem("role");
+  useEffect(() => {
+      if (role !== "tutor" && role !== "admin") {
+        navigate("/");
+      }
+    }, [role, navigate]);
+    
   useEffect(() => {
     if (selectedSubject) {
       // Filter availability based on selected subject

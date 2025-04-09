@@ -18,6 +18,12 @@ const AddTutor = () => {
   // const [allSubjects, setAllSubjects] = useState([]);
   // const [newTutorId, setNewTutorId] = useState(null);
   const navigate = useNavigate();
+  const role=localStorage.getItem("role");
+  useEffect(() => {
+      if (role !== "admin") {
+        navigate("/");
+      }
+    }, [role, navigate]);
 
   // useEffect(() => {
   //   const fetchSubjects = async () => {
