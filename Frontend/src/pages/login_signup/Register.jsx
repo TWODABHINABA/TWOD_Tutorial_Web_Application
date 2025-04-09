@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Toast from "./Toast";
 import ForgotPasswordFlow from "./ForgotPasswordFlow";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, XMarkIcon, } from "@heroicons/react/24/outline";
 
 const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [action, setAction] = useState(initialAction);
@@ -309,7 +309,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   };
 
   return (
-    <div className="relative bg-white p-6 h-90  rounded-lg shadow-lg z-10 max-w-lg w-full mt-10 mb-5">
+    <div className="  rounded-lg shadow-lg z-10 ">
+
       <div className="flex flex-col items-center gap-2 w-full mb-8 ">
         <h1 className="text-3xl font-bold text-gray-800">{action}</h1>
         <div className="w-10 h-1 bg-orange-500 rounded-full"></div>
@@ -324,7 +325,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
       )}
       {action === "Login" ? (
         <form
-          className="w-full max-w-lg mx-auto p-6 bg-white rounded-lg shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto"
+          className="
+          w-full max-w-lg mx-auto p-6 bg-white rounded-lg shadow-xl overflow-hidden h-[60vh] overflow-y-auto"
           onSubmit={handleLogin}
         >
           <div className="space-y-6">
@@ -376,7 +378,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 </button>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative md:pb-3">
               <button
                 onClick={() => setForgotPasswordOpen(true)}
                 className="bg-blue-500 text-white p-3 rounded-lg shadow"
@@ -402,27 +404,34 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
               </button>
               <button
                 type="submit"
-                className="w-full md:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-semibold transition-colors"
+                className="w-full md:w-auto px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors"
               >
                 Login
               </button>
             </div>
 
             <button
-              onClick={handleGoogleLogin}
-              className="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-all mb-4"
-            >
-              Login with Google
-            </button>
+  onClick={handleGoogleLogin}
+  className="max-md:gap-2 max-md:px-4 max-md:py-2 
+  w-full max-w-sm mx-auto flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-colors"
+>
+  <img
+    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+    alt="Google"
+    className="w-5 h-5"
+  />
+  <span className="text-sm font-medium text-gray-800">Continue with Google</span>
+</button>
           </div>
         </form>
       ) : (
         <form
-          className="w-full max-w-lg mx-auto p-6 bg-white rounded-lg shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto"
+          className=" max-md:p-3 
+          w-full max-w-lg mx-auto p-6 bg-white rounded-lg shadow-xl overflow-hidden max-h-[70vh] overflow-y-auto"
           onSubmit={handleRegister}
         >
-          <div className="space-y-6">
-            <div className="flex flex-col gap-4">
+          <div className="space-y-6 max-md:space-y-4">
+            <div className="flex flex-col gap-4 max-md:gap-3">
               {[
                 {
                   label: "Enter your name",
@@ -459,7 +468,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                       setter(e.target.value);
                       handleValidation(field, e.target.value);
                     }}
-                    className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
+                    className={`max-md:px-4 max-md:py-2 
+                      w-full px-6 py-3 rounded-lg  bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
                       errors[field]
                         ? "border-red-500"
                         : valid[field]
@@ -488,7 +498,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                     // setter(e.target.value);
                     handleValidation("password", e.target.value);
                   }}
-                  className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
+                  className={`max-md:px-4 max-md:py-2 
+                    w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
                     errors.password
                       ? "border-red-500"
                       : valid.password
@@ -505,11 +516,11 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 {errors.password && (
                   <p className="text-red-500 text-sm mt-1">{errors.password}</p>
                 )} */}
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 space-y-2 text-xs ">
                   <p className="text-gray-700 font-medium">
                     Password Strength:
                   </p>
-                  <ul className="list-disc pl-6">
+                  <ul className="list-disc pl-6 md:grid md:grid-cols-2">
                     <li
                       className={`${
                         password.length >= 8 ? "text-green-500" : "text-red-500"
@@ -573,7 +584,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onPaste={(e) => e.preventDefault()} // Prevent pasting
-                  className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
+                  className={`max-md:px-4 max-md:py-2 
+                    w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
                     confirmPassword && password !== confirmPassword
                       ? "border-red-500"
                       : confirmPassword && password === confirmPassword
@@ -584,7 +596,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 />
                 <button
                   type="button"
-                  className="absolute right-4 top-3 text-gray-600"
+                  className=" absolute right-4 top-3 text-gray-600"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
@@ -625,12 +637,13 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   name="profilePicture"
                   onChange={handleFileChange}
                   accept="image/*"
-                  className="w-full p-3 bg-white border rounded-lg focus:ring-2 focus:ring-orange-500"
+                  className="max-md:p-2
+                  w-full p-3 bg-white border rounded-lg focus:ring-2 focus:ring-orange-500"
                 />
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 max-md:gap-2">
               <button
                 type="button"
                 onClick={() => setAction("Login")}
@@ -640,18 +653,24 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
               </button>
               <button
                 type="submit"
-                className="w-full md:w-auto px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
+                className="max-md:px-4 max-md:py-2 w-full md:w-auto px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
               >
                 Sign Up
               </button>
             </div>
 
             <button
-              onClick={handleGoogleLogin}
-              className="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold"
-            >
-              Sign Up with Google
-            </button>
+  onClick={handleGoogleLogin}
+  className="max-md:gap-2 max-md:px-4 max-md:py-2 
+  w-full max-w-sm mx-auto flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-colors"
+>
+  <img
+    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+    alt="Google"
+    className="w-5 h-5"
+  />
+  <span className="text-sm font-medium text-gray-800">Continue with Google</span>
+</button>
           </div>
         </form>
       )}

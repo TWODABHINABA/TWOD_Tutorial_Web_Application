@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AuthForm from "./Register"; 
 
 const Modal = ({ onClose, initialAction }) => {
+  useEffect(() => {
+    document.body.classList.add("overflow-hidden");
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, []);
+  
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center">
       <div
@@ -9,7 +16,7 @@ const Modal = ({ onClose, initialAction }) => {
         onClick={onClose}
       ></div>
 
-      <div className="relative bg-white p-6 rounded-lg shadow-lg z-10 max-w-lg w-full">
+      <div className="relative bg-white p-6 rounded-lg shadow-lg z-10 max-w-lg w-full max-h-[90vh] ">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-2xl font-bold text-gray-700 hover:text-gray-900"
@@ -21,4 +28,5 @@ const Modal = ({ onClose, initialAction }) => {
     </div>
   );
 };
+
 export default Modal;

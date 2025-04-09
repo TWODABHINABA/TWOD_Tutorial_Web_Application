@@ -24,7 +24,12 @@ const Contact = () => {
   }, []);
 
   useEffect(() => {
-    AOS.init({ duration: 800, once: true, disable: window.innerWidth < 768 });
+    AOS.init({
+      duration: 800,
+      once: true,
+      // Disabled animations for screens < 768px
+      disable: window.innerWidth < 768,
+    });
   }, []);
 
   const handleChange = (e) => {
@@ -59,27 +64,26 @@ const Contact = () => {
   return (
     <>
       <CustomNavbar />
-      <section className="py-12 px-5 bg-orange-100">
+      <section className="py-12 px-5 bg-[#FAF3E0] ">
         <div className="max-w-6xl mx-auto px-5">
-          <header className="text-center mb-12" data-aos="fade-down">
-            <h1 className="text-4xl text-orange-400 font-bold mb-3">
+          <header className="text-center mb-12" data-aos={window.innerWidth >= 768 ? "fade-down" : ""}>
+            <h1 className="text-4xl  max-md:text-2xl text-orange-400 font-bold mb-3">
               Contact Us
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg max-md:text-base text-gray-600">
               Have questions or feedback? We’d love to hear from you.
             </p>
           </header>
-
-          <div className="flex flex-wrap gap-10 items-start">
-            <div className="flex-1 min-w-[300px]" data-aos="fade-right">
-              <h2 className="text-3xl text-orange-500 font-semibold mb-4">
+          <div className="flex flex-wrap gap-10 items-start max-md:flex-col">
+            <div className="flex-1 min-w-[250px]" data-aos={window.innerWidth >= 768 ? "fade-right" : ""}>
+              <h2 className="text-3xl text-orange-500 font-semibold mb-4 max-md:text-xl ">
                 Get in Touch
               </h2>
-              <p className="text-gray-700 mb-4">
+              <p className="text-gray-700 mb-4 max-md:text-sm">
                 Reach out to TUTOR for any queries regarding our courses or
                 services.
               </p>
-              <ul className="space-y-2 text-gray-700">
+              <ul className="space-y-2 text-gray-700  max-md:text-sm">
                 <li>
                   <strong>Email:</strong> support@tutor.com
                 </li>
@@ -94,8 +98,8 @@ const Contact = () => {
             </div>
 
             <div
-              className="flex-1 min-w-[300px] bg-white border border-gray-300 rounded-lg p-6 shadow-sm"
-              data-aos="fade-left"
+              className="flex-1 min-w-[250px] bg-white border border-gray-300 rounded-lg p-6 shadow-sm"
+              data-aos={window.innerWidth >= 768 ? "fade-left" : ""}
             >
               <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                 <input
@@ -105,7 +109,7 @@ const Contact = () => {
                   onChange={handleChange}
                   placeholder="Your Name"
                   required
-                  className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                  className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 max-md:p-2 max-md:text-sm"
                 />
                 <input
                   type="email"
@@ -114,7 +118,7 @@ const Contact = () => {
                   onChange={handleChange}
                   placeholder="Your Email"
                   required
-                  className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                  className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 max-md:p-2 max-md:text-sm"
                 />
                 <input
                   type="text"
@@ -123,7 +127,7 @@ const Contact = () => {
                   onChange={handleChange}
                   placeholder="Subject"
                   required
-                  className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                  className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 max-md:p-2 max-md:text-sm"
                 />
                 <textarea
                   id="message"
@@ -132,18 +136,18 @@ const Contact = () => {
                   rows="5"
                   placeholder="Your Message"
                   required
-                  className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                  className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 max-md:p-2 max-md:text-sm"
                 ></textarea>
                 <button
                   type="submit"
-                  className="py-3 px-4 bg-orange-500 text-white font-semibold rounded hover:bg-orange-600 transition duration-300"
+                  className="max-md:py-2 max-md:px-3 py-3 px-4 bg-orange-500 text-white font-semibold rounded hover:bg-orange-600 transition duration-300"
                 >
                   Send Message
                 </button>
                 {aiResponse && (
-                  <p className="mt-3 text-green-600">{aiResponse}</p>
+                  <p className="mt-3 text-green-600 max-md:text-sm">{aiResponse}</p>
                 )}
-                {error && <p className="mt-3 text-red-600">{error}</p>}
+                {error && <p className="mt-3 text-red-600 max-md:text-sm">{error}</p>}
               </form>
             </div>
           </div>
