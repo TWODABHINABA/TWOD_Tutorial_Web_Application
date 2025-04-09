@@ -814,13 +814,13 @@ const AddAvailability = () => {
       prevDates.map((d) =>
         d.date === date && d.subject === subject
           ? {
-              ...d,
-              timeSlots: d.timeSlots.filter(
-                (slot) =>
-                  slot.startTime !== slotToRemove.startTime ||
-                  slot.endTime !== slotToRemove.endTime
-              ), // ✅ Ensure removal matches both start & end time
-            }
+            ...d,
+            timeSlots: d.timeSlots.filter(
+              (slot) =>
+                slot.startTime !== slotToRemove.startTime ||
+                slot.endTime !== slotToRemove.endTime
+            ), // ✅ Ensure removal matches both start & end time
+          }
           : d
       )
     );
@@ -936,8 +936,7 @@ const AddAvailability = () => {
       }
     } catch (error) {
       console.error(
-        `❌ Error deleting time slot: ${
-          error.response?.status || "Unknown Status"
+        `❌ Error deleting time slot: ${error.response?.status || "Unknown Status"
         }`,
         error.response?.data || error.message
       );
@@ -977,14 +976,14 @@ const AddAvailability = () => {
       // setMessage(response.data.message);
       setToast({
         show: true,
-        message: "Email and Password Sent Successful!",
+        message: "set availability successful",
         type: "success",
       });
       // setMessageType("success");
     } catch (error) {
       setToast({
         show: true,
-        message: error.response?.data?.message|| "Email and Password Sent Successful!",
+        message: error.response?.data?.message || "Email and Password Sent Successful!",
         type: "success",
       });
 
@@ -1003,33 +1002,33 @@ const AddAvailability = () => {
           onClose={() => setToast({ show: false })}
         />
       )}
-      {!isDelete ? (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 shadow-md rounded-lg w-96 max-h-[80vh] flex flex-col">
-            <h2>Selected Subject {selectedSubject}</h2>
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Set Availability</h2>
-              <button
-                className="text-red-500 text-xl"
-                onClick={() => navigate("/")}
-              >
-                ✕
-              </button>
-            </div>
 
-            {message && (
-              <p
-                className={`text-${
-                  messageType === "error" ? "red" : "green"
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white p-6 shadow-md rounded-lg w-96 max-h-[80vh] flex flex-col">
+          <h2>Selected Subject {selectedSubject}</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Set Availability</h2>
+            <button
+              className="text-red-500 text-xl"
+              onClick={() => navigate("/")}
+            >
+              ✕
+            </button>
+          </div>
+
+          {message && (
+            <p
+              className={`text-${messageType === "error" ? "red" : "green"
                 }-500 mb-2`}
-              >
-                {message}
-              </p>
-            )}
+            >
+              {message}
+            </p>
+          )}
 
-            <div className="overflow-y-auto max-h-[60vh] mt-2 px-1">
-              <div className="mb-4">
-                <div className="flex gap-2">
+          <div className="overflow-y-auto max-h-[60vh] mt-2 px-1">
+            <div className="mb-4">
+              <div className="flex gap-2">
+                <div>
                   <label className="block font-semibold">Select Subject</label>
                   <select
                     value={selectedSubject}
@@ -1043,200 +1042,177 @@ const AddAvailability = () => {
                     ))}
                   </select>
                 </div>
-                <label className="block font-semibold">Select Date</label>
-                <div className="flex gap-2">
-                  <input
-                    type="date"
-                    className="w-full p-2 border rounded"
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    value={selectedDate}
-                  />
-                  <button
-                    className="bg-gray-500 text-white p-2 rounded disabled:opacity-50"
-                    onClick={handleAddDate}
-                    disabled={
-                      !selectedDate ||
-                      newAvailableDates.some((d) => d.date === selectedDate)
-                    }
-                  >
-                    Add
-                  </button>
-                </div>
+
+
+
               </div>
-
-              {newAvailableDates.length > 0 ? (
-                newAvailableDates.map((dateObj, index) => (
-                  <div key={index} className="mb-4 border p-2 rounded">
-                    <div className="flex justify-between">
-                      <h3 className="font-semibold">{dateObj.date}</h3>
-                      <button
-                        className="text-red-500 p-1"
-                        onClick={() =>
-                          handleRemoveDate(dateObj.date, dateObj.subject)
-                        }
-                      >
-                        ❌
-                      </button>
-                    </div>
-
-                    {dateObj.timeSlots.length > 0 ? (
-                      dateObj.timeSlots.map((slot, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-gray-200 p-1 m-1 rounded inline-block"
+              {selectedSubject && filteredAvailability.length > 0 ? (
+                <div className="mt-2 overflow-y-auto max-h-40 border rounded p-2">
+                  {filteredAvailability.map((dateObj) => (
+                    <div key={dateObj.date} className="border p-2 rounded mt-2">
+                      <div className="flex justify-between">
+                        <h3 className="font-semibold">
+                          {new Date(dateObj.date).toLocaleDateString()}
+                        </h3>
+                        <button
+                          className="text-red-500"
+                          onClick={() =>
+                            handleDeleteDate(dateObj.date, selectedSubject)
+                          }
                         >
-                          {slot.startTime} - {slot.endTime}
-                          <button
-                            className="text-red-500 p-1"
-                            onClick={() =>
-                              handleRemoveTimeSlotFromDate(
-                                dateObj.date,
-                                dateObj.subject,
-                                slot
-                              )
-                            }
-                          >
-                            ❌
-                          </button>
-                        </span>
-                      ))
-                    ) : (
-                      <p className="text-gray-500">No time slots added yet.</p>
-                    )}
+                          ✕
+                        </button>
+                      </div>
 
-                    <div className="flex gap-2 mt-2">
-                      <input
-                        type="time"
-                        className="p-2 border rounded w-full"
-                        placeholder="Start Time"
-                        value={startTime}
-                        onChange={(e) => setStartTime(e.target.value)}
-                      />
-                      <input
-                        type="time"
-                        className="p-2 border rounded w-full"
-                        placeholder="End Time"
-                        value={endTime}
-                        onChange={(e) => setEndTime(e.target.value)}
-                      />
-                      <button
-                        className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
-                        onClick={() =>
-                          handleAddTimeSlotToDate(
-                            dateObj.date,
-                            selectedSubject,
-                            startTime,
-                            endTime
-                          )
-                        }
-                        disabled={!startTime || !endTime}
-                      >
-                        Add Time
-                      </button>
+                      {dateObj.subjects
+                        .find((subj) => subj.subjectName === selectedSubject)
+                        ?.timeSlots.map((slot, index) => (
+                          <div
+                            key={slot._id || `slot-${index}`}
+                            className="bg-gray-200 p-1 m-1 rounded inline-block"
+                          >
+                            {slot.startTime} - {slot.endTime}
+                            <button
+                              className="text-red-500 ml-2"
+                              onClick={() =>
+                                handleDeleteTimeSlot(
+                                  dateObj.date,
+                                  selectedSubject,
+                                  slot
+                                )
+                              }
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               ) : (
-                <p className="text-gray-500 text-center">
-                  No availability added yet.
+                <p className="text-gray-500 text-center mt-4">
+                  {selectedSubject
+                    ? "No availability for this subject."
+                    : "Select a subject to see availability."}
                 </p>
               )}
+              <label className="block font-semibold">Select Date</label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  className="w-full p-2 border rounded"
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  value={selectedDate}
+                />
+                <button
+                  className="bg-gray-500 text-white p-2 rounded disabled:opacity-50"
+                  onClick={handleAddDate}
+                  disabled={
+                    !selectedDate ||
+                    newAvailableDates.some((d) => d.date === selectedDate)
+                  }
+                >
+                  Add
+                </button>
+              </div>
             </div>
 
-            <button
-              className="bg-green-500 text-white p-2 rounded w-full mt-4 disabled:opacity-50"
-              onClick={handleSetAvailability}
-              disabled={newAvailableDates.length === 0}
-            >
-              Set Availability
-            </button>
-            <button
+            {newAvailableDates.length > 0 ? (
+              newAvailableDates.map((dateObj, index) => (
+                <div key={index} className="mb-4 border p-2 rounded">
+                  <div className="flex justify-between">
+                    <h3 className="font-semibold">{dateObj.date}</h3>
+                    <button
+                      className="text-red-500 p-1"
+                      onClick={() =>
+                        handleRemoveDate(dateObj.date, dateObj.subject)
+                      }
+                    >
+                      ❌
+                    </button>
+                  </div>
+
+                  {dateObj.timeSlots.length > 0 ? (
+                    dateObj.timeSlots.map((slot, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-gray-200 p-1 m-1 rounded inline-block"
+                      >
+                        {slot.startTime} - {slot.endTime}
+                        <button
+                          className="text-red-500 p-1"
+                          onClick={() =>
+                            handleRemoveTimeSlotFromDate(
+                              dateObj.date,
+                              dateObj.subject,
+                              slot
+                            )
+                          }
+                        >
+                          ❌
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No time slots added yet.</p>
+                  )}
+
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      type="time"
+                      className="p-2 border rounded w-full"
+                      placeholder="Start Time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                    />
+                    <input
+                      type="time"
+                      className="p-2 border rounded w-full"
+                      placeholder="End Time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                    />
+                    <button
+                      className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
+                      onClick={() =>
+                        handleAddTimeSlotToDate(
+                          dateObj.date,
+                          selectedSubject,
+                          startTime,
+                          endTime
+                        )
+                      }
+                      disabled={!startTime || !endTime}
+                    >
+                      Add Time
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center">
+                No availability added yet.
+              </p>
+            )}
+          </div>
+
+          <button
+            className="bg-green-500 text-white p-2 rounded w-full mt-4 disabled:opacity-50"
+            onClick={handleSetAvailability}
+            disabled={newAvailableDates.length === 0}
+          >
+            Set Availability
+          </button>
+          {/* <button
               className="bg-red-500 text-white p-2 rounded w-full mt-4"
               onClick={() => setIsDelete(true)}
             >
               Delete Availability
-            </button>
-          </div>
+            </button> */}
         </div>
-      ) : (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
-          <div className="bg-white p-6 shadow-md rounded-lg w-96 max-h-[80vh] flex flex-col overflow-y-auto">
-            <h2 className="text-2xl font-bold">Delete Availability</h2>
+      </div>
 
-            <label className="mt-2 font-semibold">Select Subject:</label>
-            <select
-              className="p-2 border rounded mt-1"
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              value={selectedSubject || ""}
-            >
-              <option value="">-- Choose Subject --</option>
-              {subjects.map((subj) => (
-                <option key={subj} value={subj}>
-                  {subj}
-                </option>
-              ))}
-            </select>
 
-            {selectedSubject && filteredAvailability.length > 0 ? (
-              <div className="mt-2 overflow-y-auto max-h-40 border rounded p-2">
-                {filteredAvailability.map((dateObj) => (
-                  <div key={dateObj.date} className="border p-2 rounded mt-2">
-                    <div className="flex justify-between">
-                      <h3 className="font-semibold">
-                        {new Date(dateObj.date).toLocaleDateString()}
-                      </h3>
-                      <button
-                        className="text-red-500"
-                        onClick={() =>
-                          handleDeleteDate(dateObj.date, selectedSubject)
-                        }
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    {dateObj.subjects
-                      .find((subj) => subj.subjectName === selectedSubject)
-                      ?.timeSlots.map((slot, index) => (
-                        <div
-                          key={slot._id || `slot-${index}`}
-                          className="bg-gray-200 p-1 m-1 rounded inline-block"
-                        >
-                          {slot.startTime} - {slot.endTime}
-                          <button
-                            className="text-red-500 ml-2"
-                            onClick={() =>
-                              handleDeleteTimeSlot(
-                                dateObj.date,
-                                selectedSubject,
-                                slot
-                              )
-                            }
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center mt-4">
-                {selectedSubject
-                  ? "No availability for this subject."
-                  : "Select a subject to see availability."}
-              </p>
-            )}
-
-            <button
-              className="bg-blue-500 text-white p-2 rounded w-full mt-4"
-              onClick={() => setIsDelete(false)}
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 };
