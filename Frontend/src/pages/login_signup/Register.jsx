@@ -244,18 +244,18 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
 
       setToast({ show: true, message: "Login Successful!", type: "success" });
-      // Get the stored redirect path
+
     const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/user";
     
-    // Clean up
+
     sessionStorage.removeItem("redirectAfterLogin");
     setTimeout(() => {
-      // If we're already on the target page, perhaps just refresh or update state
+
       if (window.location.pathname === redirectPath.split('?')[0]) {
-        // Maybe refresh the component or update state to reflect logged-in status
-        window.location.reload(); // Simple approach, or use a more elegant state update
+
+        window.location.reload(); 
       } else {
-        // Navigate to the stored path
+
         navigate(redirectPath);
       }
     }, 2000);
@@ -273,7 +273,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
               error.response.data.redirectTo +
                 `?email=${encodeURIComponent(email)}`
             );
-          }, 3000); // ⏳ Increased delay to ensure the toast appears
+          }, 3000); 
         } else if (error.response.data.message === "Invalid Email") {
           setError({ email: "Invalid Email", password: "" });
         } else if (error.response.data.message === "Invalid Password") {

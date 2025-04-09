@@ -5,6 +5,7 @@ import api from "../../components/User-management/api";
 import Footer from "../../components/footer/Footer";
 import authLogout from "../../components/useLogout/UseLogout";
 import { ClipLoader } from "react-spinners";
+import Toast from "../login_signup/Toast";
 // import "./UserInfo.css";
 
 const UserInfo = () => {
@@ -17,6 +18,7 @@ const UserInfo = () => {
   const [loading, setLoading] = useState(true);
   const [allSubjects, setAllSubjects] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -50,36 +52,6 @@ const UserInfo = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   console.log("Token in localStorage:", token);
-  //   if (!token) {
-  //     navigate("/");
-  //     return;
-  //   }
-
-  //   const fetchUser = async () => {
-  //     try {
-  //       const response = await api.get("/me");
-  //       setUser(response.data);
-  //       console.log("User data:", response.data);
-  //       setUpdatedUser({
-  //         name: response.data.name,
-  //         email: response.data.email,
-  //         phone: response.data.phone || "",
-  //         birthday: response.data.birthday
-  //           ? response.data.birthday.split("T")[0]
-  //           : "",
-  //         profilePicture: response.data.profilePicture,
-  //       });
-  //     } catch (err) {
-  //       setError(`Error fetching user: ${err.message}`);
-  //     }
-  //   };
-
-  //   fetchUser();
-  // }, [navigate]);
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     console.log("Token in localStorage:", token);
@@ -92,7 +64,7 @@ const UserInfo = () => {
     const fetchUser = async () => {
       try {
         const response = await api.get("/me", {
-          headers: { Authorization: `Bearer ${token}` }, // ✅ Attach token
+          headers: { Authorization: `Bearer ${token}` }, 
         });
 
         setUser(response.data);
@@ -111,7 +83,7 @@ const UserInfo = () => {
         console.error("Error fetching user:", err);
         setError(`Error fetching user: ${err.message}`);
 
-        // If unauthorized, clear token and redirect
+
         if (err.response && err.response.status === 401) {
           localStorage.removeItem("token");
           navigate("/");
@@ -120,7 +92,7 @@ const UserInfo = () => {
     };
 
     fetchUser();
-  }, []); // ✅ No need for `navigate` in dependencies
+  }, []); 
 
   const handleInputChange = (e) => {
     setUpdatedUser((prev) => ({
@@ -152,7 +124,7 @@ const UserInfo = () => {
       Object.keys(updatedUser).forEach((key) => {
         if (updatedUser[key]) {
           if (key === "subjects" && Array.isArray(updatedUser[key])) {
-            formData.append(key, updatedUser[key].join(",")); // ✅ Convert array to string
+            formData.append(key, updatedUser[key].join(",")); 
           } else {
             formData.append(key, updatedUser[key]);
           }
@@ -163,31 +135,55 @@ const UserInfo = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setUser(response.data); // ✅ Update user state with new data
+      setUser(response.data); 
       setIsEditing(false);
-      setUpdatedUser({}); // ✅ Reset only after successful update
-
-      alert("Profile updated successfully!");
+      setUpdatedUser({}); 
+      
+      setToast({
+        show: true,
+        message: "Profile updated successfully!",
+        type: "success",
+      });
+      setTimeout(()=>{
+        setToast(false)
+        navigate(0);
+      },800)
     } catch (err) {
       if (err.response) {
-        setError(err.response.data.error || "Update failed. Please try again.");
+
+        setToast({
+          show: true,
+          message: err.response?.data?.message || "Update failed. Please try again.",
+          type: "error",
+        });
       } else {
-        setError("Network error. Please try again.");
+        setToast({
+          show: true,
+          message: "Network error. Please try again.",
+          type: "error",
+        });
       }
     }
   };
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="fixed inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50">
         <ClipLoader size={80} color="#FFA500" />
       </div>
-    );
+    );    
 
   if (error) return <p className="error-message">Error: {error}</p>;
   return (
     <>
       <Navbar />
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false })}
+        />
+      )}
 
       <div className="bg-[#FEF9F4] min-h-screen pt-24 pb-16">
         {user && (
