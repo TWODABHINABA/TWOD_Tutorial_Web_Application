@@ -628,8 +628,9 @@ router.get("/cancel", authMiddleware, async (req, res) => {
     await transaction.save();
 
     return res.redirect(
-      `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` ||
-        `http://localhost:5173/cancel?transactionId=${transaction._id}`
+      `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}` 
+      // ||
+      //   `http://localhost:5173/cancel?transactionId=${transaction._id}`
       // `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`
     );
   } catch (err) {
