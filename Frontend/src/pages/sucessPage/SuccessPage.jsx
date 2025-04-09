@@ -18,16 +18,55 @@ const SuccessPage = () => {
 
     return () => clearTimeout(timer);
   }, []);
+  // useEffect(() => {
+  //   const verifyPayment = async () => {
+  //     const queryParams = new URLSearchParams(location.search);
+  //     const transactionId = queryParams.get("transactionId");
+  //     const paymentId = queryParams.get("paymentId");
+  //     const payerId = queryParams.get("PayerID");
+
+  //     if (!transactionId || !paymentId || !payerId) {
+  //       setStatus("failed");
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     try {
+  //       const response = await api.get(
+  //         `/success?transactionId=${transactionId}&paymentId=${paymentId}&PayerID=${payerId}`,
+  //         { withCredentials: true }
+  //       );
+
+  //       if (response.data.success) {
+  //         setStatus("completed");
+  //       } else {
+  //         setStatus("failed");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error verifying payment:", error);
+  //       setStatus("failed");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   verifyPayment();
+  // }, [location.search]);
+
   useEffect(() => {
-    const verifyPayment = async () => {
+    const verifyPayment = async (retryCount = 0) => {
       const queryParams = new URLSearchParams(location.search);
       const transactionId = queryParams.get("transactionId");
       const paymentId = queryParams.get("paymentId");
       const payerId = queryParams.get("PayerID");
 
       if (!transactionId || !paymentId || !payerId) {
-        setStatus("failed");
-        setLoading(false);
+        if (retryCount < 5) {
+          setTimeout(() => verifyPayment(retryCount + 1), 2000); // Retry after 2 sec
+        } else {
+          setStatus("failed");
+          setLoading(false);
+        }
         return;
       }
 
@@ -44,7 +83,11 @@ const SuccessPage = () => {
         }
       } catch (error) {
         console.error("Error verifying payment:", error);
-        setStatus("failed");
+        if (retryCount < 5) {
+          setTimeout(() => verifyPayment(retryCount + 1), 2000); // Retry again
+        } else {
+          setStatus("failed");
+        }
       } finally {
         setLoading(false);
       }

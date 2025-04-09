@@ -69,46 +69,6 @@ const CourseSummaryPage = () => {
     setShowTutorModal(false);
   };
 
-  // const handleEnrollNow = async () => {
-  //   if (
-  //     !selectedDate ||
-  //     !selectedTimeSlot ||
-  //     !selectedDuration ||
-  //     !selectedSession
-  //   ) {
-  //     alert("Please select all options before enrolling.");
-  //     return;
-  //   }
-  //   if (!token) {
-  //     alert("Please log in first.");
-  //     navigate("/login");
-  //     return;
-  //   }
-  //   try {
-  //     console.log({
-  //       tutorId: selectedTutor,
-  //       selectedDate,
-  //       selectedTime: selectedTimeSlot,
-  //       duration: selectedDuration,
-  //     });
-  //     const { data } = await api.post(
-  //       `/courses/${course._id}/enroll`,
-  //       {
-  //         tutorId: selectedTutor,
-  //         selectedDate,
-  //         selectedTime: selectedTimeSlot,
-  //         duration: selectedDuration,
-  //       },
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-  //     if (data.approval_url) window.location.href = data.approval_url;
-  //     else alert("Payment URL not received.");
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert(err.response?.data?.message || "Enrollment failed.");
-  //   }
-  // };
-
   const handleEnrollNow = async () => {
     if (
       !selectedDate ||
@@ -125,18 +85,18 @@ const CourseSummaryPage = () => {
       return;
     }
 
-    // ✅ Format selectedDate correctly (YYYY-MM-DD)
+
     const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
 
-    // ✅ Ensure tutorId is null when 'No Preference' is selected
+
     const tutorIdToSend =
       selectedTutor === "No Preference" ? null : selectedTutor;
 
     try {
       console.log("Sending Enrollment Data:", {
         tutorId: tutorIdToSend,
-        selectedDate: formattedDate, // ✅ Correct date format
-        selectedTime: selectedTimeSlot, // ✅ Ensure 12-hour AM/PM format
+        selectedDate: formattedDate, 
+        selectedTime: selectedTimeSlot,
         duration: selectedDuration,
       });
 

@@ -1616,48 +1616,48 @@ const CourseDetailsPage = () => {
       }
     }
   }, [sessions]);
-  const handleEnrollNow = async () => {
-    if (
-      !selectedDate ||
-      !selectedTimeSlot ||
-      !selectedDuration ||
-      !selectedSession
-    ) {
-      alert("Please select all options before enrolling.");
-      return;
-    }
-    if (!token) {
-      alert("Authentication error: Please log in first.");
-      return;
-    }
-    try {
-      const response = await api.post(
-        `/courses/${course._id}/enroll`,
-        {
-          tutorId: selectedTutor || null, // ✅ Allow "No Preference" (null tutor)
-          selectedDate,
-          selectedTime: selectedTimeSlot,
-          duration: selectedDuration,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const { approval_url } = response.data;
-      if (approval_url) {
-        window.location.href = approval_url; // ✅ Redirect to PayPal
-      } else {
-        alert("Error: No approval URL received.");
-      }
-    } catch (error) {
-      console.error("Error enrolling:", error);
-      alert(
-        error.response?.data?.message || "Enrollment failed. Try again later."
-      );
-    }
-  };
+  // const handleEnrollNow = async () => {
+  //   if (
+  //     !selectedDate ||
+  //     !selectedTimeSlot ||
+  //     !selectedDuration ||
+  //     !selectedSession
+  //   ) {
+  //     alert("Please select all options before enrolling.");
+  //     return;
+  //   }
+  //   if (!token) {
+  //     alert("Authentication error: Please log in first.");
+  //     return;
+  //   }
+  //   try {
+  //     const response = await api.post(
+  //       `/courses/${course._id}/enroll`,
+  //       {
+  //         tutorId: selectedTutor || null, // ✅ Allow "No Preference" (null tutor)
+  //         selectedDate,
+  //         selectedTime: selectedTimeSlot,
+  //         duration: selectedDuration,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     const { approval_url } = response.data;
+  //     if (approval_url) {
+  //       window.location.href = approval_url; // ✅ Redirect to PayPal
+  //     } else {
+  //       alert("Error: No approval URL received.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error enrolling:", error);
+  //     alert(
+  //       error.response?.data?.message || "Enrollment failed. Try again later."
+  //     );
+  //   }
+  // };
 
   // const formatPrice = (priceString) => {
   //   if (!priceString) return 0;
