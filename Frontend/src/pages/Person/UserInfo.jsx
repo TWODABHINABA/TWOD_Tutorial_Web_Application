@@ -185,10 +185,10 @@ const UserInfo = () => {
         />
       )}
 
-      <div className="bg-[#FEF9F4] min-h-screen pt-24 pb-16">
+      <div className="bg-[#FEF9F4] min-h-screen pt-24 pb-16 max-md:pt-16 max-md:pb-12">
         {user && (
-          <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-            <div className="bg-orange-50 border border-orange-200 rounded-3xl shadow-lg p-6 flex flex-col items-center text-center gap-6">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 max-md:grid-cols-1 max-md:gap-4">
+            <div className="max-md:p-4 bg-orange-50 border border-orange-200 rounded-3xl shadow-lg p-6 flex flex-col items-center text-center gap-6">
               {updatedUser.profilePicture || user.profilePicture ? (
                 <img
                   src={
@@ -198,10 +198,10 @@ const UserInfo = () => {
                         `http://localhost:6001${user.profilePicture}`
                   }
                   alt="Profile"
-                  className="w-36 h-36 rounded-full object-cover border-4 border-orange-300"
+                  className="w-36 h-36 max-md:w-28 max-md:h-28 rounded-full object-cover border-4 border-orange-300"
                 />
               ) : (
-                <div className="w-36 h-36 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+                <div className="w-36 h-36 max-md:w-28 max-md:h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
                   No Image
                 </div>
               )}
@@ -235,7 +235,7 @@ const UserInfo = () => {
               </div>
             </div>
 
-            <div className="md:col-span-2 bg-white border border-orange-200 rounded-3xl shadow-lg p-8">
+            <div className="md:col-span-2 bg-white border border-orange-200 rounded-3xl shadow-lg p-8 max-md:p-6">
               <h2 className="text-3xl font-bold text-gray-800 mb-6">
                 👤 Your Profile
               </h2>
