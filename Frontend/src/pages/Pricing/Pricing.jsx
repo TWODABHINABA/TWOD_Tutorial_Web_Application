@@ -46,7 +46,7 @@ const PricingPage = () => {
       </div>
     );
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
+    <div className="bg-[#FAF3E0]  min-h-screen flex flex-col">
       <CustomNavbar />
 
       <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col flex-grow">

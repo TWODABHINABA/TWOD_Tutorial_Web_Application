@@ -64,7 +64,7 @@ const Contact = () => {
   return (
     <>
       <CustomNavbar />
-      <section className="py-12 px-5 bg-orange-100">
+      <section className="py-12 px-5 bg-[#FAF3E0] ">
         <div className="max-w-6xl mx-auto px-5">
           <header className="text-center mb-12" data-aos={window.innerWidth >= 768 ? "fade-down" : ""}>
             <h1 className="text-4xl  max-md:text-2xl text-orange-400 font-bold mb-3">
