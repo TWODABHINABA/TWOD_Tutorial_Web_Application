@@ -275,14 +275,34 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
             );
           }, 3000); 
         } else if (error.response.data.message === "Invalid Email") {
-          setError({ email: "Invalid Email", password: "" });
+          // setError({ email: "Invalid Email", password: "" });
+          setToast({
+            show: true,
+            message: "Invalid Email",
+            type: "error",
+          });
         } else if (error.response.data.message === "Invalid Password") {
-          setError({ email: "", password: "Incorrect Password" });
+          // setError({ email: "", password: "Incorrect Password" });
+          setToast({
+            show: true,
+            message: "Incorrect Password",
+            type: "error",
+          });
         } else {
-          setError({ email: "", password: "Something went wrong. Try again." });
+          // setError({ email: "", password: "Something went wrong. Try again." });
+          setToast({
+            show: true,
+            message: "Something went wrong. Try again.",
+            type: "error",
+          });
         }
       } else {
-        setError({ email: "", password: "Network error. Please try again." });
+        // setError({ email: "", password: "Network error. Please try again." });
+        setToast({
+          show: true,
+          message: "Network error. Please try again.",
+          type: "error",
+        });
       }
     }
   };

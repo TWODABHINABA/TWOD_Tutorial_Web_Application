@@ -4,14 +4,16 @@ import { jwtDecode } from "jwt-decode";
 
 const UseLogout = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const navigate=useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     setIsAuthenticated(false);
-    window.location.reload();
+    navigate(0);
     navigate("/");
+    setShowRegisterModal(true)
   };
   const handleLogoutRemoveAuthentication=()=>{
     localStorage.removeItem("token");
