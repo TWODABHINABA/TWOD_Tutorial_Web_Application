@@ -251,6 +251,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     sessionStorage.removeItem("redirectAfterLogin");
     setTimeout(() => {
 
+      setToast(false);
       if (window.location.pathname === redirectPath.split('?')[0]) {
 
         window.location.reload(); 
