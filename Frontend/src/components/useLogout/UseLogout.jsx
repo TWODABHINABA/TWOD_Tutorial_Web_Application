@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import Modal from "../../pages/login_signup/Modal";
 
 const UseLogout = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const navigate=useNavigate();
 
   const handleLogout = () => {
@@ -13,7 +14,7 @@ const UseLogout = () => {
     setIsAuthenticated(false);
     navigate(0);
     navigate("/");
-    setShowRegisterModal(true)
+    setShowLoginModal(true)
   };
   const handleLogoutRemoveAuthentication=()=>{
     localStorage.removeItem("token");
@@ -47,6 +48,11 @@ const UseLogout = () => {
     return () => clearInterval(interval);
   }, []);
 
-  return { isAuthenticated, handleLogout };
+  return { isAuthenticated, handleLogout, modal:showLoginModal && (
+    <Modal
+      initialAction="Login"
+      onClose={() => setShowLoginModal(false)}
+    />
+  ) };
 };
 export default UseLogout;

@@ -18,7 +18,7 @@
 //   const [loading, setLoading] = useState(true);
 //   const [error, setError] = useState(null);
 //   const [showEnrollModal, setShowEnrollModal] = useState(false);
-//   const [showRegisterModal, setShowRegisterModal] = useState(false);
+//   const [showLoginModal, setshowLoginModal] = useState(false);
 //   const [tutors, setTutors] = useState([]);
 //   const [selectedTutor, setSelectedTutor] = useState("");
 //   const [selectedSubject, setSelectedSubject] = useState("");
@@ -152,7 +152,7 @@
 //   const handleEnrollClick = async () => {
 //     // If user is not logged in, show register modal
 //     if (!token) {
-//       setShowRegisterModal(true);
+//       setshowLoginModal(true);
 //       return;
 //     }
 
@@ -1222,10 +1222,10 @@
 //         </div>
 //       </div>
 //       {/* Add the Modal component at the end of your JSX */}
-//       {showRegisterModal && (
+//       {showLoginModal && (
 //         <Modal
 //           initialAction="Sign Up"
-//           onClose={() => setShowRegisterModal(false)}
+//           onClose={() => setshowLoginModal(false)}
 //         />
 //       )}
 //       <Footer />
@@ -1262,7 +1262,7 @@ const CourseDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [tutors, setTutors] = useState([]);
   const [selectedTutor, setSelectedTutor] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
@@ -1397,7 +1397,7 @@ const CourseDetailsPage = () => {
     // If user is not logged in, show register modal
     if (!token) {
       sessionStorage.setItem("redirectAfterLogin", window.location.pathname + window.location.search);
-      setShowRegisterModal(true);
+      setShowLoginModal(true);
       return;
     }
 
@@ -2486,10 +2486,10 @@ const CourseDetailsPage = () => {
         </div>
       </div>
       {/* Add the Modal component at the end of your JSX */}
-      {showRegisterModal && (
+      {showLoginModal && (
         <Modal
-          initialAction="Sign Up"
-          onClose={() => setShowRegisterModal(false)}
+          initialAction="Login"
+          onClose={() => setShowLoginModal(false)}
         />
       )}
       <Footer />
