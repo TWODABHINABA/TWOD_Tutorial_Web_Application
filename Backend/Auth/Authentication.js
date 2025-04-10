@@ -31,6 +31,7 @@ module.exports = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({ message: "JWT must be provided" });
   }
+  
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
