@@ -1,27 +1,87 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../Auth/Authentication");
+const sendEmail = require("../emailService");
 
 // Import models
 const PayLater = require("../Models/payLater");
 const Course = require("../Models/course");
 // Import person model to ensure it’s registered
 const Person = require("../Models/person");
+const Tutor = require("../Models/tutors")
+
+const convertTo24HourFormat = (time12h) => {
+  const [time, modifier] = time12h.split(" ");
+  let [hours, minutes] = time.split(":");
+
+  if (modifier === "PM" && hours !== "12") {
+    hours = String(parseInt(hours) + 12);
+  } else if (modifier === "AM" && hours === "12") {
+    hours = "00";
+  }
+
+  return `${hours}:${minutes}`;
+};
+
+const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
+  const selectedStartTime = convertTo24HourFormat(selectedTime.split("-")[0].trim()); // "19:30"
+  const selectedEndTime = convertTo24HourFormat(selectedTime.split("-")[1].trim()); // "20:30"
+
+  const tutors = await Tutor.find({
+    "availability.date": selectedDate, // Match date
+    "availability.subjects.subjectName": subject, // Match subject
+  });
+
+  for (const tutor of tutors) {
+    for (const subjectEntry of tutor.availability) {
+      if (subjectEntry.date.toISOString().split("T")[0] === selectedDate) {
+        for (const subj of subjectEntry.subjects) {
+          if (subj.subjectName === subject) {
+            for (const slot of subj.timeSlots) {
+              if (
+                slot.startTime <= selectedStartTime &&
+                slot.endTime >= selectedEndTime
+              ) {
+                return tutor; // ✅ Found matching tutor
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return null; // No available tutor
+};
+
 
 // POST: Book a Pay Later session
 router.post("/paylater/book", authMiddleware, async (req, res) => {
   try {
     console.log("hello paylater book");
-    const { courseId, tutorId, selectedDate, selectedTime, duration, bonus } = req.body;
-
-    if (!courseId || !tutorId || !selectedDate || !selectedTime || !duration) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
+    
+    let { courseId, tutorId, selectedDate, selectedTime, duration, bonus } = req.body;
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
+    if (!tutorId) {
+      // Auto-assign a tutor
+      const assignedTutor = await findAvailableTutor(course.courseType, selectedDate, selectedTime);
+
+      if (!assignedTutor) {
+        return res.status(400).json({ error: "No tutors available for the selected date and time." });
+      }
+
+      tutorId = assignedTutor._id;
+      console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
+    }
+    if (!courseId || !tutorId || !selectedDate || !selectedTime || !duration) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    
+    
 
     const userId = req.user?._id || req.user?.id;
     if (!userId) {
@@ -71,7 +131,7 @@ router.get("/paylater/tutor-request", authMiddleware, async (req, res) => {
 router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
-    
+
     if (!["accepted", "rejected"].includes(status)) {
       return res.status(400).json({ message: "Invalid status. Use 'accepted' or 'rejected'." });
     }
@@ -82,12 +142,41 @@ router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
       { new: true }
     )
       .populate("user", "name email")
-      .populate("courseId", "name");
+      .populate("courseId", "name courseType")
+      .populate("tutorId", "name email");
 
     console.log(`✏️ Updating booking ${req.params.id} to status: ${status}`);
 
     if (!updated) {
       return res.status(404).json({ message: "Booking request not found" });
+    }
+    else {
+      await sendEmail(
+        updated.user.email,
+        `Your Pay Later Request has been ${status}`,
+        `
+Hi ${updated.user.name},
+      
+Your Pay Later request for the course "${updated.courseId.name}" has been ${status} by the tutor.
+      
+${status === "accepted" ?
+`You can now proceed with the next steps to begin your learning journey.` :
+`We're sorry to inform you that the tutor has rejected your request. Feel free to explore other courses on our platform.`}
+      
+Course Details:
+- Course Name: ${updated.courseId.name} ${updated.courseId.cousrseType}
+      
+Tutor Details:
+- Name: ${updated.tutorId?.name || "Assigned Tutor"}
+- Email: ${updated.tutorId?.email || "N/A"}
+      
+If you have any questions, feel free to contact us at support@twodtutorials.com.
+      
+Best regards,  
+Team TWOD Tutorials
+        `
+      );
+
     }
 
     res.status(200).json({ message: `Request ${status}`, data: updated });
