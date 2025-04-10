@@ -50,21 +50,40 @@ router.post("/tutors", authMiddleware, async (req, res) => {
 
     await newTutor.save();
 
-    // Send email with login credentials
     const emailText = `
-      Welcome, ${name}!
-      
-      You have been added as a tutor. Here are your login details:
-      Email (Username): ${email}
-      Password: ${tempPassword}
+Hi ${name},
 
-      Please log in and update your profile.
-      
-      Best Regards,
-      The Wall Of Dreams
-    `;
+Welcome to **TWOD Tutorials**! We're excited to have you on board as a tutor.
 
-    await sendEmail(email, "Your Tutor Account Credentials", emailText);
+Below are your login credentials:
+- **Email (Username):** ${email}
+- **Password:** ${tempPassword}
+
+To get started, please follow these steps:
+
+1. Click on the following link to access the tutor portal:  
+   https://twod-tutorial-web-application-phi.vercel.app/
+
+2. On the homepage, navigate to the **Login** section.
+
+3. Log in using the credentials provided above.
+
+4. Reset your password
+
+If you have any questions or need assistance, feel free to reach out to us at **support@twodtutorials.com**.
+
+We're thrilled to have you with us!
+
+Best regards,  
+**Team TWOD Tutorials**
+`;
+
+
+    await sendEmail(
+      email,
+      "Welcome to TWOD Tutorials!",
+      emailText
+    );
 
     res.status(201).json({
       message: "Tutor added successfully. Credentials sent via email.",
