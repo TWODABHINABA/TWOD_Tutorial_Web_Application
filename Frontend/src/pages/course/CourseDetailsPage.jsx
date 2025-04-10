@@ -1382,10 +1382,12 @@ const CourseDetailsPage = () => {
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!token) {
-      window.location.href = "/register";
+      sessionStorage.setItem("redirectAfterLogin", window.location.pathname + window.location.search);
+      setShowLoginModal(true);
+      return;
     }
     try {
-      const response = await api.post(`/courses/${courseId}/feedback,feedback`);
+      const response = await api.post(`/courses/${courseId}/feedback`, feedback);
       setCourse(response.data.course);
       setFeedback({ rating: "", comment: "" });
     } catch (err) {

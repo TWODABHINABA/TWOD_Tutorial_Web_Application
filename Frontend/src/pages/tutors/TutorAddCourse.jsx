@@ -25,7 +25,7 @@ const TutorAddCourse = () => {
   const role = localStorage.getItem("role");
 
   useEffect(() => {
-    if (role !== "admin") {
+    if (role !== "admin" && role !="tutor") {
       navigate("/");
     }
   }, [role, navigate]);

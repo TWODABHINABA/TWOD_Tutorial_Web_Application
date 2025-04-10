@@ -663,7 +663,6 @@ const AddAvailability = () => {
   const [filteredAvailability, setFilteredAvailability] = useState([]);
 
   const navigate = useNavigate();
-  // const loggedInTutorId = "TUTOR_ID_HERE"; // ✅ Replace with actual logged-in tutor ID
 
   const role=localStorage.getItem("role");
   useEffect(() => {
@@ -1210,12 +1209,6 @@ const AddAvailability = () => {
           >
             Set Availability
           </button>
-          {/* <button
-              className="bg-red-500 text-white p-2 rounded w-full mt-4"
-              onClick={() => setIsDelete(true)}
-            >
-              Delete Availability
-            </button> */}
         </div>
       </div>
 
