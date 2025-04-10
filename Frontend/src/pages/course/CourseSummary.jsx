@@ -122,10 +122,45 @@ const CourseSummaryPage = () => {
     }
   };
 
-  const handlePayLater = () => {
-    alert("Enrollment saved. You can pay later.");
-    navigate("/");
+  const handlePayLater = async () => {
+    if (!token) {
+      alert("Please log in first.");
+      navigate("/login");
+      return;
+    }
+  console.log("hello course summary")
+    const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
+    const tutorIdToSend = selectedTutor === "No Preference" ? null : selectedTutor;
+  
+    try {
+      const userId = JSON.parse(localStorage.getItem("user"))?.id; // or wherever you store the user
+
+const response = await api.post(
+  `/paylater/book`,
+  {
+    courseId: course._id,
+    tutorId: tutorIdToSend,
+    selectedDate: formattedDate,
+    selectedTime: selectedTimeSlot,
+    duration: selectedDuration,
+    bonus: selectedSession.bonus,
+    user: userId, // 👈 manually attach user if needed
+  },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+  
+      if (response.data && response.data.message) {
+        alert(response.data.message); // "Pay Later booking created successfully"
+        navigate("/");
+      } else {
+        alert("Pay Later booking saved, but no confirmation message received.");
+      }
+    } catch (error) {
+      console.error("Error saving Pay Later booking:", error);
+      alert(error.response?.data?.error || "Failed to save Pay Later booking.");
+    }
   };
+  
 
   if (!course) {
     return (
