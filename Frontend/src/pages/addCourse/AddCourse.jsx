@@ -147,7 +147,7 @@ const AddCourse = () => {
         <input
           type="text"
           name="courseType"
-          placeholder="Course Type"
+          placeholder="Enter Subject"
           value={formData.courseType}
           onChange={handleChange}
           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
@@ -155,7 +155,7 @@ const AddCourse = () => {
         />
         <input
           type="file"
-          placeholder="Enter the CourseTypeImage"
+          placeholder="Enter the Subject Image"
           accept="image/*"
           onChange={(e) => handleFileChange(e, "courseTypeImage")}
           className="w-full p-3 border rounded-lg"
@@ -164,7 +164,7 @@ const AddCourse = () => {
         <input
           type="text"
           name="name"
-          placeholder="Course Name"
+          placeholder="Grade"
           value={formData.name}
           onChange={handleChange}
           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
@@ -173,7 +173,7 @@ const AddCourse = () => {
         <input
           type="file"
           accept="image/*"
-          placeholder="Enter the CourseNameImage"
+          placeholder="Enter the Grade Image"
           onChange={(e) => handleFileChange(e, "nameImage")}
           className="w-full p-3 border rounded-lg"
         />
