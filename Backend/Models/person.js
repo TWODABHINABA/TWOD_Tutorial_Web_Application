@@ -15,9 +15,22 @@ const personSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    unique: true,
     required: true,
+    unique: true,
+    validate: {
+      validator: async function (value) {
+        const Tutor = require("./tutors"); // ✅ Require inside function to prevent circular dependency
+        const existingTutor = await Tutor.findOne({ email: value });
+        return !existingTutor;
+      },
+      message: "Email is already registered as a Tutor",
+    },
   },
+  // email: {
+  //   type: String,
+  //   unique: true,
+  //   required: true,
+  // },
   password: {
     type: String,
     // required:true

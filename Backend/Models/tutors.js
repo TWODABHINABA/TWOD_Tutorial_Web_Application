@@ -1,7 +1,21 @@
 const mongoose = require("mongoose");
 
 const tutorSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
+  // email: { type: String, required: true, unique: true },
+
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator: async function (value) {
+        const Person = require("./person"); // ✅ Fix circular dependency
+        const existingPerson = await Person.findOne({ email: value });
+        return !existingPerson;
+      },
+      message: "Email is already registered as a Person",
+    },
+  },
   password: { type: String, required: true },
   name: { type: String, required: true },
   profilePicture: { type: String, default: null },
@@ -23,6 +37,12 @@ const tutorSchema = new mongoose.Schema({
   role: {
     type: String,
     default: "tutor",
+  },
+  resetOTP: {
+    type: String,
+  },
+  otpExpires: {
+    type: Date,
   },
   availability: [
     {

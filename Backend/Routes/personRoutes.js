@@ -126,7 +126,8 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
-    const existingUser = await Person.findOne({ email });
+
+    const existingUser = await Person.findOne({ email }) || await Tutor.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
@@ -370,7 +371,10 @@ router.delete("/delete/:id", authMiddleware, async (req, res) => {
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await Person.findOne({ email });
+    let user = await Person.findOne({ email });
+    if(!user){
+      user = await Tutor.findOne({ email });
+    }
 
     if (!user || !user.phone) {
       return res
@@ -378,7 +382,6 @@ router.post("/forgot-password", async (req, res) => {
         .json({ message: "User not found or phone number not registered" });
     }
 
-    // Get last two digits of phone number
     const maskedPhone = `******${user.phone.slice(-2)}`;
 
     res.json({ maskedPhone });
@@ -396,34 +399,37 @@ const formatPhoneNumber = (phone) => {
 router.post("/verify-phone", async (req, res) => {
   try {
     const { email, phone } = req.body;
-    const user = await Person.findOne({ email });
+    let user = await Person.findOne({ email });
 
+    if(!user){
+      user = await Tutor.findOne({ email });
+    }
     if (!user || user.phone !== phone) {
       return res.status(400).json({ message: "Invalid phone number" });
     }
 
-    // Format the phone number correctly
+
     const formattedPhone = formatPhoneNumber(phone);
 
-    // Generate OTP
+
     const otp = speakeasy.totp({
       secret: process.env.OTP_SECRET || "secret",
       encoding: "base32",
-      step: 60, // OTP valid for 60 seconds
+      step: 60, 
     });
 
-    // Save OTP in database
+
     user.resetOTP = otp;
-    user.otpExpires = Date.now() + 5 * 60 * 1000; // OTP valid for 5 mins
+    user.otpExpires = Date.now() + 5 * 60 * 1000; 
     await user.save();
 
     console.log("Twilio number", process.env.TWILIO_PHONE_NUMBER);
     console.log("+91 number", formattedPhone);
-    // Send OTP via Twilio
+
     await client.messages.create({
       body: `Your OTP for verification is: ${otp}. It is valid for 5 minutes.`,
       from: process.env.TWILIO_PHONE_NUMBER,
-      to: formattedPhone, // Ensure it's properly formatted
+      to: formattedPhone,
     });
 
     res.json({ message: "OTP sent successfully to your phone" });
@@ -436,7 +442,11 @@ router.post("/verify-phone", async (req, res) => {
 router.post("/verify-otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const user = await Person.findOne({ email });
+    let user = await Person.findOne({ email });
+
+    if(!user){
+      user = await Tutor.findOne({ email });
+    }
 
     if (!user || !user.resetOTP || Date.now() > user.otpExpires) {
       return res.status(400).json({ message: "OTP expired or invalid" });
@@ -455,7 +465,10 @@ router.post("/verify-otp", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, newPassword } = req.body;
-    const user = await Person.findOne({ email });
+    let user = await Person.findOne({ email });
+    if(!user){
+      user = await Tutor.findOne({ email })
+    }
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -469,7 +482,14 @@ router.post("/reset-password", async (req, res) => {
 
     // Hash new password
     console.log(newPassword);
-    user.password = newPassword;
+    console.log(user.role);
+    if(user.role==="tutor"){
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password=hashedPassword;
+    }
+    else{
+      user.password = newPassword;
+    }
     user.resetOTP = null;
     user.otpExpires = null;
     await user.save();

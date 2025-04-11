@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Toast from "./Toast";
 import ForgotPasswordFlow from "./ForgotPasswordFlow";
-import { EyeIcon, EyeSlashIcon, XMarkIcon, } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [action, setAction] = useState(initialAction);
@@ -221,7 +221,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError({ email: "", password: "" }); 
+    setError({ email: "", password: "" });
 
     try {
       const response = await api.post("/login", { email, password });
@@ -233,33 +233,28 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
           navigate(
             response.data.redirectTo + `?email=${encodeURIComponent(email)}`
           );
-        }, 3000); 
+        }, 3000);
       }
-
 
       if (response.data.token && response.data.role) {
         localStorage.setItem("role", response.data.role);
         localStorage.setItem("token", response.data.token);
       }
 
-
       setToast({ show: true, message: "Login Successful!", type: "success" });
 
-    const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/user";
-    
+      const redirectPath =
+        sessionStorage.getItem("redirectAfterLogin") || "/user";
 
-    sessionStorage.removeItem("redirectAfterLogin");
-    setTimeout(() => {
-
-      setToast(false);
-      if (window.location.pathname === redirectPath.split('?')[0]) {
-
-        window.location.reload(); 
-      } else {
-
-        navigate(redirectPath);
-      }
-    }, 2000);
+      sessionStorage.removeItem("redirectAfterLogin");
+      setTimeout(() => {
+        setToast(false);
+        if (window.location.pathname === redirectPath.split("?")[0]) {
+          window.location.reload();
+        } else {
+          navigate(redirectPath);
+        }
+      }, 2000);
     } catch (error) {
       if (error.response) {
         if (error.response.status === 403 && error.response.data.redirectTo) {
@@ -274,7 +269,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
               error.response.data.redirectTo +
                 `?email=${encodeURIComponent(email)}`
             );
-          }, 3000); 
+          }, 3000);
         } else if (error.response.data.message === "Invalid Email") {
           // setError({ email: "Invalid Email", password: "" });
           setToast({
@@ -310,7 +305,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
   return (
     <div className="  rounded-lg shadow-lg z-10 ">
-
       <div className="flex flex-col items-center gap-2 w-full mb-8 ">
         <h1 className="text-3xl font-bold text-gray-800">{action}</h1>
         <div className="w-10 h-1 bg-orange-500 rounded-full"></div>
@@ -380,6 +374,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
             </div>
             <div className="relative md:pb-3">
               <button
+                type="button"
                 onClick={() => setForgotPasswordOpen(true)}
                 className="bg-blue-500 text-white p-3 rounded-lg shadow"
               >
@@ -411,17 +406,19 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
             </div>
 
             <button
-  onClick={handleGoogleLogin}
-  className="max-md:gap-2 max-md:px-4 max-md:py-2 
+              onClick={handleGoogleLogin}
+              className="max-md:gap-2 max-md:px-4 max-md:py-2 
   w-full max-w-sm mx-auto flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-colors"
->
-  <img
-    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-    alt="Google"
-    className="w-5 h-5"
-  />
-  <span className="text-sm font-medium text-gray-800">Continue with Google</span>
-</button>
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                className="w-5 h-5"
+              />
+              <span className="text-sm font-medium text-gray-800">
+                Continue with Google
+              </span>
+            </button>
           </div>
         </form>
       ) : (
@@ -470,12 +467,12 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                     }}
                     className={`max-md:px-4 max-md:py-2 
                       w-full px-6 py-3 rounded-lg  bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
-                      errors[field]
-                        ? "border-red-500"
-                        : valid[field]
-                        ? "border-green-500"
-                        : "border-gray-300"
-                    } border`}
+                        errors[field]
+                          ? "border-red-500"
+                          : valid[field]
+                          ? "border-green-500"
+                          : "border-gray-300"
+                      } border`}
                     required
                   />
                   {valid[field] && (
@@ -500,12 +497,12 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   }}
                   className={`max-md:px-4 max-md:py-2 
                     w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
-                    errors.password
-                      ? "border-red-500"
-                      : valid.password
-                      ? "border-green-500"
-                      : "border-gray-300"
-                  } border`}
+                      errors.password
+                        ? "border-red-500"
+                        : valid.password
+                        ? "border-green-500"
+                        : "border-gray-300"
+                    } border`}
                   required
                 />
                 {/* {valid.password && (
@@ -586,12 +583,12 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   onPaste={(e) => e.preventDefault()} // Prevent pasting
                   className={`max-md:px-4 max-md:py-2 
                     w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
-                    confirmPassword && password !== confirmPassword
-                      ? "border-red-500"
-                      : confirmPassword && password === confirmPassword
-                      ? "border-green-500"
-                      : "border-gray-300"
-                  } border`}
+                      confirmPassword && password !== confirmPassword
+                        ? "border-red-500"
+                        : confirmPassword && password === confirmPassword
+                        ? "border-green-500"
+                        : "border-gray-300"
+                    } border`}
                   required
                 />
                 <button
@@ -646,7 +643,13 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 max-md:gap-2">
               <button
                 type="button"
-                onClick={() => setAction("Login")}
+                onClick={() => {
+                  setAction("Login");
+                  setEmail("");
+                  setPassword("");
+                  setConfirmPassword("");
+                  setToast({ show: false, message: "", type: "" }); 
+                }}
                 className="text-gray-600 hover:text-orange-500"
               >
                 Already have an account? Login
@@ -660,17 +663,19 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
             </div>
 
             <button
-  onClick={handleGoogleLogin}
-  className="max-md:gap-2 max-md:px-4 max-md:py-2 
+              onClick={handleGoogleLogin}
+              className="max-md:gap-2 max-md:px-4 max-md:py-2 
   w-full max-w-sm mx-auto flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-colors"
->
-  <img
-    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-    alt="Google"
-    className="w-5 h-5"
-  />
-  <span className="text-sm font-medium text-gray-800">Continue with Google</span>
-</button>
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                className="w-5 h-5"
+              />
+              <span className="text-sm font-medium text-gray-800">
+                Continue with Google
+              </span>
+            </button>
           </div>
         </form>
       )}
