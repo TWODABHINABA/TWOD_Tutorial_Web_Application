@@ -24,7 +24,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleToast, setGoogleToast] = useState(null);
-  // const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -48,20 +48,16 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const error = params.get("error");
-    const success = params.get("success");
+    const queryParams = new URLSearchParams(location.search);
+    const error = queryParams.get("error");
 
     if (error) {
-      // setShowLoginModal(true);
-      setAction("Login")
-      setGoogleToast({ message: decodeURIComponent(error), type: "error" });
-      window.history.replaceState({}, "", location.pathname);
-    } else if (success) {
-      setGoogleToast({ message: decodeURIComponent(success), type: "success" });
-      window.history.replaceState({}, "", location.pathname);
+      setShowLoginModal(true);
+      setGoogleToast({ message: error, type: "error" });
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
     }
-  }, [location]);
+  }, [location.search]);
 
   const handleGoogleLogin = () => {
     window.open(
