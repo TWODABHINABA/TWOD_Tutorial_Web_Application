@@ -86,7 +86,10 @@ passport.use(
         const email = profile.emails[0].value;
 
         // Check if a user with the same email exists with non-Google login
-        const existingEmailUser = await Person.findOne({ email });
+        let existingEmailUser = await Person.findOne({ email });
+        if(!existingEmailUser){
+          existingEmailUser = await Person.findOne({ email });
+        }
 
         if (existingEmailUser && !existingEmailUser.googleId) {
           return done(null, false, {
