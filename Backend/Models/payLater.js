@@ -23,7 +23,7 @@ const payLaterSchema = new mongoose.Schema({
   bonus: { type: String },
   status: {
     type: String,
-    enum: ["pending", "accepted", "rejected"],
+    enum: ["pending", "accepted", "rejected", "pending for tutor acceptance", "completed"],
     default: "pending",
   },
 }, { timestamps: true });

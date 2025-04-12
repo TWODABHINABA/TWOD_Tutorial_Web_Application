@@ -79,7 +79,7 @@ const Requests = () => {
                   </div>
 
                   <div className="mt-2 sm:mt-0 flex gap-2">
-                    {noti.status === "pending" ? (
+                    {noti.status === "pending for tutor acceptance" ? (
                       <>
                         <button
                           onClick={() => handleAction(noti._id, "accepted")}
