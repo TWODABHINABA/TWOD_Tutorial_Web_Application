@@ -51,10 +51,10 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     const error = queryParams.get("error");
 
     if (error) {
-      setAction("Login");
       setGoogleToast({ message: error, type: "error" });
       const newUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
+      setAction("Login");
     }
   }, [location.search]);
 
