@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import Toast from "./Toast";
 import ForgotPasswordFlow from "./ForgotPasswordFlow";
@@ -24,6 +24,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleToast, setGoogleToast] = useState(null);
+  const location = useLocation();
 
   const navigate = useNavigate();
 
@@ -44,14 +45,10 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     const success = params.get("success");
 
     if (error) {
-      setToast({ message: decodeURIComponent(error), type: "error" });
-
-      // Clean the URL after showing the toast
-      const cleanUrl = location.pathname;
-      window.history.replaceState({}, "", cleanUrl);
+      setGoogleToast({ message: decodeURIComponent(error), type: "error" });
+      window.history.replaceState({}, "", location.pathname);
     } else if (success) {
-      setToast({ message: decodeURIComponent(success), type: "success" });
-
+      setGoogleToast({ message: decodeURIComponent(success), type: "success" });
       window.history.replaceState({}, "", location.pathname);
     }
   }, [location]);

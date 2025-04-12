@@ -54,56 +54,86 @@ router.get(
 
 
 
-router.get(
-  "/auth/callback",
-  (req, res, next) => {
-    passport.authenticate("google", (err, user, info) => {
-      if (err || !user) {
-        const errorMessage = info?.message || "Something went wrong";
+router.get("/auth/callback", (req, res, next) => {
+  passport.authenticate("google", (err, user, info) => {
+    if (err || !user) {
+      const errorMessage = info?.message || err?.message || "Something went wrong during Google login.";
+      return res.redirect(
+        `https://twod-tutorial-web-application-phi.vercel.app/login?error=${encodeURIComponent(errorMessage)}`
+      );
+    }
+
+    req.logIn(user, (err) => {
+      if (err) {
         return res.redirect(
-          `https://twod-tutorial-web-application-phi.vercel.app/login?error=${encodeURIComponent(errorMessage)}`
+          `https://twod-tutorial-web-application-phi.vercel.app/login?error=${encodeURIComponent("Login failed")}`
         );
       }
-      req.logIn(user, (err) => {
-        if (err) {
-          return res.redirect(
-            `https://twod-tutorial-web-application-phi.vercel.app/login?error=Login%20failed`
-          );
-        }
-        return res.redirect("/auth/callback/success");
-      });
-    })(req, res, next);
-  }
-);
+
+      return res.redirect("/auth/callback/success");
+    });
+  })(req, res, next);
+});
+
+router.get("/auth/callback/failure", (req, res) => {
+  return res.redirect(
+    `https://twod-tutorial-web-application-phi.vercel.app/login?error=${encodeURIComponent("Google authentication failed")}`
+  );
+});
+
 
 
 router.get("/auth/callback/success", async (req, res) => {
-  if (!req.user) return res.redirect("/auth/callback/failure");
+  if (!req.user) {
+    return res.redirect("/auth/callback/failure");
+  }
 
   const user = req.user;
   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
 
+  const frontendBase = "https://twod-tutorial-web-application-phi.vercel.app";
+  const localhostBase = "http://localhost:5173"; // fallback for testing
+
   if (!user.password) {
     return res.redirect(
-      `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(
-        user.email
-      )}` ||
-        `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(
-          user.email
-        )}`
-      // `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
+      `${frontendBase}/set-password?token=${token}&email=${encodeURIComponent(user.email)}`
     );
   }
 
   return res.redirect(
-    `https://twod-tutorial-web-application-phi.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
-      user.name
-    )}&email=${encodeURIComponent(user.email)}` ||
-      `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
-        user.name
-      )}&email=${encodeURIComponent(user.email)}`
+    `${frontendBase}/auth-success?token=${token}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}`
   );
 });
+
+
+
+// router.get("/auth/callback/success", async (req, res) => {
+//   if (!req.user) return res.redirect("/auth/callback/failure");
+
+//   const user = req.user;
+//   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+
+//   if (!user.password) {
+//     return res.redirect(
+//       `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(
+//         user.email
+//       )}` ||
+//         `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(
+//           user.email
+//         )}`
+//       // `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
+//     );
+//   }
+
+//   return res.redirect(
+//     `https://twod-tutorial-web-application-phi.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
+//       user.name
+//     )}&email=${encodeURIComponent(user.email)}` ||
+//       `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
+//         user.name
+//       )}&email=${encodeURIComponent(user.email)}`
+//   );
+// });
 
 router.post("/set-password", async (req, res) => {
   const { email, password } = req.body;
