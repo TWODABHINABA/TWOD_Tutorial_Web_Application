@@ -4,7 +4,6 @@ import api from "../../components/User-management/api";
 import Toast from "./Toast";
 import ForgotPasswordFlow from "./ForgotPasswordFlow";
 import { EyeIcon, EyeSlashIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import Modal from "./Modal";
 
 const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [action, setAction] = useState(initialAction);
@@ -25,7 +24,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleToast, setGoogleToast] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -55,13 +53,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     if (error) {
       setGoogleToast({ message: error, type: "error" });
 
-      // Show the login modal
-      setShowLoginModal(true); // 🔥 This was missing
-
-      // Set action to Login
       setAction("Login");
 
-      // Clean up the URL
       const newUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
     }
@@ -296,19 +289,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
           onClose={() => setToast({ show: false })}
         />
       )}
-      {showLoginModal && (
-        <Modal
-          initialAction={action}
-          onClose={() => setShowLoginModal(false)}
-        />
-      )}
-      {googleToast && (
-        <Toast
-          message={googleToast.message}
-          type={googleToast.type}
-          onClose={() => setGoogleToast(null)}
-        />
-      )}
+
       {action === "Login" ? (
         <form
           className="
@@ -427,6 +408,13 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 Continue with Google
               </span>
             </button>
+            {googleToast && (
+              <Toast
+                message={googleToast.message}
+                type={googleToast.type}
+                onClose={() => setGoogleToast(null)}
+              />
+            )}
           </div>
         </form>
       ) : (
