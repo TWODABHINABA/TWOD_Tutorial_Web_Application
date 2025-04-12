@@ -47,18 +47,19 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   }, []);
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const error = queryParams.get("error");
-
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+  
     if (error) {
       setGoogleToast({ message: error, type: "error" });
-
-      setAction("Login");
-
+  
       const newUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
+  
+      setAction("Login");
+      setShowLoginModal(true);
     }
-  }, [location.search]);
+  }, []);
 
   const handleGoogleLogin = () => {
     window.open(
