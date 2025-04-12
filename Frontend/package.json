@@ -29,7 +29,7 @@
     "axios": "^1.7.9",
     "bootstrap": "^5.3.5",
     "flowbite-react": "^0.10.2",
-    "framer-motion": "^12.5.0",
+    "framer-motion": "^12.6.3",
     "framework7": "^8.3.4",
     "framework7-react": "^8.3.4",
     "frontend": "file:",
