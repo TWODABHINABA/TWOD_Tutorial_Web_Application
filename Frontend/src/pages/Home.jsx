@@ -4,8 +4,9 @@ import Footer from "../components/footer/Footer";
 import Explore from "./explore/Explore";
 import ChatBot from "./chatBot/ChatBot";
 import Toast from "./login_signup/Toast";
-const [googleToast, setGoogleToast] = useState(null);
+
 const Home = () => {
+  const [googleToast, setGoogleToast] = useState(null);
   useEffect(() => {
     if (googleToast) {
       const timer = setTimeout(() => setGoogleToast(null), 4000);
