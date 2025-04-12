@@ -24,6 +24,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleToast, setGoogleToast] = useState(null);
+  // const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -52,6 +53,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     const success = params.get("success");
 
     if (error) {
+      // setShowLoginModal(true);
+      setAction("Login")
       setGoogleToast({ message: decodeURIComponent(error), type: "error" });
       window.history.replaceState({}, "", location.pathname);
     } else if (success) {
