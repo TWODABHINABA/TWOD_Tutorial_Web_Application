@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../Auth/Authentication");
 const sendEmail = require("../emailService");
+const paypal = require("../config/paypal");
+const GlobalSessionPricing = require("../Models/GlobalSessionPricing");
 
 // Import models
 const PayLater = require("../Models/payLater");
@@ -91,7 +93,8 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
     const booking = new PayLater({
       courseId,
       tutorId,
-      user: userId,  // storing the person's ID
+      user: userId,
+      status: "pending for tutor acceptance",
       selectedDate,
       selectedTime,
       duration,
@@ -185,5 +188,98 @@ Team TWOD Tutorials
     res.status(500).json({ error: err.message });
   }
 });
+
+
+router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
+  try {
+    const transactionId = req.params.id;
+
+    const transaction = await PayLater.findOne({
+      _id: transactionId,
+      user: req.user.id,
+      status: "accepted",
+    }).populate("courseId");
+
+    if (!transaction) {
+      return res.status(404).json({ message: "No accepted transaction found." });
+    }
+
+    const globalPricing = await GlobalSessionPricing.findOne();
+    if (!globalPricing) {
+      return res.status(404).json({ message: "Session pricing not found" });
+    }
+
+    const selectedSession = globalPricing.sessions.find(
+      (session) => session.duration === transaction.duration
+    );
+    if (!selectedSession) {
+      return res.status(400).json({ message: "Invalid session duration" });
+    }
+
+    const amount = selectedSession.price;
+    const formattedPrice = parseFloat(amount).toFixed(2);
+
+    const course = await Course.findById(transaction.courseId);
+
+    const paymentJson = {
+      intent: "sale",
+      payer: { payment_method: "paypal" },
+      redirect_urls: {
+        return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
+        cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+      },
+      transactions: [
+        {
+          item_list: {
+            items: [
+              {
+                name: `Course Enrollment: ${course.name}`,
+                sku: course._id.toString(),
+                price: formattedPrice,
+                currency: "USD",
+                quantity: 1,
+              },
+            ],
+          },
+          amount: {
+            currency: "USD",
+            total: formattedPrice,
+          },
+          description: `Enrollment for course ${course.name}, Duration: ${transaction.duration}.`,
+        },
+      ],
+    };
+
+    paypal.payment.create(paymentJson, async (error, payment) => {
+      if (error) {
+        console.error("PayPal error:", error);
+        return res.status(500).json({ message: "Payment creation failed" });
+      }
+
+      const approvalUrl = payment.links.find((link) => link.rel === "approval_url");
+      console.log(approvalUrl)
+      if (approvalUrl) {
+        try {
+
+          return res.json({ approval_url: approvalUrl.href });
+        } catch (err) {
+          console.error("Error updating transaction status:", err);
+          return res.status(500).json({ message: "Failed to update transaction status." });
+        }
+      } else {
+        return res.status(500).json({ message: "No approval URL found" });
+      }
+    });
+  } catch (err) {
+    console.error("Error in payNow route:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+ 
+
+
+
 
 module.exports = router;

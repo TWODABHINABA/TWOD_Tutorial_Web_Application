@@ -5,9 +5,11 @@ const Tutor = require("../Models/tutors");
 const authMiddleware = require("../Auth/Authentication");
 const paypal = require("../config/paypal");
 const Transaction = require("../Models/transaction");
+const payLater = require("../Models/payLater");
 const GlobalSessionPricing = require("../Models/GlobalSessionPricing");
 const multer = require("multer");
 const path = require("path");
+const { plus_v1 } = require("googleapis");
 
 const storage = multer.diskStorage({
   destination: "courseUploads/",
@@ -576,6 +578,8 @@ router.get("/success", authMiddleware, async (req, res) => {
 
           const transaction = await Transaction.findById(transactionId);
           if (!transaction) {
+            transaction = await payLater.findById(transactionId);
+            if(!transaction)
             return res.status(404).json({ message: "Transaction not found" });
           }
 
@@ -611,16 +615,77 @@ router.get("/success", authMiddleware, async (req, res) => {
   }
 });
 
+
+
+// router.get("/success", authMiddleware, async (req, res) => {
+//   try {
+//     const { paymentId, PayerID, transactionId } = req.query;
+
+//     if (!paymentId || !PayerID || !transactionId) {
+//       return res.status(400).json({ message: "Missing payment details" });
+//     }
+
+//     const execute_payment_json = { payer_id: PayerID };
+
+//     paypal.payment.execute(
+//       paymentId,
+//       execute_payment_json,
+//       async (error, payment) => {
+//         if (error) {
+//           console.error("Error executing PayPal payment:", error);
+//           return res.status(500).json({ error: "Payment execution failed" });
+//         } else {
+//           console.log("✅ Payment successful:", payment);
+
+//           const transaction = await Transaction.findById(transactionId);
+//           if (!transaction) {
+//             return res.status(404).json({ message: "Transaction not found" });
+//           }
+
+//           transaction.status = "completed";
+//           await transaction.save();
+
+//           const course = await Course.findById(transaction.courseId);
+//           if (!course) {
+//             return res.status(404).json({ message: "Course not found" });
+//           }
+
+//           if (!course.students) {
+//             course.students = [];
+//           }
+
+//           if (!course.students.includes(req.user.id)) {
+//             course.students.push(req.user.id);
+//             await course.save();
+//           }
+
+//           return res.json({
+//             success: true,
+//             message: "Payment verified successfully",
+//             transactionId: transaction._id,
+//             status: "completed",
+//           });
+//         }
+//       }
+//     );
+//   } catch (err) {
+//     console.error("Error processing PayPal success:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
 router.get("/cancel", authMiddleware, async (req, res) => {
   try {
     const { transactionId } = req.query;
 
-    if (!transactionId) {
+    if (!transactionId) { 
       return res.status(400).json({ message: "Missing transaction ID" });
     }
 
     const transaction = await Transaction.findById(transactionId);
     if (!transaction) {
+      transaction = await payLater.findById(transactionId);
+      if (!transaction)
       return res.status(404).json({ message: "Transaction not found" });
     }
 
@@ -659,53 +724,123 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
   }
 });
 
+// router.get("/user/courses", authMiddleware, async (req, res) => {
+//   try {
+//     console.log("Authenticated user:", req.user); // Debugging
+
+//     if (!req.user || !req.user.id) {
+//       return res
+//         .status(401)
+//         .json({ error: "Unauthorized. User not authenticated." });
+//     }
+
+//     const userId = req.user.id;
+
+//     const transactions = await Transaction.find({
+//       user: userId,
+//       status: "completed",
+//     })
+//       .populate("courseId")
+//       .populate({
+//         path: "tutorId",
+//         select: "name",
+//       })
+//       .lean();
+
+//     if (!transactions.length) {
+//       return res.status(404).json({ message: "No purchased courses found" });
+//     }
+
+//     // Handle possible nulls in courseId and tutorId
+//     const formattedCourses = transactions.map((transaction) => ({
+//       courseId: transaction.courseId?._id || "Deleted",
+//       courseTypeTitle: transaction.courseId?.courseType || "Deleted",
+//       courseTitle: transaction.courseId?.name || "Deleted",
+//       courseDescription: transaction.courseId?.description || "Deleted",
+//       coursePrice: transaction.courseId?.price || "Deleted",
+//       amountPaid: transaction.amount,
+//       tutorName: transaction.tutorId?.name || "Not Selected",
+//       selectedDate: transaction.selectedDate || "Not Selected",
+//       selectedTime: transaction.selectedTime || "Not Selected",
+//       duration: transaction.duration || "Not Selected",
+//     }));
+
+//     res.json(formattedCourses);
+//   } catch (err) {
+//     console.error("Error fetching purchased courses:", err);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
+
+
 router.get("/user/courses", authMiddleware, async (req, res) => {
   try {
-    console.log("Authenticated user:", req.user); // Debugging
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    if (!req.user || !req.user.id) {
-      return res
-        .status(401)
-        .json({ error: "Unauthorized. User not authenticated." });
-    }
-
-    const userId = req.user.id;
-
+    // 1. Fetch completed transactions
     const transactions = await Transaction.find({
       user: userId,
       status: "completed",
     })
       .populate("courseId")
-      .populate({
-        path: "tutorId",
-        select: "name",
-      })
+      .populate({ path: "tutorId", select: "name" })
       .lean();
 
-    if (!transactions.length) {
+    const completedCourses = transactions.map((tx) => ({
+      tid: tx._id,
+      type: "completed",
+      courseId: tx.courseId?._id || "Deleted",
+      courseTypeTitle: tx.courseId?.courseType || "Deleted",
+      courseTitle: tx.courseId?.name || "Deleted",
+      courseDescription: tx.courseId?.description || "Deleted",
+      coursePrice: tx.courseId?.price || "Deleted",
+      amountPaid: tx.amount,
+      tutorName: tx.tutorId?.name || "Not Selected",
+      selectedDate: tx.selectedDate || "Not Selected",
+      selectedTime: tx.selectedTime || "Not Selected",
+      duration: tx.duration || "Not Selected",
+    }));
+
+    // 2. Fetch PayLater transactions (pending + accepted)
+    const payLaterCourses = await payLater.find({
+      user: userId,
+      status: { $in: ["pending for tutor acceptance", "accepted", "completed"] },
+    })
+      .populate("courseId")
+      .populate({ path: "tutorId", select: "name" })
+      .lean();
+
+    const additionalCourses = payLaterCourses.map((pl) => ({
+      tid: pl._id,
+      type: pl.status, // either "pending for tutor acceptance" or "accepted"
+      showPayNow: pl.status === "accepted",
+      courseId: pl.courseId?._id || "Deleted",
+      courseTypeTitle: pl.courseId?.courseType || "Deleted",
+      courseTitle: pl.courseId?.name || "Deleted",
+      courseDescription: pl.courseId?.description || "Deleted",
+      coursePrice: pl.courseId?.price || "Deleted",
+      amountPaid: pl.amount || 0,
+      tutorName: pl.tutorId?.name || "Not Selected",
+      selectedDate: pl.selectedDate || "Not Selected",
+      selectedTime: pl.selectedTime || "Not Selected",
+      duration: pl.duration || "Not Selected",
+    }));
+
+    const allCourses = [...completedCourses, ...additionalCourses];
+
+    if (!allCourses.length) {
       return res.status(404).json({ message: "No purchased courses found" });
     }
 
-    // Handle possible nulls in courseId and tutorId
-    const formattedCourses = transactions.map((transaction) => ({
-      courseId: transaction.courseId?._id || "Deleted",
-      courseTypeTitle: transaction.courseId?.courseType || "Deleted",
-      courseTitle: transaction.courseId?.name || "Deleted",
-      courseDescription: transaction.courseId?.description || "Deleted",
-      coursePrice: transaction.courseId?.price || "Deleted",
-      amountPaid: transaction.amount,
-      tutorName: transaction.tutorId?.name || "Not Selected",
-      selectedDate: transaction.selectedDate || "Not Selected",
-      selectedTime: transaction.selectedTime || "Not Selected",
-      duration: transaction.duration || "Not Selected",
-    }));
-
-    res.json(formattedCourses);
+    res.json(allCourses);
   } catch (err) {
-    console.error("Error fetching purchased courses:", err);
+    console.error("Error fetching user courses:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 module.exports = router;
 
