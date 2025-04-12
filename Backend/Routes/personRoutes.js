@@ -59,14 +59,14 @@ router.get("/auth/callback", (req, res, next) => {
     if (err || !user) {
       const errorMessage = info?.message || err?.message || "Something went wrong during Google login.";
       return res.redirect(
-        `https://twod-tutorial-web-application-phi.vercel.app/login?error=${encodeURIComponent(errorMessage)}`
+        `https://twod-tutorial-web-application-phi.vercel.app/?error=${encodeURIComponent(errorMessage)}`
       );
     }
 
     req.logIn(user, (err) => {
       if (err) {
         return res.redirect(
-          `https://twod-tutorial-web-application-phi.vercel.app/login?error=${encodeURIComponent("Login failed")}`
+          `https://twod-tutorial-web-application-phi.vercel.app/?error=${encodeURIComponent("Login failed")}`
         );
       }
 
@@ -77,7 +77,7 @@ router.get("/auth/callback", (req, res, next) => {
 
 router.get("/auth/callback/failure", (req, res) => {
   return res.redirect(
-    `https://twod-tutorial-web-application-phi.vercel.app/login?error=${encodeURIComponent("Google authentication failed")}`
+    `https://twod-tutorial-web-application-phi.vercel.app/?error=${encodeURIComponent("Google authentication failed")}`
   );
 });
 
