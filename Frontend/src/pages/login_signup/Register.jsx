@@ -52,9 +52,16 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
 
     if (error) {
       setGoogleToast({ message: error, type: "error" });
+
+      // Show the login modal
+      setShowLoginModal(true); // 🔥 This was missing
+
+      // Set action to Login
+      setAction("Login");
+
+      // Clean up the URL
       const newUrl = window.location.origin + window.location.pathname;
-      window.history.replaceState(setAction("Login"), document.title, newUrl);
-      
+      window.history.replaceState({}, document.title, newUrl);
     }
   }, [location.search]);
 
@@ -285,6 +292,12 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast({ show: false })}
+        />
+      )}
+      {showLoginModal && (
+        <Modal
+          initialAction={action}
+          onClose={() => setShowLoginModal(false)}
         />
       )}
       {googleToast && (
