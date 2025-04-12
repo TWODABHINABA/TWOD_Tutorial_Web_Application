@@ -79,6 +79,7 @@ const SetPassword = ({ isOpen, onClose }) => {
       {toast.show && (
         <Toast
           message={toast.message}
+          type={toast.type}
           onClose={() => setToast({ show: false })}
         />
       )}
