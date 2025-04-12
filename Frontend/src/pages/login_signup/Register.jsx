@@ -4,6 +4,7 @@ import api from "../../components/User-management/api";
 import Toast from "./Toast";
 import ForgotPasswordFlow from "./ForgotPasswordFlow";
 import { EyeIcon, EyeSlashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import Modal from "./Modal";
 
 const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [action, setAction] = useState(initialAction);
@@ -286,6 +287,12 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast({ show: false })}
+        />
+      )}
+      {showLoginModal && (
+        <Modal
+          initialAction="Login" // 🔥 You’re using this already inside modal to set `action`
+          onClose={() => setShowLoginModal(false)}
         />
       )}
       {googleToast && (
