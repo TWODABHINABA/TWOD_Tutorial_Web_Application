@@ -4,6 +4,7 @@ import api from "../../components/User-management/api";
 import Toast from "./Toast";
 import ForgotPasswordFlow from "./ForgotPasswordFlow";
 import { EyeIcon, EyeSlashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import Modal from "./Modal";
 
 const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [action, setAction] = useState(initialAction);
