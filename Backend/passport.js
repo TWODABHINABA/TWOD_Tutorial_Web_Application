@@ -17,6 +17,16 @@ passport.use(
     
     async (request, accessToken, refreshToken, profile, done) => {
       try {
+        const email = profile.emails[0].value;
+
+
+        const existingEmailUser = await Person.findOne({ email });
+
+        if (existingEmailUser && !existingEmailUser.googleId) {
+          return done(null, false, {
+            message: "Email already exists with a different login method.",
+          });
+        }
         let user = await Person.findOne({ googleId: profile.id }); //email: profile.emails[0].value 
         if (!user) {
           user = new Person({
@@ -28,7 +38,6 @@ passport.use(
           });
           await user.save();
           console.log(user);
-          // console.log("Google Strategy Callback URL:", process.env.CALLBACK_URL);
           
         }
         const token = jwt.sign({ id: user._id }, JWT_SECRET, {

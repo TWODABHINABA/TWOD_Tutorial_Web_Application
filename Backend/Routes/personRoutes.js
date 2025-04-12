@@ -44,13 +44,38 @@ router.get(
   passport.authenticate("google", { scope: ["email", "profile"] })
 );
 
+// router.get(
+//   "/auth/callback",
+//   passport.authenticate("google", {
+//     successRedirect: "/auth/callback/success",
+//     failureRedirect: "/auth/callback/failure",
+//   })
+// );
+
+
+
 router.get(
   "/auth/callback",
-  passport.authenticate("google", {
-    successRedirect: "/auth/callback/success",
-    failureRedirect: "/auth/callback/failure",
-  })
+  (req, res, next) => {
+    passport.authenticate("google", (err, user, info) => {
+      if (err || !user) {
+        const errorMessage = info?.message || "Something went wrong";
+        return res.redirect(
+          `https://twod-tutorial-web-application-phi.vercel.app/login?error=${encodeURIComponent(errorMessage)}`
+        );
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return res.redirect(
+            `https://twod-tutorial-web-application-phi.vercel.app/login?error=Login%20failed`
+          );
+        }
+        return res.redirect("/auth/callback/success");
+      });
+    })(req, res, next);
+  }
 );
+
 
 router.get("/auth/callback/success", async (req, res) => {
   if (!req.user) return res.redirect("/auth/callback/failure");

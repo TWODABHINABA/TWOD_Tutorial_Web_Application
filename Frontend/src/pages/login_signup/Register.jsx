@@ -23,6 +23,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [googleToast, setGoogleToast] = useState(null);
 
   const navigate = useNavigate();
 
@@ -37,12 +38,25 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
       .catch((error) => console.error("Error checking admin existence", error));
   }, []);
 
-  const handleGoogleLogin = () => {
-    // const password = prompt("Set a password for future logins:");
-    // if (!password)
-    //   return alert("Password is required!");
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const error = params.get("error");
+    const success = params.get("success");
 
-    // localStorage.setItem("googlePassword", password);
+    if (error) {
+      setToast({ message: decodeURIComponent(error), type: "error" });
+
+      // Clean the URL after showing the toast
+      const cleanUrl = location.pathname;
+      window.history.replaceState({}, "", cleanUrl);
+    } else if (success) {
+      setToast({ message: decodeURIComponent(success), type: "success" });
+
+      window.history.replaceState({}, "", location.pathname);
+    }
+  }, [location]);
+
+  const handleGoogleLogin = () => {
     window.open(
       "https://twod-tutorial-web-application-3brq.onrender.com/auth",
       "_self" || "http://localhost:6001/auth",
@@ -50,21 +64,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     );
     // window.open("http://localhost:6001/auth", "_self"); // local
   };
-
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     try {
-  //       const response = await api.get("/auth/check");
-  //       if (response.data.authenticated) {
-  //         localStorage.setItem("token", response.data.token);
-  //         navigate("/user");
-  //       }
-  //     } catch (error) {
-  //       console.error("Google authentication check failed", error);
-  //     }
-  //   };
-  //   checkAuth();
-  // }, []);
 
   const isValidEmail = (email) =>
     /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
@@ -405,7 +404,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
               </button>
             </div>
 
-            <button
+            {/* <button
               onClick={handleGoogleLogin}
               className="max-md:gap-2 max-md:px-4 max-md:py-2 
   w-full max-w-sm mx-auto flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-colors"
@@ -418,7 +417,30 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
               <span className="text-sm font-medium text-gray-800">
                 Continue with Google
               </span>
+            </button> */}
+
+            <button
+              onClick={handleGoogleLogin}
+              className="max-md:gap-2 max-md:px-4 max-md:py-2 
+        w-full flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 
+        rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-colors"
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                className="w-5 h-5"
+              />
+              <span className="text-sm font-medium text-gray-800">
+                Continue with Google
+              </span>
             </button>
+            {googleToast && (
+              <Toast
+                message={googleToast.message}
+                type={googleToast.type}
+                onClose={() => setToast(null)}
+              />
+            )}
           </div>
         </form>
       ) : (
@@ -648,7 +670,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                   setEmail("");
                   setPassword("");
                   setConfirmPassword("");
-                  setToast({ show: false, message: "", type: "" }); 
+                  setToast({ show: false, message: "", type: "" });
                 }}
                 className="text-gray-600 hover:text-orange-500"
               >
