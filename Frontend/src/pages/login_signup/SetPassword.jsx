@@ -49,7 +49,7 @@ const SetPassword = ({ isOpen, onClose }) => {
       const response = await api.post("/set-password", { email, password });
       localStorage.setItem("token", response.data.token);
 
-      setToast({ show: true, message: "Password set successfully!" });
+      setToast({ show: true, message: "Password set successfully!", type: "success" });
 
  
       setTimeout(() => {
@@ -62,7 +62,7 @@ const SetPassword = ({ isOpen, onClose }) => {
     } catch (error) {
       setError("Error setting password. Try again.");
 
-      setToast({ show: true, message: "Error setting password", type: "success" });
+      setToast({ show: true, message: "Error setting password", type: "error" });
 
       setTimeout(() => setToast({ show: false }), 1500);
     }
