@@ -4,7 +4,6 @@ import api from "../../components/User-management/api";
 import Toast from "./Toast";
 import ForgotPasswordFlow from "./ForgotPasswordFlow";
 import { EyeIcon, EyeSlashIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import Modal from "./Modal";
 
 const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [action, setAction] = useState(initialAction);
@@ -25,7 +24,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleToast, setGoogleToast] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -53,7 +51,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     const error = queryParams.get("error");
 
     if (error) {
-      setShowLoginModal(true);
+      setAction("Login");
       setGoogleToast({ message: error, type: "error" });
       const newUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
@@ -287,12 +285,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast({ show: false })}
-        />
-      )}
-      {showLoginModal && (
-        <Modal
-          initialAction="Login" // 🔥 You’re using this already inside modal to set `action`
-          onClose={() => setShowLoginModal(false)}
         />
       )}
       {googleToast && (
