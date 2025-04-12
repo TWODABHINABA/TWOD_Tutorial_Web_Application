@@ -75,13 +75,6 @@ router.get("/auth/callback", (req, res, next) => {
   })(req, res, next);
 });
 
-router.get("/auth/callback/failure", (req, res) => {
-  return res.redirect(
-    `https://twod-tutorial-web-application-phi.vercel.app/?error=${encodeURIComponent("Google authentication failed")}`
-  );
-});
-
-
 
 router.get("/auth/callback/success", async (req, res) => {
   if (!req.user) return res.redirect("/auth/callback/failure");
@@ -108,6 +101,12 @@ router.get("/auth/callback/success", async (req, res) => {
       `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
         user.name
       )}&email=${encodeURIComponent(user.email)}`
+  );
+});
+
+router.get("/auth/callback/failure", (req, res) => {
+  return res.redirect(
+    `https://twod-tutorial-web-application-phi.vercel.app/?error=${encodeURIComponent("Google authentication failed")}`
   );
 });
 

@@ -33,6 +33,13 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
   };
 
   useEffect(() => {
+    if (googleToast) {
+      const timer = setTimeout(() => setGoogleToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [googleToast]);
+
+  useEffect(() => {
     api
       .get("/check-admin")
       .then((response) => setAdminExists(response.data.adminExists))
@@ -184,37 +191,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
     }
   };
 
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   setError({ email: "", password: "" });
-
-  //   try {
-  //     const userData = await api.post("/login", { email, password });
-
-  //     if (userData.data.token && userData.data.role) {
-  //       localStorage.setItem("role", userData.data.role);
-  //       localStorage.setItem("token", userData.data.token);
-  //     }
-
-  //     setToast({ show: true, message: "Login Successful!", type: "success" });
-  //     setTimeout(() => {
-  //       navigate("/user");
-  //     }, 2000);
-  //   } catch (error) {
-  //     if (error.response && error.response.data.message) {
-  //       if (error.response.data.message === "Invalid Email") {
-  //         setError({ email: "Invalid Email", password: "" });
-  //       } else if (error.response.data.message === "Invalid Password") {
-  //         setError({ email: "", password: "Incorrect Password" });
-  //       } else {
-  //         setError({ email: "", password: "Something went wrong. Try again." });
-  //       }
-  //     } else {
-  //       setError({ email: "", password: "Something went wrong. Try again." });
-  //     }
-  //   }
-  // };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError({ email: "", password: "" });
@@ -317,7 +293,7 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
         <Toast
           message={googleToast.message}
           type={googleToast.type}
-          onClose={() => setToast(null)}
+          onClose={() => setGoogleToast(null)}
         />
       )}
       {action === "Login" ? (

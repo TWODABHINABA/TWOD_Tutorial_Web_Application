@@ -8,7 +8,7 @@ const SetPassword = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [valid, setValid] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "" });
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +62,7 @@ const SetPassword = ({ isOpen, onClose }) => {
     } catch (error) {
       setError("Error setting password. Try again.");
 
-      setToast({ show: true, message: "Error setting password" });
+      setToast({ show: true, message: "Error setting password", type: "success" });
 
       setTimeout(() => setToast({ show: false }), 1500);
     }
