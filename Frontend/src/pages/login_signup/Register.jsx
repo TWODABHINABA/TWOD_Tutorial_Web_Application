@@ -313,6 +313,13 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
           onClose={() => setToast({ show: false })}
         />
       )}
+      {googleToast && (
+        <Toast
+          message={googleToast.message}
+          type={googleToast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       {action === "Login" ? (
         <form
           className="
@@ -431,13 +438,6 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
                 Continue with Google
               </span>
             </button>
-            {googleToast && (
-              <Toast
-                message={googleToast.message}
-                type={googleToast.type}
-                onClose={() => setToast(null)}
-              />
-            )}
           </div>
         </form>
       ) : (
