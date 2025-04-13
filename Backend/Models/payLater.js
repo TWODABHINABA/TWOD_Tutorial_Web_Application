@@ -6,7 +6,7 @@ const payLaterSchema = new mongoose.Schema({
     ref: "course",
     required: true,
   },
-  
+  amount: { type: String, required: true },
   tutorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Tutor",
@@ -23,7 +23,7 @@ const payLaterSchema = new mongoose.Schema({
   bonus: { type: String },
   status: {
     type: String,
-    enum: ["pending", "accepted", "rejected", "pending for tutor acceptance", "completed"],
+    enum: ["pending", "accepted", "rejected", "pending for tutor acceptance", "completed", "failed"],
     default: "pending",
   },
 }, { timestamps: true });

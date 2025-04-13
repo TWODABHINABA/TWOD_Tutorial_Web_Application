@@ -38,13 +38,11 @@ const CancelPage = () => {
 
       try {
 
-        await api.post(
-          "/cancel",
-          { transactionId },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await api.get("/cancel", {
+          params: { transactionId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
 
 
         const response = await api.get(

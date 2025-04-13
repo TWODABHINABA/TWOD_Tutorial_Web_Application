@@ -68,6 +68,25 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
 
     let { courseId, tutorId, selectedDate, selectedTime, duration, bonus } =
       req.body;
+
+
+    const globalPricing = await GlobalSessionPricing.findOne();
+        if (!globalPricing) {
+          return res.status(404).json({ message: "Session pricing not found" });
+        }
+    
+        const selectedSession = globalPricing.sessions.find(
+          (session) => session.duration === duration
+        );
+        if (!selectedSession) {
+          return res.status(400).json({ message: "Invalid session duration" });
+        }
+    
+        let amount = selectedSession.price;
+        const formattedPrice = parseFloat(amount.replace(/,/g, "")).toFixed(2);
+        console.log(formattedPrice);
+
+
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
@@ -105,6 +124,7 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
     const booking = new PayLater({
       courseId,
       tutorId,
+      amount: formattedPrice,
       user: userId,
       status: "pending for tutor acceptance",
       selectedDate,
@@ -210,7 +230,6 @@ router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
     const transaction = await PayLater.findOne({
       _id: transactionId,
       user: req.user.id,
-      status: "accepted",
     }).populate("courseId");
 
     if (!transaction) {
@@ -242,6 +261,8 @@ router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
       redirect_urls: {
         return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
         cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+        // return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
+        // cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {

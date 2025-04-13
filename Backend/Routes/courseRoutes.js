@@ -349,6 +349,8 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       redirect_urls: {
         return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
         cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+        // return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
+        // cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -556,6 +558,7 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
 //   }
 // });
 
+
 router.get("/success", authMiddleware, async (req, res) => {
   try {
     const { paymentId, PayerID, transactionId } = req.query;
@@ -573,40 +576,58 @@ router.get("/success", authMiddleware, async (req, res) => {
         if (error) {
           console.error("Error executing PayPal payment:", error);
           return res.status(500).json({ error: "Payment execution failed" });
-        } else {
-          console.log("✅ Payment successful:", payment);
+        }
 
-          const transaction = await Transaction.findById(transactionId);
-          if (!transaction) {
-            transaction = await payLater.findById(transactionId);
-            if(!transaction)
+        console.log("✅ Payment successful:", payment);
+
+        let transaction = await Transaction.findById(transactionId);
+
+        if (!transaction) {
+          const payLaterTx = await payLater.findById(transactionId);
+          if (!payLaterTx) {
             return res.status(404).json({ message: "Transaction not found" });
           }
 
-          transaction.status = "completed";
+          // Create a new Transaction entry
+          transaction = new Transaction({
+            user: payLaterTx.user,
+            tutorId: payLaterTx.tutorId,
+            courseId: payLaterTx.courseId,
+            status: "completed",
+            selectedDate: payLaterTx.selectedDate,
+            selectedTime: payLaterTx.selectedTime,
+            duration: payLaterTx.duration,
+            amount: payLaterTx.amount,
+            createdAt: new Date()
+          });
+
           await transaction.save();
 
-          const course = await Course.findById(transaction.courseId);
-          if (!course) {
-            return res.status(404).json({ message: "Course not found" });
-          }
-
-          if (!course.students) {
-            course.students = [];
-          }
-
-          if (!course.students.includes(req.user.id)) {
-            course.students.push(req.user.id);
-            await course.save();
-          }
-
-          return res.json({
-            success: true,
-            message: "Payment verified successfully",
-            transactionId: transaction._id,
-            status: "completed",
-          });
+          // Delete the PayLater entry
+          await payLater.findByIdAndDelete(transactionId);
+        } else {
+          transaction.status = "completed";
+          await transaction.save();
         }
+
+        const course = await Course.findById(transaction.courseId);
+        if (!course) {
+          return res.status(404).json({ message: "Course not found" });
+        }
+
+        if (!course.students) course.students = [];
+
+        if (!course.students.includes(req.user.id)) {
+          course.students.push(req.user.id);
+          await course.save();
+        }
+
+        return res.json({
+          success: true,
+          message: "Payment verified successfully",
+          transactionId: transaction._id,
+          status: "completed",
+        });
       }
     );
   } catch (err) {
@@ -614,6 +635,68 @@ router.get("/success", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+
+
+// router.get("/success", authMiddleware, async (req, res) => {
+//   try {
+//     const { paymentId, PayerID, transactionId } = req.query;
+
+//     if (!paymentId || !PayerID || !transactionId) {
+//       return res.status(400).json({ message: "Missing payment details" });
+//     }
+
+//     const execute_payment_json = { payer_id: PayerID };
+
+//     paypal.payment.execute(
+//       paymentId,
+//       execute_payment_json,
+//       async (error, payment) => {
+//         if (error) {
+//           console.error("Error executing PayPal payment:", error);
+//           return res.status(500).json({ error: "Payment execution failed" });
+//         } else {
+//           console.log("✅ Payment successful:", payment);
+
+//           let transaction = await Transaction.findById(transactionId);
+//           if (!transaction) {
+//             transaction = await payLater.findById(transactionId);
+//             if(!transaction)
+//             return res.status(404).json({ message: "Transaction not found" });
+//           }
+
+//           transaction.status = "completed";
+//           await transaction.save();
+
+//           const course = await Course.findById(transaction.courseId);
+//           if (!course) {
+//             return res.status(404).json({ message: "Course not found" });
+//           }
+
+//           if (!course.students) {
+//             course.students = [];
+//           }
+
+//           if (!course.students.includes(req.user.id)) {
+//             course.students.push(req.user.id);
+//             await course.save();
+//           }
+
+//           return res.json({
+//             success: true,
+//             message: "Payment verified successfully",
+//             transactionId: transaction._id,
+//             status: "completed",
+//           });
+//         }
+//       }
+//     );
+//   } catch (err) {
+//     console.error("Error processing PayPal success:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 
 
@@ -682,7 +765,7 @@ router.get("/cancel", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Missing transaction ID" });
     }
 
-    const transaction = await Transaction.findById(transactionId);
+    let transaction = await Transaction.findById(transactionId);
     if (!transaction) {
       transaction = await payLater.findById(transactionId);
       if (!transaction)
@@ -708,8 +791,10 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
   try {
     const { transactionId } = req.params;
 
-    const transaction = await Transaction.findById(transactionId);
+    let transaction = await Transaction.findById(transactionId);
     if (!transaction) {
+      transaction = await payLater.findById(transactionId);
+      if (!transaction)
       return res.status(404).json({ message: "Transaction not found" });
     }
 
@@ -806,7 +891,7 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
     // 2. Fetch PayLater transactions (pending + accepted)
     const payLaterCourses = await payLater.find({
       user: userId,
-      status: { $in: ["pending for tutor acceptance", "accepted", "completed"] },
+      status: { $in: ["pending for tutor acceptance", "accepted", "completed", "failed"] },
     })
       .populate("courseId")
       .populate({ path: "tutorId", select: "name" })
