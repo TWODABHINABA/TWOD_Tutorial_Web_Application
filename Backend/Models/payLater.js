@@ -28,4 +28,5 @@ const payLaterSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-module.exports = mongoose.model("PayLater", payLaterSchema);
+const PayLater=mongoose.model("PayLater", payLaterSchema);
+module.exports = PayLater;

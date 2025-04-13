@@ -4,13 +4,14 @@ const authMiddleware = require("../Auth/Authentication");
 const sendEmail = require("../emailService");
 const paypal = require("../config/paypal");
 const GlobalSessionPricing = require("../Models/GlobalSessionPricing");
+const Transaction = require("../Models/transaction");
 
 // Import models
 const PayLater = require("../Models/payLater");
 const Course = require("../Models/course");
 // Import person model to ensure it’s registered
 const Person = require("../Models/person");
-const Tutor = require("../Models/tutors")
+const Tutor = require("../Models/tutors");
 
 const convertTo24HourFormat = (time12h) => {
   const [time, modifier] = time12h.split(" ");
@@ -26,8 +27,12 @@ const convertTo24HourFormat = (time12h) => {
 };
 
 const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
-  const selectedStartTime = convertTo24HourFormat(selectedTime.split("-")[0].trim()); // "19:30"
-  const selectedEndTime = convertTo24HourFormat(selectedTime.split("-")[1].trim()); // "20:30"
+  const selectedStartTime = convertTo24HourFormat(
+    selectedTime.split("-")[0].trim()
+  ); // "19:30"
+  const selectedEndTime = convertTo24HourFormat(
+    selectedTime.split("-")[1].trim()
+  ); // "20:30"
 
   const tutors = await Tutor.find({
     "availability.date": selectedDate, // Match date
@@ -56,38 +61,45 @@ const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
   return null; // No available tutor
 };
 
-
 // POST: Book a Pay Later session
 router.post("/paylater/book", authMiddleware, async (req, res) => {
   try {
     console.log("hello paylater book");
-    
-    let { courseId, tutorId, selectedDate, selectedTime, duration, bonus } = req.body;
+
+    let { courseId, tutorId, selectedDate, selectedTime, duration, bonus } =
+      req.body;
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
     if (!tutorId) {
       // Auto-assign a tutor
-      const assignedTutor = await findAvailableTutor(course.courseType, selectedDate, selectedTime);
+      const assignedTutor = await findAvailableTutor(
+        course.courseType,
+        selectedDate,
+        selectedTime
+      );
 
       if (!assignedTutor) {
-        return res.status(400).json({ error: "No tutors available for the selected date and time." });
+        return res.status(400).json({
+          error: "No tutors available for the selected date and time.",
+        });
       }
 
       tutorId = assignedTutor._id;
-      console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
+      console.log(
+        `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
+      );
     }
     if (!courseId || !tutorId || !selectedDate || !selectedTime || !duration) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    
-    
-
     const userId = req.user?._id || req.user?.id;
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized: User not found in token." });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: User not found in token." });
     }
 
     const booking = new PayLater({
@@ -103,7 +115,9 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
 
     await booking.save();
 
-    res.status(201).json({ message: "Booking request submitted", data: booking });
+    res
+      .status(201)
+      .json({ message: "Booking request submitted", data: booking });
   } catch (err) {
     console.error("❌ Error creating Pay Later booking:", err);
     res.status(500).json({ error: err.message });
@@ -128,15 +142,15 @@ router.get("/paylater/tutor-request", authMiddleware, async (req, res) => {
   }
 });
 
-
-
 // PUT: Tutor updates request status
 router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
 
     if (!["accepted", "rejected"].includes(status)) {
-      return res.status(400).json({ message: "Invalid status. Use 'accepted' or 'rejected'." });
+      return res
+        .status(400)
+        .json({ message: "Invalid status. Use 'accepted' or 'rejected'." });
     }
 
     const updated = await PayLater.findByIdAndUpdate(
@@ -152,8 +166,7 @@ router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
 
     if (!updated) {
       return res.status(404).json({ message: "Booking request not found" });
-    }
-    else {
+    } else {
       await sendEmail(
         updated.user.email,
         `Your Pay Later Request has been ${status}`,
@@ -162,9 +175,11 @@ Hi ${updated.user.name},
       
 Your Pay Later request for the course "${updated.courseId.name}" has been ${status} by the tutor.
       
-${status === "accepted" ?
-`You can now proceed with the next steps to begin your learning journey.` :
-`We're sorry to inform you that the tutor has rejected your request. Feel free to explore other courses on our platform.`}
+${
+  status === "accepted"
+    ? `You can now proceed with the next steps to begin your learning journey.`
+    : `We're sorry to inform you that the tutor has rejected your request. Feel free to explore other courses on our platform.`
+}
       
 Course Details:
 - Course Name: ${updated.courseId.name} ${updated.courseId.cousrseType}
@@ -179,7 +194,6 @@ Best regards,
 Team TWOD Tutorials
         `
       );
-
     }
 
     res.status(200).json({ message: `Request ${status}`, data: updated });
@@ -188,7 +202,6 @@ Team TWOD Tutorials
     res.status(500).json({ error: err.message });
   }
 });
-
 
 router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
   try {
@@ -201,7 +214,9 @@ router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
     }).populate("courseId");
 
     if (!transaction) {
-      return res.status(404).json({ message: "No accepted transaction found." });
+      return res
+        .status(404)
+        .json({ message: "No accepted transaction found." });
     }
 
     const globalPricing = await GlobalSessionPricing.findOne();
@@ -256,15 +271,18 @@ router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
         return res.status(500).json({ message: "Payment creation failed" });
       }
 
-      const approvalUrl = payment.links.find((link) => link.rel === "approval_url");
-      console.log(approvalUrl)
+      const approvalUrl = payment.links.find(
+        (link) => link.rel === "approval_url"
+      );
+      console.log(approvalUrl);
       if (approvalUrl) {
         try {
-
           return res.json({ approval_url: approvalUrl.href });
         } catch (err) {
           console.error("Error updating transaction status:", err);
-          return res.status(500).json({ message: "Failed to update transaction status." });
+          return res
+            .status(500)
+            .json({ message: "Failed to update transaction status." });
         }
       } else {
         return res.status(500).json({ message: "No approval URL found" });
@@ -275,11 +293,5 @@ router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
-
- 
-
-
-
 
 module.exports = router;
