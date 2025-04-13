@@ -156,25 +156,25 @@ const PurchasedCourse = () => {
 
 
 
-const handlePayNow = async (tid) => {
-  console.log(tid);
-  try {
-    const { data } = await api.post(
-      `/payLater/${tid}/payNow`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+  const handlePayNow = async (tid) => {
+    console.log(tid);
+    try {
+      const { data } = await api.post(
+        `/payLater/${tid}/payNow`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    if (data.approval_url) {
-      window.location.href = data.approval_url;
-    } else {
-      alert("Payment URL not received.");
+      if (data.approval_url) {
+        window.location.href = data.approval_url;
+      } else {
+        alert("Payment URL not received.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Payment failed.");
     }
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || "Payment failed.");
-  }
-};
+  };
 
 
 
@@ -209,22 +209,32 @@ const handlePayNow = async (tid) => {
                     {course.courseTitle}
                   </h3>
                   <p className="text-lg text-green-600 mt-2">
-                    Price Paid: ${course.amountPaid}
+                    {course.type === "accepted" && `Price to be Paid: $${course.amountPaid}`}
+                    {course.type === "failed" && `Price to be Paid: $${course.amountPaid}`}
+                    {course.type === "completed" && `Price Paid: $${course.amountPaid}`}
+                    {course.type === "pending for tutor acceptance" && `Amount: $${course.amountPaid}`}
                   </p>
                   <p className="text-sm mt-1 text-gray-600 italic">
                     Status:{" "}
-                    <span
-                      className={`font-semibold ${course.type === "completed"
-                          ? "text-green-700"
-                          : "text-yellow-600"
-                        }`}
-                    >
-                      {course.type}
-                    </span>
+                    {course.type === "failed" ? (
+                      <span className="font-semibold text-red-600">
+                        Your previous payment failed. Please try again.
+                      </span>
+                    ) : (
+                      <span
+                        className={`font-semibold ${course.type === "completed"
+                            ? "text-green-700"
+                            : "text-yellow-600"
+                          }`}
+                      >
+                        {course.type}
+                      </span>
+                    )}
                   </p>
 
 
-                  {course.type === "accepted" && (
+
+                  {(course.type === "accepted" || course.type === "failed") && (
                     <div className="mt-4">
                       <button
                         onClick={() => handlePayNow(course.tid)}
