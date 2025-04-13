@@ -9,7 +9,7 @@ const Home = () => {
   const [googleToast, setGoogleToast] = useState(null);
   useEffect(() => {
     if (googleToast) {
-      const timer = setTimeout(() => setGoogleToast(null), 4000);
+      const timer = setTimeout(() => setGoogleToast(null), 8000);
       return () => clearTimeout(timer);
     }
   }, [googleToast]);

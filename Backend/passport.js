@@ -93,7 +93,7 @@ passport.use(
 
         if (existingEmailUser && !existingEmailUser.googleId) {
           return done(null, false, {
-            message: "Email already exists with a different login method.",
+            message: "Email already exists.",
           });
         }
 

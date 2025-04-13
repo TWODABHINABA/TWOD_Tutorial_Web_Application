@@ -632,7 +632,8 @@ const Register = ({ onClose, initialAction = "Sign Up" }) => {
             <button
               onClick={handleGoogleLogin}
               className="max-md:gap-2 max-md:px-4 max-md:py-2 
-  w-full max-w-sm mx-auto flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-colors"
+        w-full flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 
+        rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-colors"
             >
               <img
                 src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
