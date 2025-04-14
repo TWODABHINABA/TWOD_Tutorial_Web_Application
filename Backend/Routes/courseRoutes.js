@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Course = require("../Models/course");
+const Person = require("../Models/person");
 const Tutor = require("../Models/tutors");
 const authMiddleware = require("../Auth/Authentication");
 const paypal = require("../config/paypal");
@@ -609,6 +610,9 @@ router.get("/success", authMiddleware, async (req, res) => {
           transaction.status = "completed";
           await transaction.save();
         }
+        await Person.findByIdAndUpdate(transaction.user, {
+          $addToSet: { purchasedCourses: transaction.courseId }
+        });
 
         const course = await Course.findById(transaction.courseId);
         if (!course) {
