@@ -27,6 +27,10 @@ const Requests = () => {
     };
 
     fetchRequests();
+    const interval = setInterval(fetchRequests, 5000);
+
+    // Cleanup
+    return () => clearInterval(interval);
   }, [tutorToken]);
 
   const handleAction = async (id, action) => {
@@ -71,6 +75,7 @@ const Requests = () => {
                   <div>
                     <p className="text-sm text-gray-800">
                       <span className="font-semibold">{noti.user?.name}</span> has requested to join{" "}
+                      <span className="font-semibold">{noti.courseId?.courseType}</span> of {" "}
                       <span className="font-semibold">{noti.courseId?.name}</span>
                     </p>
                     <p className="text-xs text-gray-500">

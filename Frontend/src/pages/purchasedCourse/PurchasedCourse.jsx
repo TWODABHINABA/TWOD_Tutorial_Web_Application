@@ -152,6 +152,9 @@ const PurchasedCourse = () => {
     };
 
     fetchPurchasedCourses();
+    const interval = setInterval(fetchPurchasedCourses, 5000);
+
+    return () => clearInterval(interval);
   }, [navigate, isAdmin]);
 
 
