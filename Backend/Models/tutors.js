@@ -38,12 +38,12 @@ const tutorSchema = new mongoose.Schema({
     type: String,
     default: "tutor",
   },
-  resetOTP: {
-    type: String,
-  },
-  otpExpires: {
-    type: Date,
-  },
+  // resetOTP: {
+  //   type: String,
+  // },
+  // otpExpires: {
+  //   type: Date,
+  // },
   availability: [
     {
       date: { type: Date, required: true },

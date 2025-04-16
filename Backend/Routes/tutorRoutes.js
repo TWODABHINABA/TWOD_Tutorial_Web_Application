@@ -4,6 +4,9 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const bcrypt = require("bcrypt");
+const PayLater = require("../Models/payLater");
+const Transaction = require("../Models/transaction");
+const Person = require("../Models/person");
 const authMiddleware = require("../Auth/Authentication");
 const sendEmail = require("../emailService");
 
@@ -518,6 +521,131 @@ router.delete(
     }
   }
 );
+
+
+router.get("/dashboard", authMiddleware, async (req, res) => {
+  try {
+    const tutorId = req.user.id;
+    const tutor = await Tutor.findById(tutorId);
+    if (!tutor) return res.status(404).json({ message: "Tutor not found" });
+
+    const subjectCounts = {};
+    const uniqueStudentIds = new Set(); // 👈 new line
+
+    // --- Get enrollments from PayLater ---
+    const payLaterEnrollments = await PayLater.find({
+      tutorId,
+      status: { $in: ["accepted", "completed"] },
+    }).populate("courseId user"); // 👈 also populate user
+
+    payLaterEnrollments.forEach((enroll) => {
+      const subject = enroll.courseId?.subject;
+      const studentId = enroll.user?._id;
+      if (subject) {
+        subjectCounts[subject] = (subjectCounts[subject] || 0) + 1;
+      }
+      if (studentId) {
+        uniqueStudentIds.add(studentId.toString());
+      }
+    });
+
+    // --- Get enrollments from Transaction ---
+    const transactionEnrollments = await Transaction.find({
+      tutorId,
+      status: "completed",
+    }).populate("courseId user"); // 👈 also populate user
+
+    transactionEnrollments.forEach((enroll) => {
+      const subject = enroll.courseId?.subject;
+      const studentId = enroll.user?._id;
+      if (subject) {
+        subjectCounts[subject] = (subjectCounts[subject] || 0) + 1;
+      }
+      if (studentId) {
+        uniqueStudentIds.add(studentId.toString());
+      }
+    });
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const upcomingPayLater = await PayLater.find({
+      tutorId,
+      selectedDate: { $gte: today },
+      status: "accepted",
+    }).populate("user courseId");
+
+    const upcomingTransactions = await Transaction.find({
+      tutorId,
+      selectedDate: { $gte: today },
+      status: "completed",
+    }).populate("user courseId");
+
+    const upcomingClasses = [];
+
+    upcomingPayLater.forEach((item) => {
+      if (item.courseId && item.user) {
+        upcomingClasses.push({
+          subject: item.courseId.subject,
+          date: item.selectedDate,
+          time: item.selectedTime,
+          studentName: item.user.name,
+        });
+      }
+    });
+
+    upcomingTransactions.forEach((item) => {
+      if (item.courseId && item.user) {
+        upcomingClasses.push({
+          subject: item.courseId.subject,
+          date: item.selectedDate,
+          time: item.selectedTime,
+          studentName: item.user.name,
+        });
+      }
+    });
+
+    res.status(200).json({
+      totalStudents: uniqueStudentIds.size, // 👈 return total students
+      enrolledSubjects: subjectCounts,
+      upcomingClasses,
+    });
+  } catch (error) {
+    console.error("Dashboard error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+router.get("/students", authMiddleware, async (req, res) => {
+  try {
+    const tutorId = req.user.id;
+
+    const payLater = await PayLater.find({
+      tutorId,
+      status: { $in: ["accepted", "completed"] },
+    }).populate("user")
+
+    const transactions = await Transaction.find({
+      tutorId,
+      status: "completed",
+    }).populate("user")
+
+    const studentMap = new Map();
+
+    [...payLater, ...transactions].forEach((enroll) => {
+      if (enroll.user) {
+        studentMap.set(enroll.user._id.toString(), enroll.user);
+      }
+    });
+
+    const students = Array.from(studentMap.values());
+
+    res.status(200).json({ students });
+  } catch (err) {
+    console.error("Error fetching student list:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 module.exports = router;
 

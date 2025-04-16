@@ -989,8 +989,8 @@ const AddAvailability = () => {
     } catch (error) {
       setToast({
         show: true,
-        message: error.response?.data?.message || "Email and Password Sent Successful!",
-        type: "success",
+        message: error.response?.data?.message || "Conflicts with the time and Date",
+        type: "error",
       });
 
       if (error.response?.data?.error) {
