@@ -19,6 +19,9 @@ const UserInfo = () => {
   const [allSubjects, setAllSubjects] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [errors, setErrors] = useState({});
+  const [valid, setValid] = useState({});
+  const [touched, setTouched] = useState({});
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -64,7 +67,7 @@ const UserInfo = () => {
     const fetchUser = async () => {
       try {
         const response = await api.get("/me", {
-          headers: { Authorization: `Bearer ${token}` }, 
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         setUser(response.data);
@@ -83,7 +86,6 @@ const UserInfo = () => {
         console.error("Error fetching user:", err);
         setError(`Error fetching user: ${err.message}`);
 
-
         if (err.response && err.response.status === 401) {
           localStorage.removeItem("token");
           navigate("/");
@@ -92,14 +94,46 @@ const UserInfo = () => {
     };
 
     fetchUser();
-  }, []); 
+  }, []);
+
+  // const handleInputChange = (e) => {
+  //   setUpdatedUser((prev) => ({
+  //     ...prev,
+  //     [e.target.name]: e.target.value,
+  //   }));
+  //   setIsEditing(true);
+  // };
+  const handleValidation = (name, value) => {
+    let errorMsg = "";
+    let isValid = true;
+  
+    if (name === "email") {
+      isValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(value);
+      if (!isValid) errorMsg = "Invalid email format. Use '@something.com'";
+    }
+  
+    if (name === "phone") {
+      isValid = /^\d{10}$/.test(value);
+      if (!isValid) errorMsg = "Phone number must be 10 digits.";
+    }
+  
+    if (name === "birthday") {
+      isValid = /^\d{4}-\d{2}-\d{2}$/.test(value);
+      if (!isValid) errorMsg = "Birthday must be in 'YYYY-MM-DD' format.";
+    }
+  
+    setErrors((prev) => ({ ...prev, [name]: errorMsg }));
+    setValid((prev) => ({ ...prev, [name]: isValid }));
+  };
+  
 
   const handleInputChange = (e) => {
-    setUpdatedUser((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-    setIsEditing(true);
+    const { name, value } = e.target;
+
+    setUpdatedUser((prev) => ({ ...prev, [name]: value }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
+
+    handleValidation(name, value);
   };
 
   const handleFileChange = (e) => {
@@ -110,11 +144,130 @@ const UserInfo = () => {
     setIsEditing(true);
   };
 
+  // const handleUpdate = async (e) => {
+  //   e.preventDefault();
+
+  //   if (!Object.keys(updatedUser).length) {
+  //     alert("No changes made!");
+  //     return;
+  //   }
+
+  //   try {
+  //     const formData = new FormData();
+
+  //     Object.keys(updatedUser).forEach((key) => {
+  //       if (updatedUser[key]) {
+  //         if (key === "subjects" && Array.isArray(updatedUser[key])) {
+  //           formData.append(key, updatedUser[key].join(","));
+  //         } else {
+  //           formData.append(key, updatedUser[key]);
+  //         }
+  //       }
+  //     });
+
+  //     const response = await api.put(`/update/${user._id}`, formData, {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //     });
+
+  //     setUser(response.data);
+  //     setIsEditing(false);
+  //     setUpdatedUser({});
+
+  //     setToast({
+  //       show: true,
+  //       message: "Profile updated successfully!",
+  //       type: "success",
+  //     });
+  //     setTimeout(()=>{
+  //       setToast(false)
+  //       navigate(0);
+  //     },800)
+  //   } catch (err) {
+  //     if (err.response) {
+
+  //       setToast({
+  //         show: true,
+  //         message: err.response?.data?.message || "Update failed. Please try again.",
+  //         type: "error",
+  //       });
+  //     } else {
+  //       setToast({
+  //         show: true,
+  //         message: "Network error. Please try again.",
+  //         type: "error",
+  //       });
+  //     }
+  //   }
+  // };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
 
     if (!Object.keys(updatedUser).length) {
       alert("No changes made!");
+      return;
+    }
+
+    let formHasError = false;
+
+    const tempErrors = {};
+    const tempValid = {};
+
+    const validateField = (field, value) => {
+      switch (field) {
+        case "email":
+          tempValid[field] = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(
+            value
+          );
+          tempErrors[field] = tempValid[field]
+            ? ""
+            : "Invalid email format. Use '@something.com'.";
+          break;
+
+        case "phone":
+          tempValid[field] = /^\d{10}$/.test(value);
+          tempErrors[field] = tempValid[field]
+            ? ""
+            : "Phone number must be 10 digits.";
+          break;
+
+        case "birthday":
+          tempValid[field] = /^\d{4}-\d{2}-\d{2}$/.test(value);
+          tempErrors[field] = tempValid[field]
+            ? ""
+            : "Birthday must be in 'YYYY-MM-DD' format.";
+          break;
+
+        case "name":
+          tempValid[field] = value.trim().length >= 2;
+          tempErrors[field] = tempValid[field]
+            ? ""
+            : "Name must be at least 2 characters.";
+          break;
+
+        default:
+          tempValid[field] = true;
+          tempErrors[field] = "";
+      }
+
+      if (!tempValid[field]) formHasError = true;
+    };
+
+    // Validate only the updated fields
+    Object.entries(updatedUser).forEach(([field, value]) => {
+      validateField(field, value);
+    });
+
+    setErrors(tempErrors);
+    setValid(tempValid);
+
+    if (formHasError) {
+      const firstError = Object.values(tempErrors).find((msg) => msg);
+      setToast({
+        show: true,
+        message: firstError || "Please correct the highlighted errors.",
+        type: "error",
+      });
       return;
     }
 
@@ -124,7 +277,7 @@ const UserInfo = () => {
       Object.keys(updatedUser).forEach((key) => {
         if (updatedUser[key]) {
           if (key === "subjects" && Array.isArray(updatedUser[key])) {
-            formData.append(key, updatedUser[key].join(",")); 
+            formData.append(key, updatedUser[key].join(","));
           } else {
             formData.append(key, updatedUser[key]);
           }
@@ -135,25 +288,26 @@ const UserInfo = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setUser(response.data); 
+      setUser(response.data);
       setIsEditing(false);
-      setUpdatedUser({}); 
-      
+      setUpdatedUser({});
+
       setToast({
         show: true,
         message: "Profile updated successfully!",
         type: "success",
       });
-      setTimeout(()=>{
-        setToast(false)
+
+      setTimeout(() => {
+        setToast(false);
         navigate(0);
-      },800)
+      }, 800);
     } catch (err) {
       if (err.response) {
-
         setToast({
           show: true,
-          message: err.response?.data?.message || "Update failed. Please try again.",
+          message:
+            err.response?.data?.message || "Update failed. Please try again.",
           type: "error",
         });
       } else {
@@ -171,7 +325,7 @@ const UserInfo = () => {
       <div className="fixed inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50">
         <ClipLoader size={80} color="#FFA500" />
       </div>
-    );    
+    );
 
   if (error) return <p className="error-message">Error: {error}</p>;
   return (
@@ -211,12 +365,16 @@ const UserInfo = () => {
               </h2>
 
               <div className="space-y-3 w-full">
-                {user.role==="tutor"?(<p
-                  className="cursor-pointer hover:text-orange-600"
-                  onClick={() => navigate("/tutor-dashboard")}
-                >
-                  Tutor Dashboard
-                </p>):(<p></p>)}
+                {user.role === "tutor" ? (
+                  <p
+                    className="cursor-pointer hover:text-orange-600"
+                    onClick={() => navigate("/tutor-dashboard")}
+                  >
+                    Tutor Dashboard
+                  </p>
+                ) : (
+                  <p></p>
+                )}
                 <p className="cursor-pointer hover:text-orange-600">
                   Account Settings
                 </p>
@@ -253,6 +411,30 @@ const UserInfo = () => {
                     />
                   </div>
 
+                  {/* {["name", "email", "phone", "birthday"].map((field, idx) => (
+                    <div key={idx}>
+                      <label className="block mb-2 font-medium capitalize">
+                        {field === "birthday" ? "Date of Birth" : field}
+                      </label>
+                      <input
+                        type={
+                          field === "email"
+                            ? "email"
+                            : field === "phone"
+                            ? "tel"
+                            : field === "birthday"
+                            ? "text"
+                            : "text"
+                        }
+                        name={field}
+                        value={updatedUser[field] ?? user[field] ?? ""}
+                        onChange={handleInputChange}
+                        placeholder={`Enter your ${field}`}
+                        className="w-full border p-3 rounded-lg"
+                      />
+                    </div>
+                  ))} */}
+
                   {["name", "email", "phone", "birthday"].map((field, idx) => (
                     <div key={idx}>
                       <label className="block mb-2 font-medium capitalize">
@@ -264,21 +446,33 @@ const UserInfo = () => {
                             ? "email"
                             : field === "phone"
                             ? "tel"
+                            : field === "birthday"
+                            ? "text"
                             : "text"
                         }
                         name={field}
-                        value={updatedUser[field]}
+                        value={updatedUser[field] ?? user[field] ?? ""}
                         onChange={handleInputChange}
                         placeholder={`Enter your ${field}`}
-                        className="w-full border p-3 rounded-lg"
+                        className={`w-full border p-3 rounded-lg ${
+                          touched[field] && errors[field]
+                            ? "border-red-500"
+                            : touched[field] && valid[field]
+                            ? "border-green-500"
+                            : ""
+                        }`}
                       />
+                      {touched[field] && errors[field] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors[field]}
+                        </p>
+                      )}
                     </div>
                   ))}
 
-                  {/* Additional fields for Tutors */}
+     
                   {user.role === "tutor" && (
                     <>
-                      {/* Description Field */}
                       <div>
                         <label className="block mb-2 font-medium">
                           Description

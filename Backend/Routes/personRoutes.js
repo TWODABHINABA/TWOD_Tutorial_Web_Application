@@ -384,6 +384,94 @@ router.put(
 );
 
 
+// const isValidEmail = (email) =>
+//   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(email);
+// const isValidPhone = (phone) => /^\d+$/.test(phone);
+// const isValidBirthday = (birthday) =>
+//   /^\d{4}-[A-Za-z]{3}-\d{2}$/.test(birthday);
+
+// router.put(
+//   "/update/:id",
+//   authMiddleware,
+//   upload.single("profilePicture"),
+//   async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const updates = {};
+
+//       // Name validation (optional)
+//       if (req.body.name) updates.name = req.body.name;
+
+//       // Phone validation
+//       if (req.body.phone) {
+//         if (!isValidPhone(req.body.phone)) {
+//           return res.status(400).json({ message: "Invalid phone number." });
+//         }
+//         updates.phone = req.body.phone;
+//       }
+
+//       // Birthday validation
+//       if (req.body.birthday) {
+//         if (!isValidBirthday(req.body.birthday)) {
+//           return res.status(400).json({ message: "Invalid date format. Use 'YYYY-MMM-DD'." });
+//         }
+//         updates.birthday = req.body.birthday;
+//       }
+
+//       // Email validation
+//       if (req.body.email) {
+//         if (!isValidEmail(req.body.email)) {
+//           return res.status(400).json({ message: "Invalid email format. Use '@something.com'." });
+//         }
+//         const existingUser = await Person.findOne({ email: req.body.email });
+//         const existingTutor = await Tutor.findOne({ email: req.body.email });
+//         if (existingUser || existingTutor) {
+//           return res.status(400).json({ message: "Email already exists" });
+//         }
+//         updates.email = req.body.email;
+//       }
+
+//       // Description field
+//       if (req.body.description) updates.description = req.body.description;
+
+//       // Subjects (Convert to array if provided)
+//       if (req.body.subjects) updates.subjects = req.body.subjects.split(",");
+
+//       // Handle profile picture
+//       if (req.file) {
+//         updates.profilePicture = "/uploads/" + req.file.filename;
+//       }
+
+//       // First update in Person collection
+//       let updatedUser = await Person.findByIdAndUpdate(
+//         id,
+//         { $set: updates },
+//         { new: true }
+//       );
+
+//       // If no person found, try updating in Tutor collection
+//       if (!updatedUser) {
+//         updatedUser = await Tutor.findByIdAndUpdate(
+//           id,
+//           { $set: updates },
+//           { new: true }
+//         );
+//       }
+
+//       if (!updatedUser) {
+//         return res.status(404).json({ error: "User Not Found" });
+//       }
+
+//       res.status(200).json(updatedUser);
+//     } catch (err) {
+//       console.error("Error Updating Data", err);
+//       res.status(500).json({ error: "Internal Server Error" });
+//     }
+//   }
+// );
+
+
+
 router.delete("/delete/:id", authMiddleware, async (req, res) => {
   try {
     const user = await Person.findByIdAndDelete({
