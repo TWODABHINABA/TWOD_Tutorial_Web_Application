@@ -23,7 +23,7 @@ const Navbar = ({ title = "Dashboard", user}) => {
         </button>
         <button className="flex items-center">
         <img 
-  src={`http://localhost:6001${user?.profilePicture || "/placeholder.jpg"}`} 
+  src={`https://twod-tutorial-web-application-3brq.onrender.com${user?.profilePicture || "/placeholder.jpg"}`} 
   alt="Profile" 
   className="w-6 h-6 md:w-8 md:h-8 rounded-full object-cover" 
 />
