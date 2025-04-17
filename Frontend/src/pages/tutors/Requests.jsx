@@ -8,19 +8,33 @@ import api from "../../components/User-management/api";
 const Requests = () => {
   const [notifications, setNotifications] = useState([]);
   const tutorToken = localStorage.getItem("token");
-
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/me");
+        
+        setUser(res.data);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
+  console.log(user);
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        console.log("Tutor token:", tutorToken);
+        // console.log("Tutor token:", tutorToken);
         const res = await api.get("/paylater/tutor-request", {
           headers: {
             Authorization: `Bearer ${tutorToken}`,
           },
         });
 
-        console.log("✅ Fetched Requests:", res.data);
-        setNotifications(res.data.data); // assuming response data structure { data: [...] }
+        // console.log("✅ Fetched Requests:", res.data);
+        setNotifications(res.data.data);
+        // console.log(res.data.data[0].tutorId) // assuming response data structure { data: [...] }
       } catch (err) {
         console.error("❌ Error fetching tutor requests", err);
       }
@@ -60,7 +74,7 @@ const Requests = () => {
 
       {/* Main Content */}
       <div className="w-full z-0 relative">
-        <Navbar title="Requests" />
+        <Navbar title="Requests" user = {user}/>
         <div className="p-4 bg-[#FAF3E0]">
           <h2 className="text-xl font-bold text-orange-500 mb-4">Course Booking Requests</h2>
           <div className="space-y-4">

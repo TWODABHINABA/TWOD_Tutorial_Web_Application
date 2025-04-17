@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import SidebarMobile from './SidebarMobile';
+import api from '../../components/User-management/api';
 
 const Controls = () => {
   const navigate = useNavigate();
-
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/me");
+        
+        setUser(res.data);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
   return (
     <div className="flex bg-white">
       {/* Sidebar */}
@@ -23,7 +36,7 @@ const Controls = () => {
       {/* Main Content */}
       <div className="w-full z-0 relative">
         {/* Pass the title prop to show "Controls" */}
-        <Navbar title="Controls" />
+        <Navbar title="Controls" user = {user}/>
         <div className="p-4 flex flex-col sm:flex-row gap-4">
           {/* Add Course Button */}
           <button

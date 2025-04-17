@@ -122,19 +122,35 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [totalStudents, setTotalStudents] = useState(0);
   const [upcomingClasses, setUpcomingClasses] = useState([]);
+  const [previousClasses, setPreviousClasses] = useState([]);
   const [subjectCounts, setSubjectCounts] = useState({});
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [students, setStudents] = useState([]);
+  const [showUpcomingModal, setShowUpcomingModal] = useState(false);
+  const [showPreviousModal, setShowPreviousModal] = useState(false);
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/me");
 
+        setUser(res.data);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const res = await api.get("/dashboard");
-        const { totalStudents, enrolledSubjects, upcomingClasses } = res.data;
+        const { totalStudents, enrolledSubjects, upcomingClasses, previousClasses } = res.data;
 
         setTotalStudents(totalStudents || 0);
         setSubjectCounts(enrolledSubjects || {});
         setUpcomingClasses(upcomingClasses || []);
+        setPreviousClasses(previousClasses || []);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -142,7 +158,6 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, []);
-
   const fetchStudents = async () => {
     try {
       const res = await api.get("/students");
@@ -153,7 +168,9 @@ const Dashboard = () => {
       console.error("Error fetching students:", error);
     }
   };
-
+  console.log("previousClasses", previousClasses);
+  const firstFive = upcomingClasses.slice(0, 5);
+  const firstFivePrevious = previousClasses.slice(0, 5);
   return (
     <div className="flex min-h-screen bg-gray-100 z-50">
       <div className="absolute md:static top-0 left-0 z-50">
@@ -168,7 +185,7 @@ const Dashboard = () => {
 
       <div className="w-full z-0 relative ml-0">
 
-        <Navbar title="Dashboard" />
+        <Navbar title="Dashboard" user={user} />
 
 
         <div className="p-4">
@@ -196,8 +213,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-
-          <div className="mt-6">
+          {/* enrolledSubjects */}
+          {/* <div className="mt-6">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-semibold mb-4">Enrolled Subjects</h2>
               <ul className="divide-y divide-gray-200">
@@ -211,7 +228,7 @@ const Dashboard = () => {
                 ))}
               </ul>
             </div>
-          </div>
+          </div> */}
 
           {/* Upcoming Classes Section */}
           <div className="mt-6">
@@ -220,21 +237,127 @@ const Dashboard = () => {
               {upcomingClasses.length === 0 ? (
                 <p className="text-gray-600">No upcoming classes scheduled.</p>
               ) : (
-                <ul className="divide-y divide-gray-200">
-                  {upcomingClasses.map((item, index) => (
-                    <li key={index} className="py-2 flex justify-between">
-                      <span>
-                        {item.subject} — {item.studentName}
-                      </span>
-                      <span className="text-gray-600 text-sm">
-                        {item.date} at {item.time}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="divide-y divide-gray-200">
+                    {firstFive.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <span>
+                          {item.subject}, {item.grade} — {item.studentName}
+                        </span>
+                        <span>payment Status: {item.status}</span>
+                        <span className="text-gray-600 text-sm">
+                          {item.date} at {item.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {upcomingClasses.length > 5 && (
+                    <button
+                      onClick={() => setShowUpcomingModal(true)}
+                      className="mt-4 text-blue-600 hover:underline"
+                    >
+                      View All
+                    </button>
+                  )}
+                </>
               )}
             </div>
+
+            {/* Modal */}
+            {showUpcomingModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">All Upcoming Classes</h3>
+                    <button
+                      onClick={() => setShowUpcomingModal(false)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <ul className="divide-y divide-gray-200">
+                    {upcomingClasses.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <span>
+                          {item.subject}, {item.grade} — {item.studentName}
+                        </span>
+                        <span>payment Status: {item.status}</span>
+                        <span className="text-gray-600 text-sm">
+                          {item.date} at {item.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Previous Classes Section */}
+          <div className="mt-6">
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-xl font-semibold mb-4">Previous Classes</h2>
+              {previousClasses.length === 0 ? (
+                <p className="text-gray-600">No previous classes recorded.</p>
+              ) : (
+                <>
+                  <ul className="divide-y divide-gray-200">
+                    {firstFivePrevious.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <span>
+                          {item.subject}, {item.grade} — {item.studentName}
+                        </span>
+                        <span>payment Status: {item.status}</span>
+                        <span className="text-gray-600 text-sm">
+                          {item.date} at {item.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {previousClasses.length > 5 && (
+                    <button
+                      onClick={() => setShowPreviousModal(true)}
+                      className="mt-4 text-blue-600 hover:underline"
+                    >
+                      View All
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Modal */}
+            {showPreviousModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">All Previous Classes</h3>
+                    <button
+                      onClick={() => setShowPreviousModal(false)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <ul className="divide-y divide-gray-200">
+                    {previousClasses.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <span>
+                          {item.subject}, {item.grade} — {item.studentName}
+                        </span>
+                        <span>payment Status: {item.status}</span>
+                        <span className="text-gray-600 text-sm">
+                          {item.date} at {item.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+
 
           {/* You can keep this or remove it depending on future use */}
           {/* 
@@ -269,7 +392,7 @@ const Dashboard = () => {
                   </p>
                 ) : (
                   <ul className="space-y-4">
-                    {students.map((student) => (
+                    {students.map(({ student, transactions }) => (
                       <li
                         key={student._id}
                         className="border border-gray-200 p-4 rounded-md bg-gray-50"
@@ -283,6 +406,45 @@ const Dashboard = () => {
                         <p>
                           <strong>Phone:</strong> {student.phone || "N/A"}
                         </p>
+                        <p>
+                          <strong>Purchased Courses:</strong>
+                          <ul>
+                            {transactions.map((txn, idx) => {
+                              const courseName = txn.courseId?.name || "Course";
+                              const courseType = txn.courseId?.courseType || "N/A";
+
+                              // Extract date and time
+                              const selectedDate = new Date(txn.selectedDate); // "2025-04-18"
+                              const startTimeStr = txn.selectedTime.split("-")[0].trim(); // "05:00 AM"
+
+                              // Convert to 24-hour time
+                              const [time, modifier] = startTimeStr.split(" ");
+                              let [hours, minutes] = time.split(":").map(Number);
+                              if (modifier === "PM" && hours !== 12) hours += 12;
+                              if (modifier === "AM" && hours === 12) hours = 0;
+
+                              selectedDate.setHours(hours);
+                              selectedDate.setMinutes(minutes);
+                              selectedDate.setSeconds(0);
+
+                              const now = new Date();
+                              const classStatus = selectedDate > now ? "Upcoming" : "Completed";
+
+                              let paymentStatus = "Pending";
+                              if (txn.status === "completed") paymentStatus = "Paid";
+                              else if (txn.status === "accepted") paymentStatus = "Accepted (Pay Later)";
+                              else if (txn.status === "pending for tutor acceptance") paymentStatus = "Pending for Tutor Acceptance (you have to accept the class)";
+                              else if (txn.status === "rejected") paymentStatus = "Rejected";
+
+                              return (
+                                <li key={idx}>
+                                  {courseName}, {courseType} — <strong>{classStatus}</strong> | Payment: <strong>{paymentStatus}</strong>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </p>
+
                       </li>
                     ))}
                   </ul>
