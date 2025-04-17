@@ -35,7 +35,7 @@ const Sidebar = () => {
       setSelected("Dashboard");
     } else if (location.pathname.includes("tutor-controls")) {
       setSelected("controls");
-    } 
+    }
     // else if (location.pathname.includes("view-site")) {
     //   setSelected("View Site");
     // } 
@@ -167,6 +167,7 @@ const Option = ({ Icon, title, selected, setSelected, open, notifs, onClick }) =
 
 
 const TitleSection = ({ open }) => {
+  const navigate = useNavigate();
   return (
     <div className="mb-3 border-b border-orange-300 pb-3">
       <div className="flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-orange-100">
@@ -190,8 +191,13 @@ const TitleSection = ({ open }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.125 }}
             >
-              
-              <span className="block text-xl font-bold text-orange-500">TUTOR</span>
+
+              <span
+                onClick={() => navigate("/")}
+                className="block text-xl font-bold text-orange-500"
+              >
+                TUTOR
+              </span>
             </motion.div>
           )}
         </div>

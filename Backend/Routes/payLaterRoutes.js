@@ -152,7 +152,8 @@ router.get("/paylater/tutor-request", authMiddleware, async (req, res) => {
 
     const bookings = await PayLater.find({ tutorId })
       .populate("user", "name email")
-      .populate("courseId", "name courseType");
+      .populate("courseId", "name courseType")
+      .populate("tutorId")
 
     console.log("✅ Bookings for this tutor:", bookings);
     res.status(200).json({ data: bookings });

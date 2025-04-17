@@ -2,7 +2,7 @@ import React from "react";
 import { FiBell, FiGrid, FiHelpCircle } from "react-icons/fi";
 import BellDropdown from "./BellDropdown";
 
-const Navbar = ({ title = "Dashboard" }) => {
+const Navbar = ({ title = "Dashboard", user}) => {
   return (
     <nav className="flex justify-between max-sm:justify-items-stretch max-sm:pl-16 items-center p-3 max-sm:p-[14px] bg-orange-50 border-b border-orange-300">
       {/* Left Section: Dynamic Title */}
@@ -22,11 +22,12 @@ const Navbar = ({ title = "Dashboard" }) => {
           <FiHelpCircle className="text-lg md:text-2xl" />
         </button>
         <button className="flex items-center">
-          <img 
-            src="https://via.placeholder.com/40" 
-            alt="Profile" 
-            className="w-6 h-6 md:w-8 md:h-8 rounded-full object-cover" 
-          />
+        <img 
+  src={`http://localhost:6001${user?.profilePicture || "/placeholder.jpg"}`} 
+  alt="Profile" 
+  className="w-6 h-6 md:w-8 md:h-8 rounded-full object-cover" 
+/>
+
         </button>
       </div>
     </nav>
