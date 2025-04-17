@@ -535,7 +535,7 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     // --- Get enrollments from PayLater ---
     const payLaterEnrollments = await PayLater.find({
       tutorId,
-      status: { $in: ["accepted", "completed"] },
+      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
     }).populate("courseId user"); // 👈 also populate user
 
     payLaterEnrollments.forEach((enroll) => {
@@ -571,7 +571,7 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     const upcomingPayLater = await PayLater.find({
       tutorId,
       selectedDate: { $gte: today },
-      status: "accepted",
+      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
     }).populate("user courseId");
 
     const upcomingTransactions = await Transaction.find({
@@ -579,13 +579,13 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
       selectedDate: { $gte: today },
       status: "completed",
     }).populate("user courseId");
-
-    const upcomingClasses = [];
-
+    upcomingClasses = [];
     upcomingPayLater.forEach((item) => {
       if (item.courseId && item.user) {
         upcomingClasses.push({
-          subject: item.courseId.subject,
+          status: item.status,
+          subject: item.courseId.courseType,
+          grade: item.courseId.name,
           date: item.selectedDate,
           time: item.selectedTime,
           studentName: item.user.name,
@@ -596,7 +596,9 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     upcomingTransactions.forEach((item) => {
       if (item.courseId && item.user) {
         upcomingClasses.push({
-          subject: item.courseId.subject,
+          status: item.status,
+          subject: item.courseId.courseType,
+          grade: item.courseId.name,
           date: item.selectedDate,
           time: item.selectedTime,
           studentName: item.user.name,
@@ -604,10 +606,53 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
       }
     });
 
+
+
+    const previousPayLaters = await PayLater.find({
+      tutorId,
+      selectedDate: { $lt: today },
+      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
+    }).populate("user courseId");
+
+    const previousTransactions = await Transaction.find({
+      tutorId,
+      selectedDate: { $lt: today },
+      status: "completed",
+    }).populate("user courseId");
+
+    const previousClasses = [];
+    previousPayLaters.forEach((item) => {
+      if (item.courseId && item.user) {
+        previousClasses.push({
+          status: item.status,
+          subject: item.courseId.courseType,
+          grade: item.courseId.name,
+          date: item.selectedDate,
+          time: item.selectedTime,
+          studentName: item.user.name,
+        });
+      }
+    });
+
+    previousTransactions.forEach((item) => {
+      if (item.courseId && item.user) {
+        previousClasses.push({
+          status: item.status,
+          subject: item.courseId.courseType,
+          grade: item.courseId.name,
+          date: item.selectedDate,
+          time: item.selectedTime,
+          studentName: item.user.name,
+        });
+      }
+    });
+    
+
     res.status(200).json({
       totalStudents: uniqueStudentIds.size, // 👈 return total students
       enrolledSubjects: subjectCounts,
       upcomingClasses,
+      previousClasses,
     });
   } catch (error) {
     console.error("Dashboard error:", error);
@@ -616,25 +661,77 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
 });
 
 
+// router.get("/students", authMiddleware, async (req, res) => {
+//   try {
+//     const tutorId = req.user.id;
+
+//     const payLater = await PayLater.find({
+//       tutorId,
+//       status: { $in: ["accepted", "completed"] },
+//     }).populate("user")
+
+//     const transactions = await Transaction.find({
+//       tutorId,
+//       status: "completed",
+//     }).populate("user")
+
+//     const studentMap = new Map();
+
+//     [...payLater, ...transactions].forEach((enroll) => {
+//       if (enroll.user) {
+//         studentMap.set(enroll.user._id.toString(), enroll.user);
+//       }
+//     });
+
+//     const students = Array.from(studentMap.values());
+
+//     res.status(200).json({ students });
+//   } catch (err) {
+//     console.error("Error fetching student list:", err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
+
 router.get("/students", authMiddleware, async (req, res) => {
   try {
     const tutorId = req.user.id;
 
+    // Fetch all relevant transactions
     const payLater = await PayLater.find({
       tutorId,
-      status: { $in: ["accepted", "completed"] },
-    }).populate("user")
-
+      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
+    })
+    .populate({
+      path: "user",
+      select: "-password" // exclude password
+    })
+    .populate("courseId");
+    
     const transactions = await Transaction.find({
       tutorId,
       status: "completed",
-    }).populate("user")
+    })
+    .populate({
+      path: "user",
+      select: "-password" // exclude password
+    })
+    .populate("courseId");
+    
 
     const studentMap = new Map();
 
+    // Combine all transactions and map them by user ID
     [...payLater, ...transactions].forEach((enroll) => {
       if (enroll.user) {
-        studentMap.set(enroll.user._id.toString(), enroll.user);
+        const userId = enroll.user._id.toString();
+        if (!studentMap.has(userId)) {
+          studentMap.set(userId, {
+            student: enroll.user,
+            transactions: [],
+          });
+        }
+        studentMap.get(userId).transactions.push(enroll);
       }
     });
 
@@ -643,6 +740,60 @@ router.get("/students", authMiddleware, async (req, res) => {
     res.status(200).json({ students });
   } catch (err) {
     console.error("Error fetching student list:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+router.get("/notifications", authMiddleware, async (req, res) => {
+  try {
+    const tutorId = req.user.id;
+
+    // Fetch PayLater transactions
+    const payLater = await PayLater.find({
+      tutorId,
+      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
+    })
+      .sort({ createdAt: -1 })
+      .populate("user") // get name and image
+      .populate("courseId");
+
+    // Fetch completed Transactions
+    const transactions = await Transaction.find({
+      tutorId,
+      status: "completed",
+    })
+      .sort({ createdAt: -1 })
+      .populate("user")
+      .populate("courseId");
+
+    // Merge and sort by time
+    const combined = [...payLater, ...transactions].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    // Keep only latest per student
+    const seenStudents = new Set();
+    const notifications = [];
+
+    for (const tx of combined) {
+      // if (!tx.user || seenStudents.has(tx.user._id.toString())) continue;
+      // seenStudents.add(tx.user._id.toString());
+
+      notifications.push({
+        id: tx._id,
+        student: tx.user.name,
+        image: tx.user.profilePicture || "https://placehold.it/45x45",
+        course: tx.courseId?.name || "Unknown Course",
+        time: tx.createdAt,
+        read: false,
+      });
+    }
+
+    res.status(200).json({ notifications });
+  } catch (err) {
+    console.error("Error fetching notifications:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
