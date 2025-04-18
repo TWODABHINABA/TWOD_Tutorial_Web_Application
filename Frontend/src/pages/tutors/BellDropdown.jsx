@@ -211,7 +211,8 @@ const BellDropdown = () => {
                 >
                   <div className="flex-shrink-0">
                     <img
-                      src={n.image}
+                      // src={n.image}
+                      src={`https://twod-tutorial-web-application-3brq.onrender.com${n.image}`}
                       alt="Notification"
                       className="w-10 h-10 rounded-full"
                     />
