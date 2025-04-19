@@ -10,7 +10,11 @@ const TransactionSchema = new mongoose.Schema({
   selectedDate: { type: String }, // e.g., "2025-03-11"
   selectedTime: { type: String }, // e.g., "15:00"
   duration: { type: String }, // e.g., "1 hr"
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  isRead: {
+    type: Boolean,
+    default: false,
+  },
 });
 const Transaction=mongoose.model("Transaction",TransactionSchema);
 module.exports = Transaction;

@@ -17,6 +17,10 @@ const payLaterSchema = new mongoose.Schema({
     ref: "person",  // note the change here to "person"
     required: true,
   },
+  isRead: {
+    type: Boolean,
+    default: false,
+  },
   selectedDate: { type: String, required: true },
   selectedTime: { type: String, required: true },
   duration: { type: String, required: true },

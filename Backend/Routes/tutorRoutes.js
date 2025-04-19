@@ -9,6 +9,7 @@ const Transaction = require("../Models/transaction");
 const Person = require("../Models/person");
 const authMiddleware = require("../Auth/Authentication");
 const sendEmail = require("../emailService");
+const Notification = require("../Models/transaction");
 
 const storage = multer.diskStorage({
   destination: "uploads/",
@@ -787,7 +788,7 @@ router.get("/notifications", authMiddleware, async (req, res) => {
         image: tx.user.profilePicture || "https://placehold.it/45x45",
         course: tx.courseId?.name || "Unknown Course",
         time: tx.createdAt,
-        read: false,
+        isRead: tx.isRead || false,
       });
     }
 
@@ -797,6 +798,32 @@ router.get("/notifications", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+// Assuming you use JWT and req.user._id is available
+router.post("/notifications/mark-all-read", authMiddleware, async (req, res) => {
+  try {
+    const tutorId = req.user._id;
+
+    await PayLater.updateMany(
+      { tutorId, isRead: false },
+      { $set: { isRead: true } }
+    );
+
+    await Transaction.updateMany(
+      { tutorId, isRead: false },
+      { $set: { isRead: true } }
+    );
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error updating notifications:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
+
 
 module.exports = router;
 
