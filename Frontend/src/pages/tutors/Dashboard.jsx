@@ -1,115 +1,3 @@
-// import React from "react";
-// import Sidebar from "./Sidebar";
-// import Navbar from "./Navbar";
-// import SidebarMobile from "./SidebarMobile";
-// import { useNavigate } from "react-router-dom";
-
-// const Dashboard = () => {
-//   const navigate = useNavigate();
-
-//   return (
-//     <div className="flex min-h-screen bg-gray-100 z-50">
-//       {/* Sidebar for Desktop and Mobile */}
-//       <div className="absolute md:static top-0 left-0 z-50">
-//         <div className="max-md:hidden">
-//           <Sidebar />
-//         </div>
-//         <div className="md:hidden">
-//           <SidebarMobile />
-//         </div>
-//       </div>
-
-//       {/* Main Content */}
-//       <div className="w-full z-0 relative ml-0">
-//         {/* Navbar with Dashboard Title */}
-//         <Navbar title="Dashboard" />
-
-//         {/* Teacher Dashboard Content */}
-//         <div className="p-4">
-//           {/* Overview Cards */}
-//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-//             <div className="bg-white p-4 rounded shadow">
-//               <h2 className="text-lg font-semibold">Total Students</h2>
-//               <p className="text-2xl mt-2">120</p>
-//             </div>
-//             <div className="bg-white p-4 rounded shadow">
-//               <h2 className="text-lg font-semibold">Upcoming Classes</h2>
-//               <p className="text-2xl mt-2">3</p>
-//             </div>
-//             <div className="bg-white p-4 rounded shadow">
-//               <h2 className="text-lg font-semibold">Pending Assignments</h2>
-//               <p className="text-2xl mt-2">5</p>
-//             </div>
-//           </div>
-
-//           {/* Performance Metrics Section */}
-//           <div className="mt-6">
-//             <div className="bg-white p-4 rounded shadow">
-//               <h2 className="text-xl font-semibold mb-4">Performance Metrics</h2>
-//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                 <div className="p-4 border rounded">
-//                   <h3 className="font-semibold">Student Progress</h3>
-//                   <p className="mt-2">75% average completion</p>
-//                 </div>
-//                 <div className="p-4 border rounded">
-//                   <h3 className="font-semibold">Feedback Score</h3>
-//                   <p className="mt-2">4.5 / 5</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Recent Notifications Section */}
-//           <div className="mt-6">
-//             <div className="bg-white p-4 rounded shadow">
-//               <h2 className="text-xl font-semibold mb-4">Recent Notifications</h2>
-//               <ul className="divide-y divide-gray-200">
-//                 <li className="py-2">
-//                   <p className="text-gray-800">
-//                     John Doe submitted assignment for React Basics.
-//                   </p>
-//                   <p className="text-gray-600 text-xs">Just now</p>
-//                 </li>
-//                 <li className="py-2">
-//                   <p className="text-gray-800">
-//                     Aisha Khan joined your class JS Data Structures.
-//                   </p>
-//                   <p className="text-gray-600 text-xs">1 hour ago</p>
-//                 </li>
-//                 <li className="py-2">
-//                   <p className="text-gray-800">
-//                     New assignment posted for Advanced React.
-//                   </p>
-//                   <p className="text-gray-600 text-xs">3 hours ago</p>
-//                 </li>
-//               </ul>
-//             </div>
-//           </div>
-
-//           {/* Upcoming Classes Section */}
-//           <div className="mt-6">
-//             <div className="bg-white p-4 rounded shadow">
-//               <h2 className="text-xl font-semibold mb-4">Upcoming Classes</h2>
-//               <ul className="divide-y divide-gray-200">
-//                 <li className="py-2 flex justify-between">
-//                   <span>React Basics</span>
-//                   <span className="text-gray-600 text-xs">Tomorrow 10:00 AM</span>
-//                 </li>
-//                 <li className="py-2 flex justify-between">
-//                   <span>JS Data Structures</span>
-//                   <span className="text-gray-600 text-xs">Friday 2:00 PM</span>
-//                 </li>
-//               </ul>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard;
-
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
@@ -135,6 +23,8 @@ const Dashboard = () => {
         const res = await api.get("/me");
 
         setUser(res.data);
+        setSubjectCounts(res.data.subjects);
+        console.log("USERRRRR",user);
       } catch (err) {
         console.error("Error fetching user:", err);
       }
@@ -145,10 +35,15 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const res = await api.get("/dashboard");
-        const { totalStudents, enrolledSubjects, upcomingClasses, previousClasses } = res.data;
+        const {
+          totalStudents,
+          // enrolledSubjects,
+          upcomingClasses,
+          previousClasses,
+        } = res.data;
 
         setTotalStudents(totalStudents || 0);
-        setSubjectCounts(enrolledSubjects || {});
+        // setSubjectCounts(enrolledSubjects || {});
         setUpcomingClasses(upcomingClasses || []);
         setPreviousClasses(previousClasses || []);
       } catch (error) {
@@ -158,16 +53,65 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, []);
+  // const fetchStudents = async () => {
+  //   try {
+  //     const res = await api.get("/students");
+  //     setStudents(res.data.students);
+  //     console.log(res.data.students);
+  //     setShowStudentModal(true);
+  //   } catch (error) {
+  //     console.error("Error fetching students:", error);
+  //   }
+  // };
+
   const fetchStudents = async () => {
     try {
       const res = await api.get("/students");
-      setStudents(res.data.students);
-      console.log(res.data.students);
+      console.log("Raw students data from API:", res.data); // Check the response structure
+      const rawStudents = res.data.students;
       setShowStudentModal(true);
+
+      // Check if rawStudents is an array and if it contains data
+      if (!Array.isArray(rawStudents) || rawStudents.length === 0) {
+        console.log("No student data found");
+        return;
+      }
+
+      // Proceed with your existing grouping logic if data exists
+      const groupedStudents = rawStudents.reduce((acc, student) => {
+        const date = student.selectedDate; // Group by selectedDate
+        const subject = student.courseId.name; // Group by course name
+        const courseType = student.courseId.courseType; // Group by course type
+
+        // Ensure the date group exists
+        if (!acc[date]) acc[date] = {};
+
+        // Ensure the subject group exists under the date
+        if (!acc[date][subject]) acc[date][subject] = {};
+
+        // Ensure the courseType group exists under the subject
+        if (!acc[date][subject][courseType]) {
+          acc[date][subject][courseType] = [];
+        }
+
+        // Push student data into the courseType group
+        acc[date][subject][courseType].push({
+          studentName: student.user.name,
+          studentEmail: student.user.email,
+          timeSlot: student.selectedTime,
+          status: student.status,
+        });
+
+        return acc;
+      }, {});
+
+      // Update state with the grouped data
+      setStudents(groupedStudents); // Make sure `setStudents` is properly defined
     } catch (error) {
       console.error("Error fetching students:", error);
     }
   };
+
   console.log("previousClasses", previousClasses);
   const firstFive = upcomingClasses.slice(0, 5);
   const firstFivePrevious = previousClasses.slice(0, 5);
@@ -182,14 +126,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-
       <div className="w-full z-0 relative ml-0">
-
         <Navbar title="Dashboard" user={user} />
 
-
         <div className="p-4">
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-lg font-semibold">Total Students</h2>
@@ -213,24 +153,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* enrolledSubjects */}
-          {/* <div className="mt-6">
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">Enrolled Subjects</h2>
-              <ul className="divide-y divide-gray-200">
-                {Object.entries(subjectCounts).map(([subject, count]) => (
-                  <li key={subject} className="py-2 flex justify-between">
-                    <span>{subject}</span>
-                    <span className="text-gray-600 text-sm">
-                      {count} students
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div> */}
-
-          {/* Upcoming Classes Section */}
           <div className="mt-6">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-semibold mb-4">Upcoming Classes</h2>
@@ -268,7 +190,9 @@ const Dashboard = () => {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">All Upcoming Classes</h3>
+                    <h3 className="text-lg font-semibold">
+                      All Upcoming Classes
+                    </h3>
                     <button
                       onClick={() => setShowUpcomingModal(false)}
                       className="text-red-600 hover:text-red-800"
@@ -332,7 +256,9 @@ const Dashboard = () => {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">All Previous Classes</h3>
+                    <h3 className="text-lg font-semibold">
+                      All Previous Classes
+                    </h3>
                     <button
                       onClick={() => setShowPreviousModal(false)}
                       className="text-red-600 hover:text-red-800"
@@ -358,20 +284,10 @@ const Dashboard = () => {
             )}
           </div>
 
-
-          {/* You can keep this or remove it depending on future use */}
-          {/* 
-          <div className="mt-6">
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">Performance Metrics</h2>
-              ...
-            </div>
-          </div> 
-          */}
-          {showStudentModal && (
+          {/* {showStudentModal && (
             <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
               <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto relative">
-                {/* Close button */}
+
                 <button
                   onClick={() => setShowStudentModal(false)}
                   className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
@@ -380,12 +296,12 @@ const Dashboard = () => {
                   &times;
                 </button>
 
-                {/* Header */}
+
                 <h3 className="text-2xl font-bold mb-4 text-center">
                   Enrolled Students
                 </h3>
 
-                {/* Student List */}
+
                 {students.length === 0 ? (
                   <p className="text-gray-500 text-center">
                     No students found.
@@ -413,11 +329,10 @@ const Dashboard = () => {
                               const courseName = txn.courseId?.name || "Course";
                               const courseType = txn.courseId?.courseType || "N/A";
 
-                              // Extract date and time
-                              const selectedDate = new Date(txn.selectedDate); // "2025-04-18"
-                              const startTimeStr = txn.selectedTime.split("-")[0].trim(); // "05:00 AM"
+ 
+                              const selectedDate = new Date(txn.selectedDate); 
+                              const startTimeStr = txn.selectedTime.split("-")[0].trim(); 
 
-                              // Convert to 24-hour time
                               const [time, modifier] = startTimeStr.split(" ");
                               let [hours, minutes] = time.split(":").map(Number);
                               if (modifier === "PM" && hours !== 12) hours += 12;
@@ -448,6 +363,87 @@ const Dashboard = () => {
                       </li>
                     ))}
                   </ul>
+                )}
+              </div>
+            </div>
+          )} */}
+
+          {showStudentModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
+              <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto relative">
+                {/* Close button */}
+                <button
+                  onClick={() => setShowStudentModal(false)}
+                  className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
+                  title="Close"
+                >
+                  &times;
+                </button>
+
+                {/* Header */}
+                <h3 className="text-2xl font-bold mb-4 text-center">
+                  Enrolled Students
+                </h3>
+
+                {/* Grouped Student List */}
+                {students && Object.keys(students).length === 0 ? (
+                  <p className="text-gray-500 text-center">
+                    No students found.
+                  </p>
+                ) : (
+                  <div>
+                    {Object.entries(students).map(([date, subjects]) => (
+                      <div key={date} className="mb-6">
+                        <h4 className="font-semibold text-lg mb-2">{date}</h4>
+
+                        {Object.entries(subjects).map(
+                          ([subject, courseTypes]) => (
+                            <div key={subject} className="ml-4">
+                              <h5 className="font-semibold text-md mb-2">
+                                {subject}
+                              </h5>
+
+                              {Object.entries(courseTypes).map(
+                                ([courseType, courseStudents]) => (
+                                  <div key={courseType} className="ml-4">
+                                    <h6 className="font-semibold text-sm mb-2">
+                                      {courseType}
+                                    </h6>
+
+                                    <ul className="space-y-2">
+                                      {courseStudents.map((student, idx) => (
+                                        <li
+                                          key={idx}
+                                          className="p-2 border border-gray-200 rounded-md bg-gray-50"
+                                        >
+                                          <p>
+                                            <strong>Name:</strong>{" "}
+                                            {student.studentName}
+                                          </p>
+                                          <p>
+                                            <strong>Email:</strong>{" "}
+                                            {student.studentEmail}
+                                          </p>
+                                          <p>
+                                            <strong>Time Slot:</strong>{" "}
+                                            {student.timeSlot}
+                                          </p>
+                                          <p>
+                                            <strong>Status:</strong>{" "}
+                                            {student.status}
+                                          </p>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          )
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

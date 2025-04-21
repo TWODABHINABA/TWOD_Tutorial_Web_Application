@@ -666,21 +666,41 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
 //   try {
 //     const tutorId = req.user.id;
 
+//     // Fetch all relevant transactions
 //     const payLater = await PayLater.find({
 //       tutorId,
-//       status: { $in: ["accepted", "completed"] },
-//     }).populate("user")
-
+//       status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
+//     })
+//     .populate({
+//       path: "user",
+//       select: "-password" // exclude password
+//     })
+//     .populate("courseId");
+    
 //     const transactions = await Transaction.find({
 //       tutorId,
 //       status: "completed",
-//     }).populate("user")
+//     })
+//     .populate({
+//       path: "user",
+//       select: "-password" // exclude password
+//     })
+//     .populate("courseId");
+    
 
 //     const studentMap = new Map();
 
+//     // Combine all transactions and map them by user ID
 //     [...payLater, ...transactions].forEach((enroll) => {
 //       if (enroll.user) {
-//         studentMap.set(enroll.user._id.toString(), enroll.user);
+//         const userId = enroll.user._id.toString();
+//         if (!studentMap.has(userId)) {
+//           studentMap.set(userId, {
+//             student: enroll.user,
+//             transactions: [],
+//           });
+//         }
+//         studentMap.get(userId).transactions.push(enroll);
 //       }
 //     });
 
@@ -694,57 +714,34 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
 // });
 
 
+
+
 router.get("/students", authMiddleware, async (req, res) => {
   try {
-    const tutorId = req.user.id;
-
-    // Fetch all relevant transactions
-    const payLater = await PayLater.find({
-      tutorId,
-      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
-    })
-    .populate({
+    const payLater = await PayLater.find().populate({
       path: "user",
-      select: "-password" // exclude password
-    })
-    .populate("courseId");
-    
-    const transactions = await Transaction.find({
-      tutorId,
-      status: "completed",
-    })
-    .populate({
+      select: "-password",
+    }).populate("courseId");
+
+    const transactions = await Transaction.find().populate({
       path: "user",
-      select: "-password" // exclude password
-    })
-    .populate("courseId");
-    
+      select: "-password",
+    }).populate("courseId");
 
-    const studentMap = new Map();
+    // Log data to ensure it's being fetched correctly
+    console.log("PayLater data:", payLater);
+    console.log("Transaction data:", transactions);
 
-    // Combine all transactions and map them by user ID
-    [...payLater, ...transactions].forEach((enroll) => {
-      if (enroll.user) {
-        const userId = enroll.user._id.toString();
-        if (!studentMap.has(userId)) {
-          studentMap.set(userId, {
-            student: enroll.user,
-            transactions: [],
-          });
-        }
-        studentMap.get(userId).transactions.push(enroll);
-      }
-    });
+    const allEnrollments = [...payLater, ...transactions];
 
-    const students = Array.from(studentMap.values());
+    // Ensure we are returning the data
+    res.status(200).json({ students: allEnrollments });
 
-    res.status(200).json({ students });
   } catch (err) {
     console.error("Error fetching student list:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 
 router.get("/notifications", authMiddleware, async (req, res) => {
@@ -802,17 +799,27 @@ router.get("/notifications", authMiddleware, async (req, res) => {
 // Assuming you use JWT and req.user._id is available
 router.post("/notifications/mark-all-read", authMiddleware, async (req, res) => {
   try {
-    const tutorId = req.user._id;
+    const tutorId = req.user.id;
+    console.log(tutorId)
 
-    await PayLater.updateMany(
-      { tutorId, isRead: false },
+    const result1 = await PayLater.updateMany(
+      {
+        tutorId,
+        $or: [{ isRead: false }, { isRead: { $exists: false } }],
+      },
       { $set: { isRead: true } }
     );
-
-    await Transaction.updateMany(
-      { tutorId, isRead: false },
+    
+    const result2 = await Transaction.updateMany(
+      {
+        tutorId,
+        $or: [{ isRead: false }, { isRead: { $exists: false } }],
+      },
       { $set: { isRead: true } }
     );
+    
+    console.log("PayLater updated:", result1.modifiedCount);
+    console.log("Transaction updated:", result2.modifiedCount);
 
     res.status(200).json({ success: true });
   } catch (error) {

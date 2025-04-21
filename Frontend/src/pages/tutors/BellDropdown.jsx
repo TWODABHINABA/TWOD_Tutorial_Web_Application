@@ -6,8 +6,10 @@ const BellDropdown = () => {
   const [show, setShow] = useState(false);
   const dropdownRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
+  const token=localStorage.getItem("token");
+  console.log(token);
 
-  // Fetch notifications on mount
+
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -49,21 +51,22 @@ const BellDropdown = () => {
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("tutorToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-
-      // Update local state
-      const updatedNotifications = notifications.map((notification) => ({
-        ...notification,
-        isRead: true,
-      }));
-      setNotifications(updatedNotifications);
+  
+      // Create a new copy of notifications to trigger re-render
+      const updatedNotifications = notifications.map((notification) => {
+        return { ...notification, isRead: true };
+      });
+  
+      setNotifications([...updatedNotifications]); // this spreads into a new array
     } catch (error) {
       console.error("Failed to mark notifications as read", error);
     }
   };
+  
 
   return (
     <div ref={dropdownRef} className="relative inline-block">
