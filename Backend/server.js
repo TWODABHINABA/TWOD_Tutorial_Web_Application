@@ -13,6 +13,7 @@ const searchRoutes = require("./Routes/searchRoutes");
 const googleRoutes = require("./Routes/googleRoutes");
 const contactRoutes = require("./Routes/contactRoutes");
 const payLaterRoutes = require("./Routes/payLaterRoutes");
+const assignmentRoutes = require("./Routes/assignmentRoutes");
 const path = require("path");
 
 app.use(express.json());
@@ -49,6 +50,7 @@ app.use("/", searchRoutes);
 app.use("/", googleRoutes);
 app.use("/", contactRoutes);
 app.use("/", payLaterRoutes);
+app.use("/", assignmentRoutes);
 
 app.use(compression());
 app.listen(process.env.PORT || 6001, () =>

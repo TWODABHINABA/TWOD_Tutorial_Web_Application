@@ -10,18 +10,18 @@ const Person = require("../Models/person");
 const authMiddleware = require("../Auth/Authentication");
 const sendEmail = require("../emailService");
 const Notification = require("../Models/transaction");
+const Assignment = require("../Models/assignment");
 
 router.post("/upload-assignment", authMiddleware, async (req, res) => {
   try {
-    const { courseName, courseType, date, fileUrl, description } = req.body;
+    const { courseName, courseType, description, questions } = req.body;
 
-    const newAssignment = new AssignmentUpload({
+    const newAssignment = new Assignment({
       tutorId: req.user.id,
       courseName,
       courseType,
-      date,
-      fileUrl,
       description,
+      questions,
     });
 
     await newAssignment.save();
@@ -33,6 +33,7 @@ router.post("/upload-assignment", authMiddleware, async (req, res) => {
       .json({ success: false, error: "Failed to upload assignment" });
   }
 });
+
 
 router.get("/assignments/students", authMiddleware, async (req, res) => {
   try {

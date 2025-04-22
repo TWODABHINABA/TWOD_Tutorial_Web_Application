@@ -105,6 +105,7 @@ const Sidebar = () => {
           selected={selected}
           setSelected={setSelected}
           open={open}
+          onClick={() => navigate('/tutor-members')}
         />
       </div>
 

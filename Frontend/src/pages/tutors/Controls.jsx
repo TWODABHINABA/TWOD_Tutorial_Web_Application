@@ -33,12 +33,12 @@ const Controls = () => {
             </div>
       </div>
 
-      {/* Main Content */}
+  
       <div className="w-full z-0 relative">
-        {/* Pass the title prop to show "Controls" */}
+
         <Navbar title="Controls" user = {user}/>
         <div className="p-4 flex flex-col sm:flex-row gap-4">
-          {/* Add Course Button */}
+  
           <button
             onClick={() => navigate('/tutor-add-course')}
             className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors w-full sm:w-auto"
@@ -46,12 +46,19 @@ const Controls = () => {
             Add Course
           </button>
 
-          {/* Add Availability Button */}
+
           <button
             onClick={() => navigate('/tutor-add-availability')}
             className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors w-full sm:w-auto"
           >
             Add Availability
+          </button>
+
+          <button
+            onClick={() => navigate("/tutor-add-assignment")}
+            className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors w-full sm:w-auto"
+          >
+            Add Assignment
           </button>
         </div>
       </div>

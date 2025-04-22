@@ -19,6 +19,7 @@ const TutorAddCourse = () => {
     curriculum: [],
   });
   const [courseTypeImage, setCourseTypeImage] = useState(null);
+  const [user,setUser]=useState(null)
   const [nameImage, setNameImage] = useState(null);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
@@ -29,6 +30,19 @@ const TutorAddCourse = () => {
       navigate("/");
     }
   }, [role, navigate]);
+
+    useEffect(() => {
+      const fetchUser = async () => {
+        try {
+          const res = await api.get("/me");
+          setUser(res.data);
+          console.log(res.data);
+        } catch (err) {
+          console.error("Error fetching user:", err);
+        }
+      };
+      fetchUser();
+    }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -141,12 +155,12 @@ const TutorAddCourse = () => {
             </div>
       </div>
 
-        {/* Main Content */}
-        <div className="w-full z-0 relative">
-          {/* Navbar with dynamic title */}
-          <Navbar title="Add Course" />
 
-          {/* Form Container */}
+        <div className="w-full z-0 relative">
+
+          <Navbar title="Dashboard" user={user} />
+
+ 
           <div className="max-w-3xl mx-auto mt-10 p-4 sm:p-6 bg-indigo-50 shadow-xl rounded-xl border border-indigo-200">
             <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700 mb-6 text-center">
               Add New Course

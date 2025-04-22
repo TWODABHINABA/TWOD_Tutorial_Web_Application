@@ -7,24 +7,22 @@ const assignmentSchema = new mongoose.Schema({
     required: true,
   },
   courseName: {
-    type: String, // e.g., "Chemistry"
+    type: String,
     required: true,
   },
   courseType: {
-    type: String, // e.g., "Grade 10"
-    required: true,
-  },
-  date: {
-    type: String, // "2025-04-22"
-    required: true,
-  },
-  fileUrl: {
     type: String,
     required: true,
   },
   description: {
     type: String,
   },
+  questions: [
+    {
+      text: { type: String, required: true },
+      number: { type: Number, required: true }, // Could be marks or serial number
+    },
+  ],
 }, {
   timestamps: true
 });

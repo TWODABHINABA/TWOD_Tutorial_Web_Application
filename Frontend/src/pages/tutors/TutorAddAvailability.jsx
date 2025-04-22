@@ -640,6 +640,7 @@ const TutorAddAvailability = () => {
   const [subjects, setSubjects] = useState([]);
   const [loggedInTutorId, setLoggedInTutorId] = useState(null);
   const [filteredAvailability, setFilteredAvailability] = useState([]);
+  const [user,setUser]=useState(null)
 
   const navigate = useNavigate();
 
@@ -649,6 +650,19 @@ const TutorAddAvailability = () => {
         navigate("/");
       }
     }, [role, navigate]);
+
+      useEffect(() => {
+        const fetchUser = async () => {
+          try {
+            const res = await api.get("/me");
+            setUser(res.data);
+            console.log(res.data);
+          } catch (err) {
+            console.error("Error fetching user:", err);
+          }
+        };
+        fetchUser();
+      }, []);
     
   useEffect(() => {
     if (selectedSubject) {
@@ -991,7 +1005,7 @@ const TutorAddAvailability = () => {
            </div>
         </div>
         <div className="w-full z-0 relative">
-        <Navbar title="Set Availability" />
+        <Navbar title="Dashboard" user={user} />
         {toast.show && (
         <Toast
           message={toast.message}

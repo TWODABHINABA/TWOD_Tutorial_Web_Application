@@ -3,7 +3,6 @@ import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import SidebarMobile from "./SidebarMobile";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import api from "../../components/User-management/api";
 
 const Dashboard = () => {
