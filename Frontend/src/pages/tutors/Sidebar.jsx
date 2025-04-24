@@ -101,11 +101,11 @@ const Sidebar = () => {
         /> */}
         <Option
           Icon={FiUsers}
-          title="Members"
+          title="Assignment"
           selected={selected}
           setSelected={setSelected}
           open={open}
-          onClick={() => navigate('/tutor-members')}
+          onClick={() => navigate('/tutor-assignment')}
         />
       </div>
 

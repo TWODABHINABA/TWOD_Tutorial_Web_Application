@@ -87,10 +87,10 @@ export default function MobileSidebar() {
             onClick={() => handleNav("Analytics", "/tutor-analytics")}
           />
           <NavButton
-            label="Members"
-            to="/tutor-members"
-            active={active === "Members"}
-            onClick={() => handleNav("Members", "/tutor-members")}
+            label="Assignment"
+            to="/tutor-assignment"
+            active={active === "Assignment"}
+            onClick={() => handleNav("Assignment", "/tutor-assignment")}
           />
         </nav>
       </div>

@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 import SidebarMobile from "./SidebarMobile";
 import api from "../../components/User-management/api";
 import { useNavigate } from "react-router-dom";
-const Members = () => {
+const Assignment = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   useEffect(() => {
@@ -40,7 +40,7 @@ const Members = () => {
             onClick={() => navigate("/tutor-add-course")}
             className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors w-full sm:w-auto"
           >
-            Add 
+            Send Assignment
           </button>
 
 
@@ -55,4 +55,4 @@ const Members = () => {
     </div>
   );
 };
-export default Members;
+export default Assignment;
