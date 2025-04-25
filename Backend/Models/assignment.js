@@ -27,4 +27,6 @@ const assignmentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model("assignment", assignmentSchema);
+const assignment=mongoose.model("assignment",assignmentSchema);
+module.exports = assignment
+

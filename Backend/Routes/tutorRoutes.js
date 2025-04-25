@@ -662,60 +662,6 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
 });
 
 
-// router.get("/students", authMiddleware, async (req, res) => {
-//   try {
-//     const tutorId = req.user.id;
-
-//     // Fetch all relevant transactions
-//     const payLater = await PayLater.find({
-//       tutorId,
-//       status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
-//     })
-//     .populate({
-//       path: "user",
-//       select: "-password" // exclude password
-//     })
-//     .populate("courseId");
-    
-//     const transactions = await Transaction.find({
-//       tutorId,
-//       status: "completed",
-//     })
-//     .populate({
-//       path: "user",
-//       select: "-password" // exclude password
-//     })
-//     .populate("courseId");
-    
-
-//     const studentMap = new Map();
-
-//     // Combine all transactions and map them by user ID
-//     [...payLater, ...transactions].forEach((enroll) => {
-//       if (enroll.user) {
-//         const userId = enroll.user._id.toString();
-//         if (!studentMap.has(userId)) {
-//           studentMap.set(userId, {
-//             student: enroll.user,
-//             transactions: [],
-//           });
-//         }
-//         studentMap.get(userId).transactions.push(enroll);
-//       }
-//     });
-
-//     const students = Array.from(studentMap.values());
-
-//     res.status(200).json({ students });
-//   } catch (err) {
-//     console.error("Error fetching student list:", err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
-
-
-
 router.get("/students", authMiddleware, async (req, res) => {
   try {
     const payLater = await PayLater.find().populate({

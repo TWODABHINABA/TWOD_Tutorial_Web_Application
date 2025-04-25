@@ -7,10 +7,9 @@ const GlobalSessionPricing = require("../Models/GlobalSessionPricing");
 const Transaction = require("../Models/transaction");
 const moment = require("moment");
 
-// Import models
+
 const PayLater = require("../Models/payLater");
 const Course = require("../Models/course");
-// Import person model to ensure it’s registered
 const Person = require("../Models/person");
 const Tutor = require("../Models/tutors");
 
@@ -30,14 +29,14 @@ const convertTo24HourFormat = (time12h) => {
 const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
   const selectedStartTime = convertTo24HourFormat(
     selectedTime.split("-")[0].trim()
-  ); // "19:30"
+  ); 
   const selectedEndTime = convertTo24HourFormat(
     selectedTime.split("-")[1].trim()
-  ); // "20:30"
+  ); 
 
   const tutors = await Tutor.find({
-    "availability.date": selectedDate, // Match date
-    "availability.subjects.subjectName": subject, // Match subject
+    "availability.date": selectedDate, 
+    "availability.subjects.subjectName": subject, 
   });
 
   for (const tutor of tutors) {
@@ -50,7 +49,7 @@ const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
                 slot.startTime <= selectedStartTime &&
                 slot.endTime >= selectedEndTime
               ) {
-                return tutor; // ✅ Found matching tutor
+                return tutor; 
               }
             }
           }
@@ -59,10 +58,10 @@ const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
     }
   }
 
-  return null; // No available tutor
+  return null; 
 };
 
-// POST: Book a Pay Later session
+
 router.post("/paylater/book", authMiddleware, async (req, res) => {
   try {
     console.log("hello paylater book");
@@ -144,85 +143,15 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
 });
 
 // GET: Tutor views requests (populating person and course data)
-// router.get("/paylater/tutor-request", authMiddleware, async (req, res) => {
-//   try {
-//     const tutorId = req.user.id;
-//     console.log("👤 Tutor ID from token:", tutorId);
-
-//     const bookings = await PayLater.find({ tutorId })
-//       .populate("user", "name email")
-//       .populate("courseId", "name courseType")
-//       .populate("tutorId")
-
-//     console.log("✅ Bookings for this tutor:", bookings);
-//     res.status(200).json({ data: bookings });
-//   } catch (err) {
-//     console.error("❌ Error fetching tutor bookings:", err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
 router.get("/paylater/tutor-request", authMiddleware, async (req, res) => {
   try {
     const tutorId = req.user.id;
     console.log("👤 Tutor ID from token:", tutorId);
 
-    let bookings = await PayLater.find({ tutorId })
+    const bookings = await PayLater.find({ tutorId })
       .populate("user", "name email")
       .populate("courseId", "name courseType")
-      .populate("tutorId");
-
-    const now = moment();
-
-    for (let booking of bookings) {
-      // const bookingDateTime = moment(`${booking.selectedDate} ${booking.selectedTime}`, "YYYY-MM-DD hh:mm A");
-      const startTime = booking.selectedTime.split("-")[0].trim(); // "06:30 PM"
-      const bookingDateTime = moment(
-        `${booking.selectedDate} ${startTime}`,
-        "YYYY-MM-DD hh:mm A"
-      );
-
-      if (
-        booking.status === "pending for tutor acceptance" &&
-        bookingDateTime.isBefore(now)
-      ) {
-        booking.status = "rejected";
-        await booking.save();
-
-        console.log(`⏰ Auto-rejected expired booking: ${booking._id}`);
-
-        // Send email to user
-        await sendEmail(
-          booking.user.email,
-          `Your Pay Later Request has been rejected`,
-          `
-Hi ${booking.user.name},
-
-Your Pay Later request for the course "${booking.courseId.name}" was automatically rejected because the tutor did not respond before the session time.
-
-You may explore and rebook this or other courses from our platform at your convenience.
-
-Course Details:
-- Course Name: ${booking.courseId.name} ${booking.courseId.courseType}
-
-Tutor Details:
-- Name: ${booking.tutorId?.name || "Assigned Tutor"}
-- Email: ${booking.tutorId?.email || "N/A"}
-
-If you have any questions, feel free to contact us at support@twodtutorials.com.
-
-Best regards,  
-Team TWOD Tutorials
-          `
-        );
-      }
-    }
-
-    // Refresh after potential updates
-    bookings = await PayLater.find({ tutorId })
-      .populate("user", "name email")
-      .populate("courseId", "name courseType")
-      .populate("tutorId");
+      .populate("tutorId")
 
     console.log("✅ Bookings for this tutor:", bookings);
     res.status(200).json({ data: bookings });
@@ -232,97 +161,12 @@ Team TWOD Tutorials
   }
 });
 
+
+
 // PUT: Tutor updates request status
-// router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
-//   try {
-//     const { status } = req.body;
-
-//     if (!["accepted", "rejected"].includes(status)) {
-//       return res
-//         .status(400)
-//         .json({ message: "Invalid status. Use 'accepted' or 'rejected'." });
-//     }
-
-//     const updated = await PayLater.findByIdAndUpdate(
-//       req.params.id,
-//       { status },
-//       { new: true }
-//     )
-//       .populate("user", "name email")
-//       .populate("courseId", "name courseType")
-//       .populate("tutorId", "name email");
-
-//     console.log(`✏️ Updating booking ${req.params.id} to status: ${status}`);
-
-//     if (!updated) {
-//       return res.status(404).json({ message: "Booking request not found" });
-//     } else {
-//       await sendEmail(
-//         updated.user.email,
-//         `Your Pay Later Request has been ${status}`,
-//         `
-// Hi ${updated.user.name},
-
-// Your Pay Later request for the course "${updated.courseId.name}" has been ${status} by the tutor.
-
-// ${
-//   status === "accepted"
-//     ? `You can now proceed with the next steps to begin your learning journey.`
-//     : `We're sorry to inform you that the tutor has rejected your request. Feel free to explore other courses on our platform.`
-// }
-
-// Course Details:
-// - Course Name: ${updated.courseId.name} ${updated.courseId.cousrseType}
-
-// Tutor Details:
-// - Name: ${updated.tutorId?.name || "Assigned Tutor"}
-// - Email: ${updated.tutorId?.email || "N/A"}
-
-// If you have any questions, feel free to contact us at support@twodtutorials.com.
-
-// Best regards,
-// Team TWOD Tutorials
-//         `
-//       );
-//     }
-
-//     res.status(200).json({ message: `Request ${status}`, data: updated });
-//   } catch (err) {
-//     console.error("Error updating status:", err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
 router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
   try {
-    let { status } = req.body;
-
-    const booking = await PayLater.findById(req.params.id)
-      .populate("user", "name email")
-      .populate("courseId", "name courseType")
-      .populate("tutorId", "name email");
-
-    if (!booking) {
-      return res.status(404).json({ message: "Booking request not found" });
-    }
-
-    const startTime = booking.selectedTime.split("-")[0].trim();
-    const bookingDateTime = moment(
-      `${booking.selectedDate} ${startTime}`,
-      "YYYY-MM-DD hh:mm A"
-    );
-    const now = moment();
-    console.log(`🕓 Now: ${now.format()}, Booking Time: ${bookingDateTime.format()}`);
-
-    if (
-      booking.status === "pending for tutor acceptance" &&
-      bookingDateTime.isBefore(now)
-    ) {
-      status = "rejected";
-      console.log(
-        `⏰ Booking is in the past, auto-rejecting booking ${booking._id}`
-      );
-    }
+    const { status } = req.body;
 
     if (!["accepted", "rejected"].includes(status)) {
       return res
@@ -330,18 +174,27 @@ router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
         .json({ message: "Invalid status. Use 'accepted' or 'rejected'." });
     }
 
-    booking.status = status;
-    await booking.save();
+    const updated = await PayLater.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    )
+      .populate("user", "name email")
+      .populate("courseId", "name courseType")
+      .populate("tutorId", "name email");
 
-    console.log(`✏️ Updating booking ${booking._id} to status: ${status}`);
+    console.log(`✏️ Updating booking ${req.params.id} to status: ${status}`);
 
-    await sendEmail(
-      booking.user.email,
-      `Your Pay Later Request has been ${status}`,
-      `
-Hi ${booking.user.name},
+    if (!updated) {
+      return res.status(404).json({ message: "Booking request not found" });
+    } else {
+      await sendEmail(
+        updated.user.email,
+        `Your Pay Later Request has been ${status}`,
+        `
+Hi ${updated.user.name},
 
-Your Pay Later request for the course "${booking.courseId.name}" has been ${status} by the tutor.
+Your Pay Later request for the course "${updated.courseId.name}" has been ${status} by the tutor.
 
 ${
   status === "accepted"
@@ -350,25 +203,27 @@ ${
 }
 
 Course Details:
-- Course Name: ${booking.courseId.name} ${booking.courseId.courseType}
+- Course Name: ${updated.courseId.name} ${updated.courseId.cousrseType}
 
 Tutor Details:
-- Name: ${booking.tutorId?.name || "Assigned Tutor"}
-- Email: ${booking.tutorId?.email || "N/A"}
+- Name: ${updated.tutorId?.name || "Assigned Tutor"}
+- Email: ${updated.tutorId?.email || "N/A"}
 
 If you have any questions, feel free to contact us at support@twodtutorials.com.
 
-Best regards,  
+Best regards,
 Team TWOD Tutorials
-      `
-    );
+        `
+      );
+    }
 
-    res.status(200).json({ message: `Request ${status}`, data: booking });
+    res.status(200).json({ message: `Request ${status}`, data: updated });
   } catch (err) {
-    console.error("❌ Error updating status:", err);
+    console.error("Error updating status:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
   try {

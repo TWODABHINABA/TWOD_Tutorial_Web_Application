@@ -35,6 +35,7 @@ import Requests from './pages/tutors/Requests'
 import SetPasswordTutor from './pages/login_signup/SetPasswordTutor'
 import TutorAddAssignment from './pages/tutors/TutorAddAssignment'
 import Assignment from './pages/tutors/Assignment'
+import SendAssignment from './pages/tutors/SendAssignment'
 
 function App() {
   // const isAdmin=localStorage.getItem("role");
@@ -72,7 +73,8 @@ function App() {
         <Route path='/tutor-add-availability' element={<TutorAddAvailability/>}/>
         <Route path='/tutor-requests' element={<Requests/>}/>
         <Route path='/tutor-assignment' element={<Assignment/>}/>
-        <Route path='/tutor-add-assignment' element={<TutorAddAssignment/>}/>
+        <Route path='/tutor-add-assignment' element={<TutorAddAssignment/>}/>  
+        <Route path='/tutor-send-assignment' element={<SendAssignment/>}/>
       </Routes>
     </Router>
   )

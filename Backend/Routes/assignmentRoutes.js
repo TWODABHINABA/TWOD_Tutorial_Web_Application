@@ -39,35 +39,61 @@ router.get("/assignments/students", authMiddleware, async (req, res) => {
   try {
     const { date } = req.query;
 
+    const payLaterFilter = date ? { selectedDate: date } : {};
+    const transactionFilter = date ? { selectedDate: date } : {};
+
     const [payLaterData, transactionData] = await Promise.all([
-      PayLater.find({ date }).lean(),
-      Transaction.find({ date }).lean(),
+      PayLater.find(payLaterFilter).populate("user courseId").lean(),
+      Transaction.find(transactionFilter).populate("user courseId").lean(),
     ]);
 
-    // Combine and group them
     const allEnrollments = [...payLaterData, ...transactionData];
 
-    const groupedBySubject = {};
+    const grouped = {};
 
     allEnrollments.forEach((entry) => {
-      const key = `${entry.name}-${entry.courseType}`; // Chemistry-Grade 10
+      const dateKey = entry.selectedDate;
+      const subject = entry.courseId?.courseType || "Unknown Subject";
+      const grade = entry.courseId?.name || "Unknown Grade";
+      const student = {
+        studentName: entry.user?.name || "No Name",
+        email: entry.user?.email || "No Email",
+        timeSlot: entry.selectedTime || "Not Provided",
+      };
 
-      if (!groupedBySubject[key]) {
-        groupedBySubject[key] = [];
-      }
+      if (!grouped[dateKey]) grouped[dateKey] = {};
+      if (!grouped[dateKey][subject]) grouped[dateKey][subject] = {};
+      if (!grouped[dateKey][subject][grade]) grouped[dateKey][subject][grade] = [];
 
-      groupedBySubject[key].push({
-        studentName: entry.studentName,
-        email: entry.email,
-        timeSlot: entry.timeSlot,
-      });
+      grouped[dateKey][subject][grade].push(student);
     });
 
-    res.status(200).json({ success: true, grouped: groupedBySubject });
+    res.status(200).json({ success: true, grouped });
   } catch (err) {
     console.error("Error fetching students:", err);
     res.status(500).json({ success: false, error: "Failed to fetch students" });
   }
 });
+
+
+router.get("/get-assignments", authMiddleware, async (req, res) => {
+  try {
+    const tutorId = req.user?.id;
+
+    if (!tutorId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const assignments = await Assignment.find({ tutorId }).sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, assignments });
+  } catch (error) {
+    console.error("Error fetching assignments:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch assignments" });
+  }
+});
+
+
+
 
 module.exports = router;

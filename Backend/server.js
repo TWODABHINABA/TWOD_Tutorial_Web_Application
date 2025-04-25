@@ -14,6 +14,7 @@ const googleRoutes = require("./Routes/googleRoutes");
 const contactRoutes = require("./Routes/contactRoutes");
 const payLaterRoutes = require("./Routes/payLaterRoutes");
 const assignmentRoutes = require("./Routes/assignmentRoutes");
+require("./cron/autoReject");
 const path = require("path");
 
 app.use(express.json());
