@@ -16,6 +16,8 @@ const passport = require("passport");
 const cookieSession = require("express-session");
 require("../passport");
 require("dotenv").config();
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -384,94 +386,6 @@ router.put(
 );
 
 
-// const isValidEmail = (email) =>
-//   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(email);
-// const isValidPhone = (phone) => /^\d+$/.test(phone);
-// const isValidBirthday = (birthday) =>
-//   /^\d{4}-[A-Za-z]{3}-\d{2}$/.test(birthday);
-
-// router.put(
-//   "/update/:id",
-//   authMiddleware,
-//   upload.single("profilePicture"),
-//   async (req, res) => {
-//     try {
-//       const { id } = req.params;
-//       const updates = {};
-
-//       // Name validation (optional)
-//       if (req.body.name) updates.name = req.body.name;
-
-//       // Phone validation
-//       if (req.body.phone) {
-//         if (!isValidPhone(req.body.phone)) {
-//           return res.status(400).json({ message: "Invalid phone number." });
-//         }
-//         updates.phone = req.body.phone;
-//       }
-
-//       // Birthday validation
-//       if (req.body.birthday) {
-//         if (!isValidBirthday(req.body.birthday)) {
-//           return res.status(400).json({ message: "Invalid date format. Use 'YYYY-MMM-DD'." });
-//         }
-//         updates.birthday = req.body.birthday;
-//       }
-
-//       // Email validation
-//       if (req.body.email) {
-//         if (!isValidEmail(req.body.email)) {
-//           return res.status(400).json({ message: "Invalid email format. Use '@something.com'." });
-//         }
-//         const existingUser = await Person.findOne({ email: req.body.email });
-//         const existingTutor = await Tutor.findOne({ email: req.body.email });
-//         if (existingUser || existingTutor) {
-//           return res.status(400).json({ message: "Email already exists" });
-//         }
-//         updates.email = req.body.email;
-//       }
-
-//       // Description field
-//       if (req.body.description) updates.description = req.body.description;
-
-//       // Subjects (Convert to array if provided)
-//       if (req.body.subjects) updates.subjects = req.body.subjects.split(",");
-
-//       // Handle profile picture
-//       if (req.file) {
-//         updates.profilePicture = "/uploads/" + req.file.filename;
-//       }
-
-//       // First update in Person collection
-//       let updatedUser = await Person.findByIdAndUpdate(
-//         id,
-//         { $set: updates },
-//         { new: true }
-//       );
-
-//       // If no person found, try updating in Tutor collection
-//       if (!updatedUser) {
-//         updatedUser = await Tutor.findByIdAndUpdate(
-//           id,
-//           { $set: updates },
-//           { new: true }
-//         );
-//       }
-
-//       if (!updatedUser) {
-//         return res.status(404).json({ error: "User Not Found" });
-//       }
-
-//       res.status(200).json(updatedUser);
-//     } catch (err) {
-//       console.error("Error Updating Data", err);
-//       res.status(500).json({ error: "Internal Server Error" });
-//     }
-//   }
-// );
-
-
-
 router.delete("/delete/:id", authMiddleware, async (req, res) => {
   try {
     const user = await Person.findByIdAndDelete({
@@ -508,9 +422,63 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
+
+router.post("/email-forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+
+    let user = await Person.findOne({ email });
+    if(!user){
+      user = await Tutor.findOne({ email });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found with this email" });
+    }
+
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); 
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); 
+
+
+    user.resetOTP = otp;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail", 
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: email,
+      subject: "Your OTP for password reset",
+      html: `<p>Your OTP is <strong>${otp}</strong>. It will expire in 10 minutes.</p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "OTP sent successfully!" });
+  } catch (error) {
+    console.error("❌ Error sending OTP:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 const formatPhoneNumber = (phone) => {
   if (!phone.startsWith("+")) {
-    return `+91${phone}`; // Assuming India (+91), change as needed
+    return `+91${phone}`; 
   }
   return phone;
 };
@@ -598,7 +566,6 @@ router.post("/reset-password", async (req, res) => {
         .json({ message: "New Password must be different from the older one" });
     }
 
-    // Hash new password
     console.log(newPassword);
     console.log(user.role);
     if(user.role==="tutor"){
@@ -617,6 +584,8 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
+
+
 module.exports = router;
 
 // router.post("/login", async (req, res) => {
@@ -718,6 +687,93 @@ module.exports = router;
 //         { $set: updates },
 //         { new: true }
 //       );
+
+//       if (!updatedUser) {
+//         return res.status(404).json({ error: "User Not Found" });
+//       }
+
+//       res.status(200).json(updatedUser);
+//     } catch (err) {
+//       console.error("Error Updating Data", err);
+//       res.status(500).json({ error: "Internal Server Error" });
+//     }
+//   }
+// );
+
+
+// const isValidEmail = (email) =>
+//   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(email);
+// const isValidPhone = (phone) => /^\d+$/.test(phone);
+// const isValidBirthday = (birthday) =>
+//   /^\d{4}-[A-Za-z]{3}-\d{2}$/.test(birthday);
+
+// router.put(
+//   "/update/:id",
+//   authMiddleware,
+//   upload.single("profilePicture"),
+//   async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const updates = {};
+
+//       // Name validation (optional)
+//       if (req.body.name) updates.name = req.body.name;
+
+//       // Phone validation
+//       if (req.body.phone) {
+//         if (!isValidPhone(req.body.phone)) {
+//           return res.status(400).json({ message: "Invalid phone number." });
+//         }
+//         updates.phone = req.body.phone;
+//       }
+
+//       // Birthday validation
+//       if (req.body.birthday) {
+//         if (!isValidBirthday(req.body.birthday)) {
+//           return res.status(400).json({ message: "Invalid date format. Use 'YYYY-MMM-DD'." });
+//         }
+//         updates.birthday = req.body.birthday;
+//       }
+
+//       // Email validation
+//       if (req.body.email) {
+//         if (!isValidEmail(req.body.email)) {
+//           return res.status(400).json({ message: "Invalid email format. Use '@something.com'." });
+//         }
+//         const existingUser = await Person.findOne({ email: req.body.email });
+//         const existingTutor = await Tutor.findOne({ email: req.body.email });
+//         if (existingUser || existingTutor) {
+//           return res.status(400).json({ message: "Email already exists" });
+//         }
+//         updates.email = req.body.email;
+//       }
+
+//       // Description field
+//       if (req.body.description) updates.description = req.body.description;
+
+//       // Subjects (Convert to array if provided)
+//       if (req.body.subjects) updates.subjects = req.body.subjects.split(",");
+
+//       // Handle profile picture
+//       if (req.file) {
+//         updates.profilePicture = "/uploads/" + req.file.filename;
+//       }
+
+//       // First update in Person collection
+//       let updatedUser = await Person.findByIdAndUpdate(
+//         id,
+//         { $set: updates },
+//         { new: true }
+//       );
+
+//       // If no person found, try updating in Tutor collection
+//       if (!updatedUser) {
+//         updatedUser = await Tutor.findByIdAndUpdate(
+//           id,
+//           { $set: updates },
+//           { new: true }
+//         );
+//       }
 
 //       if (!updatedUser) {
 //         return res.status(404).json({ error: "User Not Found" });

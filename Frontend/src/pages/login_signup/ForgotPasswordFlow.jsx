@@ -17,6 +17,7 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "" });
+  const [selectedMethod, setSelectedMethod] = useState(""); // 'email' or 'phone'
 
   const isValidPassword = (password) => {
     const lengthValid = password.length >= 8 && password.length <= 20;
@@ -37,15 +38,35 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
     setIsValid(isValidPassword(password));
   }, [password]);
 
-  const handleEmailSubmit = async (e) => {
+  const handleEmail = async (e) => {
     e.preventDefault();
     try {
       const response = await api.post("/forgot-password", { email });
       setMaskedPhone(response.data.maskedPhone);
-      setStep(2);
+      setStep(3);
       setToast({
         show: true,
         message: "Email verified successfully!",
+        type: "success",
+      });
+    } catch (error) {
+      setToast({
+        show: true,
+        message: "Error: " + error.response?.data?.message,
+        type: "error",
+      });
+    }
+  };
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post("/email-forgot-password", { email });
+      setStep(4);
+
+      setToast({
+        show: true,
+        message: "OTP sent successfully!",
         type: "success",
       });
     } catch (error) {
@@ -61,14 +82,18 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
     e.preventDefault();
     try {
       await api.post("/verify-phone", { email, phone });
-      setStep(3);
+      setStep(4);
       setToast({
         show: true,
         message: "Phone number verified successfully!",
         type: "success",
       });
     } catch (error) {
-      setToast({ show: true, message: error.response?.data?.message || "Invalid phone number", type: "error" });
+      setToast({
+        show: true,
+        message: error.response?.data?.message || "Invalid phone number",
+        type: "error",
+      });
     }
   };
 
@@ -76,14 +101,18 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
     e.preventDefault();
     try {
       await api.post("/verify-otp", { email, otp });
-      setStep(4);
+      setStep(5);
       setToast({
         show: true,
         message: "OTP verified successfully!",
         type: "success",
       });
     } catch (error) {
-      setToast({ show: true, message: error.response?.data?.message || "Invalid OTP", type: "error" });
+      setToast({
+        show: true,
+        message: error.response?.data?.message || "Invalid OTP",
+        type: "error",
+      });
     }
   };
 
@@ -157,15 +186,54 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
             ✖
           </button>
 
-          {/* Step 1: Enter Email */}
+
           {step === 1 && (
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fadeIn">
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl"
+                >
+                  ✖
+                </button>
+                <h3 className="text-2xl font-semibold text-center text-gray-800 mb-2">
+                  Forgot Password
+                </h3>
+                <p className="text-sm text-gray-600 text-center mb-6">
+                  Choose how you'd like to reset your password
+                </p>
+                <div className="flex flex-col gap-4">
+                  <button
+                    onClick={() => {
+                      setSelectedMethod("phone");
+                      setStep(2);
+                    }}
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300"
+                  >
+                    📱 Reset via Phone
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedMethod("email");
+                      setStep(2);
+                    }}
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300"
+                  >
+                    ✉️ Reset via Email
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {step === 2 && selectedMethod === "phone" && (
+            <form onSubmit={handleEmail} className="space-y-4">
               <h2 className="text-2xl font-semibold text-center">
                 Forgot Password
               </h2>
               <input
                 type="email"
                 value={email}
+                autoFocus
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
                 placeholder="Enter your email"
@@ -179,9 +247,30 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
               </button>
             </form>
           )}
+          {step === 2 && selectedMethod === "email" && (
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <h2 className="text-2xl font-semibold text-center">
+                Forgot Password
+              </h2>
+              <input
+                type="email"
+                value={email}
+                autoFocus
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                placeholder="Enter your email"
+                required
+              />
+              <button
+                type="submit"
+                className="w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all"
+              >
+                Send OTP
+              </button>
+            </form>
+          )}
 
-          {/* Step 2: Verify Phone */}
-          {step === 2 && (
+          {step === 3 && (
             <form onSubmit={handlePhoneSubmit} className="space-y-4">
               <h2 className="text-2xl font-semibold text-center">
                 Verify Phone
@@ -192,6 +281,7 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
               <input
                 type="text"
                 value={phone}
+                autoFocus
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
                 placeholder="Full mobile number"
@@ -206,13 +296,14 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
             </form>
           )}
 
-          {/* Step 3: Enter OTP */}
-          {step === 3 && (
+
+          {step === 4 && (
             <form onSubmit={handleOtpSubmit} className="space-y-4">
               <h2 className="text-2xl font-semibold text-center">Enter OTP</h2>
               <input
                 type="text"
                 value={otp}
+                autoFocus
                 onChange={(e) => setOtp(e.target.value)}
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
                 placeholder="Enter OTP"
@@ -227,20 +318,20 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
             </form>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <form className="space-y-4" onSubmit={handlePasswordSubmit}>
               <h2 className="text-2xl font-semibold text-center">
                 Reset Password
               </h2>
 
-              {/* New Password */}
+
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
-                    setPasswordError(""); // Clear error on input
+                    setPasswordError(""); 
                   }}
                   // className="w-full p-3 border rounded-lg focus:ring-2 transition-all"
                   className={`w-full px-6 py-3 rounded-lg bg-white bg-opacity-80 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300 ease-in-out ${
@@ -251,10 +342,11 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
                       : "border-gray-300"
                   } border`}
                   placeholder="New Password"
+                  autoFocus
                   required
-                  onCopy={(e) => e.preventDefault()} // Disable Copy
-                  onCut={(e) => e.preventDefault()} // Disable Cut
-                  onPaste={(e) => e.preventDefault()} // Disable Paste
+                  onCopy={(e) => e.preventDefault()} 
+                  onCut={(e) => e.preventDefault()} 
+                  onPaste={(e) => e.preventDefault()} 
                 />
 
                 <button
@@ -319,7 +411,7 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
                 <p className="text-red-500 text-sm">{passwordError}</p>
               )}
 
-              {/* Confirm Password */}
+
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
@@ -335,9 +427,9 @@ const ForgotPasswordFlow = ({ isOpen, setIsOpen }) => {
                   } border`}
                   placeholder="Confirm Password"
                   required
-                  onCopy={(e) => e.preventDefault()} // Disable Copy
-                  onCut={(e) => e.preventDefault()} // Disable Cut
-                  onPaste={(e) => e.preventDefault()} // Disable Paste
+                  onCopy={(e) => e.preventDefault()} 
+                  onCut={(e) => e.preventDefault()} 
+                  onPaste={(e) => e.preventDefault()} 
                 />
                 <button
                   type="button"

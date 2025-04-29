@@ -37,14 +37,12 @@ router.post("/tutors", authMiddleware, async (req, res) => {
         .json({ error: "Tutor with this email already exists" });
     }
 
-    // Generate a random password
     const tempPassword = Math.random().toString(36).slice(-8);
 
-    // Hash the password before storing it
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
     const newTutor = new Tutor({
-      email, // Email is the username
+      email,
       password: hashedPassword,
       name,
       profilePicture: null,
@@ -54,39 +52,65 @@ router.post("/tutors", authMiddleware, async (req, res) => {
 
     await newTutor.save();
 
-    const emailText = `
+    const plainText = `
 Hi ${name},
 
-Welcome to **TWOD Tutorials**! We're excited to have you on board as a tutor.
+Welcome to TWOD Tutorials! We're excited to have you on board as a tutor.
 
 Below are your login credentials:
-- **Email (Username):** ${email}
-- **Password:** ${tempPassword}
+- Email (Username): ${email}
+- Password: ${tempPassword}
 
 To get started, please follow these steps:
 
-1. Click on the following link to access the tutor portal:  
+1. Click on the following link to access the tutor portal:
    https://twod-tutorial-web-application-phi.vercel.app/
 
-2. On the homepage, navigate to the **Login** section.
+2. On the homepage, navigate to the Login section.
 
 3. Log in using the credentials provided above.
 
-4. Reset your password
+4. Reset your password.
 
-If you have any questions or need assistance, feel free to reach out to us at **support@twodtutorials.com**.
+If you have any questions or need assistance, feel free to reach out to us at support@twodtutorials.com.
 
 We're thrilled to have you with us!
 
 Best regards,  
-**Team TWOD Tutorials**
+Team TWOD Tutorials
 `;
 
+    const htmlContent = `
+<p>Hi ${name},</p>
+
+<p>Welcome to <strong>TWOD Tutorials</strong>! We're excited to have you on board as a tutor.</p>
+
+<p><strong>Your login credentials:</strong></p>
+<ul>
+  <li><strong>Email:</strong> ${email}</li>
+  <li><strong>Password:</strong> ${tempPassword}</li>
+</ul>
+
+<p><strong>Steps to get started:</strong></p>
+<ol>
+  <li>Visit the tutor portal: <a href="https://twod-tutorial-web-application-phi.vercel.app/">Click Here</a></li>
+  <li>Go to the <strong>Login</strong> section.</li>
+  <li>Enter your credentials above.</li>
+  <li>Reset your password after logging in.</li>
+</ol>
+
+<p>If you have any questions, feel free to email us at <a href="mailto:support@twodtutorials.com">support@twodtutorials.com</a>.</p>
+
+<p>We're thrilled to have you with us!</p>
+
+<p><strong>Team TWOD Tutorials</strong></p>
+`;
 
     await sendEmail(
       email,
       "Welcome to TWOD Tutorials!",
-      emailText
+      plainText,
+      htmlContent
     );
 
     res.status(201).json({
@@ -131,7 +155,6 @@ router.get("/courses/:courseId/tutors", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch tutors" });
   }
 });
-
 
 router.get("/tutors/me", authMiddleware, async (req, res) => {
   try {
@@ -260,15 +283,17 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
 
     if (tutorId === "no-preference") {
       if (!subject) {
-        return res.status(400).json({ error: "Subject is required for no preference" });
+        return res
+          .status(400)
+          .json({ error: "Subject is required for no preference" });
       }
 
       // Fetch tutors who teach the selected subject
-      const tutors = await Tutor.find({ "subjects": subject });
+      const tutors = await Tutor.find({ subjects: subject });
 
       tutors.forEach((tutor) => {
         tutor.availability.forEach(({ date, subjects }) => {
-          if (subjects.some(s => s.subjectName === subject)) {
+          if (subjects.some((s) => s.subjectName === subject)) {
             availableDates.add(date);
           }
         });
@@ -280,7 +305,7 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
         return res.status(404).json({ error: "Tutor not found" });
       }
       tutor.availability.forEach(({ date, subjects }) => {
-        if (!subject || subjects.some(s => s.subjectName === subject)) {
+        if (!subject || subjects.some((s) => s.subjectName === subject)) {
           availableDates.add(date);
         }
       });
@@ -303,7 +328,6 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
   }
 });
 
-
 router.get("/tutors/:tutorId/available-slots", async (req, res) => {
   try {
     const { tutorId } = req.params;
@@ -316,15 +340,15 @@ router.get("/tutors/:tutorId/available-slots", async (req, res) => {
     let availableSlots = []; // Array to store available slots
 
     // Ensure the date is in the correct format
-    const formattedDate = new Date(date).toISOString().split('T')[0];
+    const formattedDate = new Date(date).toISOString().split("T")[0];
 
     if (tutorId === "no-preference") {
       // Fetch tutors who teach the selected subject
-      const tutors = await Tutor.find({ "subjects": subject });
+      const tutors = await Tutor.find({ subjects: subject });
 
       tutors.forEach((tutor) => {
         const selectedDate = tutor.availability.find((entry) => {
-          const entryDate = new Date(entry.date).toISOString().split('T')[0]; 
+          const entryDate = new Date(entry.date).toISOString().split("T")[0];
           return entryDate === formattedDate;
         });
 
@@ -344,12 +368,14 @@ router.get("/tutors/:tutorId/available-slots", async (req, res) => {
       }
 
       const selectedDate = tutor.availability.find((entry) => {
-        const entryDate = new Date(entry.date).toISOString().split('T')[0]; 
+        const entryDate = new Date(entry.date).toISOString().split("T")[0];
         return entryDate === formattedDate;
       });
 
       if (!selectedDate) {
-        return res.status(404).json({ error: "No available slots for this date" });
+        return res
+          .status(404)
+          .json({ error: "No available slots for this date" });
       }
 
       selectedDate.subjects.forEach((s) => {
@@ -365,8 +391,6 @@ router.get("/tutors/:tutorId/available-slots", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch available time slots" });
   }
 });
-
-
 
 router.delete(
   "/tutors/availability/date/:date",
@@ -523,7 +547,6 @@ router.delete(
   }
 );
 
-
 router.get("/dashboard", authMiddleware, async (req, res) => {
   try {
     const tutorId = req.user.id;
@@ -531,13 +554,14 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     if (!tutor) return res.status(404).json({ message: "Tutor not found" });
 
     const subjectCounts = {};
-    const uniqueStudentIds = new Set(); // 👈 new line
+    const uniqueStudentIds = new Set();
 
-    // --- Get enrollments from PayLater ---
     const payLaterEnrollments = await PayLater.find({
       tutorId,
-      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
-    }).populate("courseId user"); // 👈 also populate user
+      status: {
+        $in: ["accepted", "completed", "pending for tutor acceptance"],
+      },
+    }).populate("courseId user");
 
     payLaterEnrollments.forEach((enroll) => {
       const subject = enroll.courseId?.subject;
@@ -550,7 +574,6 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
       }
     });
 
-    // --- Get enrollments from Transaction ---
     const transactionEnrollments = await Transaction.find({
       tutorId,
       status: "completed",
@@ -572,7 +595,9 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     const upcomingPayLater = await PayLater.find({
       tutorId,
       selectedDate: { $gte: today },
-      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
+      status: {
+        $in: ["accepted", "completed", "pending for tutor acceptance"],
+      },
     }).populate("user courseId");
 
     const upcomingTransactions = await Transaction.find({
@@ -607,12 +632,12 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
       }
     });
 
-
-
     const previousPayLaters = await PayLater.find({
       tutorId,
       selectedDate: { $lt: today },
-      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
+      status: {
+        $in: ["accepted", "completed", "pending for tutor acceptance"],
+      },
     }).populate("user courseId");
 
     const previousTransactions = await Transaction.find({
@@ -647,7 +672,6 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
         });
       }
     });
-    
 
     res.status(200).json({
       totalStudents: uniqueStudentIds.size, // 👈 return total students
@@ -661,18 +685,21 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
   }
 });
 
-
 router.get("/students", authMiddleware, async (req, res) => {
   try {
-    const payLater = await PayLater.find().populate({
-      path: "user",
-      select: "-password",
-    }).populate("courseId");
+    const payLater = await PayLater.find()
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate("courseId");
 
-    const transactions = await Transaction.find().populate({
-      path: "user",
-      select: "-password",
-    }).populate("courseId");
+    const transactions = await Transaction.find()
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate("courseId");
 
     // Log data to ensure it's being fetched correctly
     console.log("PayLater data:", payLater);
@@ -682,13 +709,11 @@ router.get("/students", authMiddleware, async (req, res) => {
 
     // Ensure we are returning the data
     res.status(200).json({ students: allEnrollments });
-
   } catch (err) {
     console.error("Error fetching student list:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 router.get("/notifications", authMiddleware, async (req, res) => {
   try {
@@ -697,7 +722,9 @@ router.get("/notifications", authMiddleware, async (req, res) => {
     // Fetch PayLater transactions
     const payLater = await PayLater.find({
       tutorId,
-      status: { $in: ["accepted", "completed", "pending for tutor acceptance"] },
+      status: {
+        $in: ["accepted", "completed", "pending for tutor acceptance"],
+      },
     })
       .sort({ createdAt: -1 })
       .populate("user") // get name and image
@@ -743,40 +770,40 @@ router.get("/notifications", authMiddleware, async (req, res) => {
 });
 
 // Assuming you use JWT and req.user._id is available
-router.post("/notifications/mark-all-read", authMiddleware, async (req, res) => {
-  try {
-    const tutorId = req.user.id;
-    console.log(tutorId)
+router.post(
+  "/notifications/mark-all-read",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const tutorId = req.user.id;
+      console.log(tutorId);
 
-    const result1 = await PayLater.updateMany(
-      {
-        tutorId,
-        $or: [{ isRead: false }, { isRead: { $exists: false } }],
-      },
-      { $set: { isRead: true } }
-    );
-    
-    const result2 = await Transaction.updateMany(
-      {
-        tutorId,
-        $or: [{ isRead: false }, { isRead: { $exists: false } }],
-      },
-      { $set: { isRead: true } }
-    );
-    
-    console.log("PayLater updated:", result1.modifiedCount);
-    console.log("Transaction updated:", result2.modifiedCount);
+      const result1 = await PayLater.updateMany(
+        {
+          tutorId,
+          $or: [{ isRead: false }, { isRead: { $exists: false } }],
+        },
+        { $set: { isRead: true } }
+      );
 
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error updating notifications:", error);
-    res.status(500).json({ error: "Server error" });
+      const result2 = await Transaction.updateMany(
+        {
+          tutorId,
+          $or: [{ isRead: false }, { isRead: { $exists: false } }],
+        },
+        { $set: { isRead: true } }
+      );
+
+      console.log("PayLater updated:", result1.modifiedCount);
+      console.log("Transaction updated:", result2.modifiedCount);
+
+      res.status(200).json({ success: true });
+    } catch (error) {
+      console.error("Error updating notifications:", error);
+      res.status(500).json({ error: "Server error" });
+    }
   }
-});
-
-
-
-
+);
 
 module.exports = router;
 
