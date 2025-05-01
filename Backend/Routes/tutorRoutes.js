@@ -146,8 +146,7 @@ router.get("/courses/:courseId/tutors", async (req, res) => {
 
     console.log("🔍 Course Type (Subject):", course.courseType); // Debugging
 
-    const tutors = await Tutor.find({ subjects: course.courseType }); // Fix here
-    console.log("📢 Tutors Found:", tutors); // Debugging
+    const tutors = await Tutor.find({ subjects: course.courseType });
 
     res.json(tutors);
   } catch (error) {
@@ -175,20 +174,24 @@ router.get("/tutors/me", authMiddleware, async (req, res) => {
 router.get("/tutors/availability", authMiddleware, async (req, res) => {
   try {
     const tutorId = req.user.id; // Get logged-in tutor's ID
-    const { subject } = req.query; // Optional subject filter
+    const { subject, grade } = req.query; // Optional subject and grade filter
 
     const tutor = await Tutor.findById(tutorId);
     if (!tutor) {
       return res.status(404).json({ message: "Tutor not found" });
     }
 
-    // Filter availability by subject (if provided)
+    // Filter availability by subject and grade (if provided)
     const filteredAvailability = tutor.availability
       .map((entry) => ({
         date: entry.date.toISOString().split("T")[0], // Convert to YYYY-MM-DD
-        subjects: entry.subjects.filter(
-          (sub) => !subject || sub.subjectName === subject
-        ), // Filter by subject
+        subjects: entry.subjects
+          .filter((sub) => !subject || sub.subjectName === subject)
+          .map((sub) => ({
+            subjectName: sub.subjectName,
+            grades: sub.grades.filter((g) => !grade || g.grade === grade),
+          }))
+          .filter((sub) => sub.grades.length > 0),
       }))
       .filter((entry) => entry.subjects.length > 0); // Remove entries with no matching subjects
 
@@ -217,7 +220,7 @@ router.post("/tutors/availability", authMiddleware, async (req, res) => {
 
     console.log("📥 Incoming Availability Data:", availability);
 
-    for (const { date, subject, timeSlots } of availability) {
+    for (const { date, subject, grade, timeSlots } of availability) {
       const formattedDate = new Date(date).toISOString().split("T")[0];
 
       // Check if the tutor already has availability for the selected date
@@ -227,24 +230,32 @@ router.post("/tutors/availability", authMiddleware, async (req, res) => {
       );
 
       if (!existingDate) {
-        // If date doesn't exist, add new date with the subject
+        // If date doesn't exist, add new date with the subject and grade
         tutor.availability.push({
           date: new Date(formattedDate),
-          subjects: [{ subjectName: subject, timeSlots }],
+          subjects: [{
+            subjectName: subject,
+            grades: [{
+              grade: grade,
+              timeSlots: timeSlots
+            }]
+          }],
         });
       } else {
-        // Check if the tutor already has a time slot for another subject on the same date
+        // Check if the tutor already has a time slot for another subject/grade on the same date
         for (const existingSubject of existingDate.subjects) {
-          for (const slot of timeSlots) {
-            const conflict = existingSubject.timeSlots.some(
-              (existingSlot) =>
-                existingSlot.startTime === slot.startTime &&
-                existingSlot.endTime === slot.endTime
-            );
-            if (conflict) {
-              return res.status(400).json({
-                error: `Conflict detected! You have already added ${existingSlot.startTime} - ${existingSlot.endTime} for ${existingSubject.subjectName}.`,
-              });
+          for (const existingGrade of existingSubject.grades) {
+            for (const slot of timeSlots) {
+              const conflict = existingGrade.timeSlots.some(
+                (existingSlot) =>
+                  existingSlot.startTime === slot.startTime &&
+                  existingSlot.endTime === slot.endTime
+              );
+              if (conflict) {
+                return res.status(400).json({
+                  error: `Conflict detected! You have already added ${slot.startTime} - ${slot.endTime} for ${existingSubject.subjectName} (${existingGrade.grade}).`,
+                });
+              }
             }
           }
         }
@@ -255,9 +266,26 @@ router.post("/tutors/availability", authMiddleware, async (req, res) => {
         );
 
         if (!subjectEntry) {
-          existingDate.subjects.push({ subjectName: subject, timeSlots });
+          existingDate.subjects.push({
+            subjectName: subject,
+            grades: [{
+              grade: grade,
+              timeSlots: timeSlots
+            }]
+          });
         } else {
-          subjectEntry.timeSlots.push(...timeSlots);
+          let gradeEntry = subjectEntry.grades.find(
+            (g) => g.grade === grade
+          );
+
+          if (!gradeEntry) {
+            subjectEntry.grades.push({
+              grade: grade,
+              timeSlots: timeSlots
+            });
+          } else {
+            gradeEntry.timeSlots.push(...timeSlots);
+          }
         }
       }
     }
@@ -277,12 +305,20 @@ router.post("/tutors/availability", authMiddleware, async (req, res) => {
 router.get("/tutors/:tutorId/available-dates", async (req, res) => {
   try {
     const { tutorId } = req.params;
-    const { subject } = req.query; // Get subject from query parameters
+    console.log("Fetching available dates for tutor:", tutorId);
+    const { subject, grade } = req.query;
 
-    let availableDates = new Set(); // Using Set to store unique dates
+    console.log("🔍 Fetching available dates with params:", {
+      tutorId,
+      subject,
+      grade
+    });
+
+    let availableDates = new Set(); 
 
     if (tutorId === "no-preference") {
       if (!subject) {
+        console.log("❌ Subject is required for no preference");
         return res
           .status(400)
           .json({ error: "Subject is required for no preference" });
@@ -293,37 +329,133 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
 
       tutors.forEach((tutor) => {
         tutor.availability.forEach(({ date, subjects }) => {
-          if (subjects.some((s) => s.subjectName === subject)) {
-            availableDates.add(date);
-          }
+          subjects.forEach((subj) => {
+            if (subj.subjectName === subject) {
+              // If grade is provided, check if the subject has that grade
+              if (!grade || subj.grades.some(g => g.grade === grade)) {
+                availableDates.add(date);
+              }
+            }
+          });
         });
       });
     } else {
       // Fetch specific tutor
       const tutor = await Tutor.findById(tutorId);
       if (!tutor) {
+        console.log("❌ Tutor not found:", tutorId);
         return res.status(404).json({ error: "Tutor not found" });
       }
       tutor.availability.forEach(({ date, subjects }) => {
-        if (!subject || subjects.some((s) => s.subjectName === subject)) {
-          availableDates.add(date);
-        }
+        subjects.forEach((subj) => {
+          if (subj.subjectName === subject) {
+            // If grade is provided, check if the subject has that grade
+            if (!grade || subj.grades.some(g => g.grade === grade)) {
+              availableDates.add(date);
+            }
+          }
+        });
       });
     }
 
-    // Convert set to array and filter for the next 2 months
+    // Convert set to array and filter for the next 6 months
     const today = new Date();
-    const twoMonthsLater = new Date();
-    twoMonthsLater.setMonth(twoMonthsLater.getMonth() + 2);
+    today.setUTCHours(0, 0, 0, 0); // Set to start of day in UTC
+    
+    const sixMonthsLater = new Date();
+    sixMonthsLater.setUTCMonth(sixMonthsLater.getUTCMonth() + 6);
+    sixMonthsLater.setUTCHours(23, 59, 59, 999); // Set to end of day in UTC
+
 
     availableDates = [...availableDates].filter((date) => {
       const dateObj = new Date(date);
-      return dateObj >= today && dateObj <= twoMonthsLater;
+      dateObj.setUTCHours(0, 0, 0, 0); // Normalize to start of day in UTC
+      const isInRange = dateObj >= today && dateObj <= sixMonthsLater;
+      return isInRange;
     });
+    console.log("📅 Final filtered available dates:", availableDates);
+    res.json(availableDates);
+  } catch (error) {
+    console.error("❌ Error in available-dates route:", error);
+    res.status(500).json({ error: "Failed to fetch available dates" });
+  }
+});
+
+router.get("/tutors/no-preference/available-dates", async (req, res) => {
+  try {
+    const { subject, grade } = req.query;
+
+    console.log("🔍 Fetching available dates for no-preference with params:", {
+      subject,
+      grade
+    });
+
+    if (!subject) {
+      console.log("❌ Subject is required for no-preference");
+      return res
+        .status(400)
+        .json({ error: "Subject is required for no-preference" });
+    }
+
+    let availableDates = new Set();
+
+    // Fetch tutors who teach the selected subject
+    const tutors = await Tutor.find({ subjects: subject });
+    console.log("📢 Found tutors for subject:", tutors.length);
+    // console.log("📢 Tutors found:", tutors.map(t => ({ 
+    //   name: t.name, 
+    //   subjects: t.subjects,
+    //   availability: t.availability.length 
+    // })));
+
+    tutors.forEach((tutor) => {
+      console.log("🔍 Checking tutor:", tutor.name);
+      tutor.availability.forEach(({ date, subjects }) => {
+        console.log("📅 Checking date:", date);
+        subjects.forEach((subj) => {
+          console.log("📚 Checking subject:", subj.subjectName);
+          if (subj.subjectName === subject) {
+            console.log("✅ Found matching subject:", subject);
+            // If grade is provided, check if the subject has that grade
+            if (!grade || subj.grades.some(g => g.grade === grade)) {
+              console.log("✅ Found matching grade:", grade);
+              availableDates.add(date);
+            }
+          }
+        });
+      });
+    });
+
+    // Convert set to array and filter for the next 6 months
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0); // Set to start of day in UTC
+    
+    const sixMonthsLater = new Date();
+    sixMonthsLater.setUTCMonth(sixMonthsLater.getUTCMonth() + 6);
+    sixMonthsLater.setUTCHours(23, 59, 59, 999); // Set to end of day in UTC
+
+    console.log("📅 Date range:", {
+      today: today,
+      sixMonthsLater: sixMonthsLater
+    });
+    console.log("📅 All available dates before filtering:", [...availableDates]);
+
+    availableDates = [...availableDates].filter((date) => {
+      const dateObj = new Date(date);
+      dateObj.setUTCHours(0, 0, 0, 0); // Normalize to start of day in UTC
+      const isInRange = dateObj >= today && dateObj <= sixMonthsLater;
+      console.log("📅 Date check:", {
+        date: dateObj,
+        isInRange: isInRange
+      });
+      return isInRange;
+    });
+
+    console.log("📅 Final filtered available dates:", availableDates);
 
     res.json(availableDates);
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error in no-preference available-dates route:", error);
     res.status(500).json({ error: "Failed to fetch available dates" });
   }
 });
@@ -331,22 +463,24 @@ router.get("/tutors/:tutorId/available-dates", async (req, res) => {
 router.get("/tutors/:tutorId/available-slots", async (req, res) => {
   try {
     const { tutorId } = req.params;
-    const { date, subject } = req.query; // Ensure subject is passed
+    const { date, subject, grade } = req.query;
+
+    
 
     if (!date || !subject) {
+      console.log("❌ Missing required parameters");
       return res.status(400).json({ error: "Date and Subject are required" });
     }
 
-    let availableSlots = []; // Array to store available slots
-
-    // Ensure the date is in the correct format
+    let availableSlots = [];
     const formattedDate = new Date(date).toISOString().split("T")[0];
 
     if (tutorId === "no-preference") {
-      // Fetch tutors who teach the selected subject
       const tutors = await Tutor.find({ subjects: subject });
 
       tutors.forEach((tutor) => {
+        
+
         const selectedDate = tutor.availability.find((entry) => {
           const entryDate = new Date(entry.date).toISOString().split("T")[0];
           return entryDate === formattedDate;
@@ -355,17 +489,46 @@ router.get("/tutors/:tutorId/available-slots", async (req, res) => {
         if (selectedDate) {
           selectedDate.subjects.forEach((s) => {
             if (s.subjectName === subject) {
-              availableSlots.push(...s.timeSlots);
+              
+
+              // Check for matching grade
+              const matchingGrades = s.grades.filter(g => !grade || g.grade === grade);
+              
+              matchingGrades.forEach(g => {
+                
+
+                g.timeSlots.forEach(slot => {
+                  
+
+                  // Create slot object with all required fields
+                  const slotObject = {
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
+                    tutorName: tutor.name,
+                    tutorId: tutor._id,
+                    grade: g.grade
+                  };
+
+                  // Only add if both startTime and endTime are defined
+                  if (slotObject.startTime && slotObject.endTime) {
+                    availableSlots.push(slotObject);
+                  } else {
+                    console.log("⚠️ Skipping invalid slot:", slot);
+                  }
+                });
+              });
             }
           });
         }
       });
     } else {
-      // Fetch specific tutor
       const tutor = await Tutor.findById(tutorId);
       if (!tutor) {
+        console.log("❌ Tutor not found:", tutorId);
         return res.status(404).json({ error: "Tutor not found" });
       }
+
+      
 
       const selectedDate = tutor.availability.find((entry) => {
         const entryDate = new Date(entry.date).toISOString().split("T")[0];
@@ -373,21 +536,239 @@ router.get("/tutors/:tutorId/available-slots", async (req, res) => {
       });
 
       if (!selectedDate) {
-        return res
-          .status(404)
-          .json({ error: "No available slots for this date" });
+        return res.status(404).json({ error: "No available slots for this date" });
       }
 
       selectedDate.subjects.forEach((s) => {
         if (s.subjectName === subject) {
-          availableSlots.push(...s.timeSlots);
+          
+
+          // Check for matching grade
+          const matchingGrades = s.grades.filter(g => !grade || g.grade === grade);
+          
+          matchingGrades.forEach(g => {
+            
+
+            g.timeSlots.forEach(slot => {
+              
+
+              // Create slot object with all required fields
+              const slotObject = {
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                tutorName: tutor.name,
+                tutorId: tutor._id,
+                grade: g.grade
+              };
+
+              // Only add if both startTime and endTime are defined
+              if (slotObject.startTime && slotObject.endTime) {
+                availableSlots.push(slotObject);
+              } else {
+                console.log("⚠️ Skipping invalid slot:", slot);
+              }
+            });
+          });
         }
       });
     }
 
-    res.json(availableSlots);
+    // Remove duplicate slots and sort by time
+    const uniqueSlots = Array.from(new Map(
+      availableSlots.map(slot => [slot.startTime, slot])
+    ).values()).sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    
+
+    res.json(uniqueSlots);
   } catch (error) {
-    console.error("Error fetching tutor-specific slots:", error);
+    console.error("❌ Error fetching available slots:", error);
+    res.status(500).json({ error: "Failed to fetch available time slots" });
+  }
+});
+
+router.get("/tutors/no-preference/available-slots", async (req, res) => {
+  try {
+    const { date, subject, grade } = req.query;
+
+    console.log("🔍 Fetching available slots for no-preference with params:", {
+      date,
+      subject,
+      grade
+    });
+
+    if (!date || !subject) {
+      console.log("❌ Missing required parameters");
+      return res.status(400).json({ error: "Date and Subject are required" });
+    }
+
+    const formattedDate = new Date(date).toISOString().split("T")[0];
+    console.log("📅 Formatted date:", formattedDate);
+
+    // Find all tutors who teach the subject
+    const tutors = await Tutor.find({ subjects: subject });
+    console.log("📢 Found tutors for subject:", tutors.length);
+    // console.log("📢 Tutors found:", tutors.map(t => ({ 
+    //   name: t.name, 
+    //   subjects: t.subjects,
+    //   availability: t.availability.length 
+    // })));
+
+    if (tutors.length === 0) {
+      console.log("❌ No tutors found for subject:", subject);
+      return res.status(404).json({ error: "No tutors available for this subject" });
+    }
+
+    let availableSlots = [];
+
+    // Check each tutor's availability
+    tutors.forEach((tutor) => {
+      console.log("\n👤 Checking tutor:", {
+        name: tutor.name,
+        id: tutor._id,
+        availability: tutor.availability
+      });
+
+      // Find matching date in tutor's availability
+      const matchingDate = tutor.availability.find(entry => {
+        if (!entry || !entry.date) {
+          console.log("⚠️ Invalid date entry:", entry);
+          return false;
+        }
+        const entryDate = new Date(entry.date).toISOString().split("T")[0];
+        console.log("📅 Comparing dates:", {
+          entryDate,
+          formattedDate,
+          matches: entryDate === formattedDate
+        });
+        return entryDate === formattedDate;
+      });
+
+      if (!matchingDate) {
+        console.log("❌ No matching date found for tutor:", tutor.name);
+        return;
+      }
+
+      console.log("📅 Found matching date:", matchingDate);
+      
+      // Find matching subject
+      if (!matchingDate.subjects || !Array.isArray(matchingDate.subjects)) {
+        console.log("❌ Invalid subjects array in date entry:", matchingDate.subjects);
+        return;
+      }
+
+      console.log("📚 Available subjects:", matchingDate.subjects.map(s => s.subjectName));
+
+      const matchingSubject = matchingDate.subjects.find(subj => {
+        if (!subj || !subj.subjectName) {
+          console.log("⚠️ Invalid subject entry:", subj);
+          return false;
+        }
+        const matches = subj.subjectName === subject;
+        console.log("📚 Comparing subjects:", {
+          subjectName: subj.subjectName,
+          targetSubject: subject,
+          matches
+        });
+        return matches;
+      });
+
+      if (!matchingSubject) {
+        console.log("❌ No matching subject found");
+        return;
+      }
+
+      console.log("📚 Found matching subject:", matchingSubject);
+
+      // Find matching grade
+      if (!matchingSubject.grades || !Array.isArray(matchingSubject.grades)) {
+        console.log("❌ Invalid grades array in subject entry:", matchingSubject.grades);
+        return;
+      }
+
+      console.log("📚 Available grades:", matchingSubject.grades.map(g => g.grade));
+
+      const matchingGrades = matchingSubject.grades.filter(g => {
+        if (!g || !g.grade) {
+          console.log("⚠️ Invalid grade entry:", g);
+          return false;
+        }
+        const matches = !grade || g.grade === grade;
+        console.log("📚 Comparing grades:", {
+          grade: g.grade,
+          targetGrade: grade,
+          matches
+        });
+        return matches;
+      });
+
+      if (matchingGrades.length === 0) {
+        console.log("❌ No matching grades found");
+        return;
+      }
+
+      console.log("📚 Found matching grades:", matchingGrades);
+
+      // Process each matching grade's time slots
+      matchingGrades.forEach(g => {
+        if (!g.timeSlots || !Array.isArray(g.timeSlots)) {
+          console.log("❌ Invalid time slots array in grade entry:", g.timeSlots);
+          return;
+        }
+
+        console.log("⏰ Available time slots:", g.timeSlots);
+
+        g.timeSlots.forEach(slot => {
+          if (!slot || !slot.startTime || !slot.endTime) {
+            console.log("⚠️ Invalid time slot:", slot);
+            return;
+          }
+
+          console.log("⏰ Processing slot:", {
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            tutorName: tutor.name,
+            tutorId: tutor._id,
+            grade: g.grade
+          });
+
+          // Create slot object with all required fields
+          const slotObject = {
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            tutorName: tutor.name,
+            tutorId: tutor._id,
+            grade: g.grade
+          };
+
+          availableSlots.push(slotObject);
+        });
+      });
+    });
+
+    // Remove duplicate slots and sort by time
+    const uniqueSlots = Array.from(new Map(
+      availableSlots.map(slot => [slot.startTime + slot.tutorId, slot])
+    ).values()).sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    console.log("\n✅ Final available slots summary:", {
+      totalSlots: uniqueSlots.length,
+      slots: uniqueSlots.map(slot => ({
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        tutorName: slot.tutorName,
+        grade: slot.grade
+      }))
+    });
+
+    if (uniqueSlots.length === 0) {
+      console.log("❌ No available slots found after processing");
+      return res.status(404).json({ error: "No available slots found for the selected criteria" });
+    }
+
+    res.json(uniqueSlots);
+  } catch (error) {
+    console.error("❌ Error fetching available slots:", error);
     res.status(500).json({ error: "Failed to fetch available time slots" });
   }
 });
@@ -401,10 +782,10 @@ router.delete(
         return res.status(401).json({ error: "Unauthorized access" });
       }
 
-      const { subject } = req.query; // Extract subject from query
+      const { subject, grade } = req.query; // Extract subject and grade from query
       const { date } = req.params; // Extract date from params
       const userId = req.user.id;
-      const userRole = req.user.role; // Ensure userRole is defined
+      const userRole = req.user.role;
 
       let tutor;
 
@@ -431,8 +812,25 @@ router.delete(
           .json({ error: "Date not found in availability" });
       }
 
-      if (subject) {
-        // Remove only the subject's availability instead of the entire date
+      if (subject && grade) {
+        // Remove only the subject's grade availability
+        dateEntry.subjects = dateEntry.subjects.map(subjectEntry => {
+          if (subjectEntry.subjectName === subject) {
+            subjectEntry.grades = subjectEntry.grades.filter(
+              gradeEntry => gradeEntry.grade !== grade
+            );
+          }
+          return subjectEntry;
+        }).filter(subjectEntry => subjectEntry.grades.length > 0);
+
+        // If no subjects remain for the date, remove the date entry
+        if (dateEntry.subjects.length === 0) {
+          tutor.availability = tutor.availability.filter(
+            (entry) => entry.date.toISOString().split("T")[0] !== date
+          );
+        }
+      } else if (subject) {
+        // Remove only the subject's availability
         dateEntry.subjects = dateEntry.subjects.filter(
           (sub) => sub.subjectName !== subject
         );
@@ -469,7 +867,7 @@ router.delete(
   async (req, res) => {
     try {
       const { date, time } = req.params; // Extract from URL params
-      const { subject, tutorId } = req.query; // Extract from query params
+      const { subject, grade, tutorId } = req.query; // Extract from query params
       const userId = req.user.id;
       const userRole = req.user.role;
 
@@ -508,20 +906,37 @@ router.delete(
           .json({ error: "Subject not found in availability" });
       }
 
+      // Find the grade entry
+      const gradeEntry = subjectEntry.grades.find(
+        (g) => g.grade === grade
+      );
+      if (!gradeEntry) {
+        return res
+          .status(404)
+          .json({ error: "Grade not found in availability" });
+      }
+
       // Remove the specified time slot based on `startTime`
-      const updatedTimeSlots = subjectEntry.timeSlots.filter(
+      const updatedTimeSlots = gradeEntry.timeSlots.filter(
         (slot) => slot.startTime !== time
       );
 
-      if (updatedTimeSlots.length === subjectEntry.timeSlots.length) {
+      if (updatedTimeSlots.length === gradeEntry.timeSlots.length) {
         return res.status(404).json({ error: "Time slot not found" });
       }
 
-      // Update the subject's time slots
-      subjectEntry.timeSlots = updatedTimeSlots;
+      // Update the grade's time slots
+      gradeEntry.timeSlots = updatedTimeSlots;
 
-      // If no time slots remain, remove the subject entry
-      if (subjectEntry.timeSlots.length === 0) {
+      // If no time slots remain, remove the grade entry
+      if (gradeEntry.timeSlots.length === 0) {
+        subjectEntry.grades = subjectEntry.grades.filter(
+          (g) => g.grade !== grade
+        );
+      }
+
+      // If no grades remain, remove the subject entry
+      if (subjectEntry.grades.length === 0) {
         dateEntry.subjects = dateEntry.subjects.filter(
           (sub) => sub.subjectName !== subject
         );

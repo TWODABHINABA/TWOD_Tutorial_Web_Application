@@ -263,26 +263,35 @@ const convertTo24HourFormat = (time12h) => {
   return `${hours}:${minutes}`;
 };
 
-const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
-  const selectedStartTime = convertTo24HourFormat(selectedTime.split("-")[0].trim()); // "19:30"
-  const selectedEndTime = convertTo24HourFormat(selectedTime.split("-")[1].trim()); // "20:30"
+const findAvailableTutor = async (subject, grade, selectedDate, selectedTime) => {
+  const selectedStartTime = convertTo24HourFormat(
+    selectedTime.split("-")[0].trim()
+  );
+  const selectedEndTime = convertTo24HourFormat(
+    selectedTime.split("-")[1].trim()
+  );
 
   const tutors = await Tutor.find({
-    "availability.date": selectedDate, // Match date
-    "availability.subjects.subjectName": subject, // Match subject
+    "availability.date": selectedDate,
+    "availability.subjects.subjectName": subject,
+    "availability.subjects.grades.grade": grade,
   });
-
+console.log("Tutors found:", tutors);
   for (const tutor of tutors) {
     for (const subjectEntry of tutor.availability) {
-      if (subjectEntry.date.toISOString().split("T")[0] === selectedDate) {
+      if (new Date(subjectEntry.date).toISOString().split("T")[0] === selectedDate) {
         for (const subj of subjectEntry.subjects) {
           if (subj.subjectName === subject) {
-            for (const slot of subj.timeSlots) {
-              if (
-                slot.startTime <= selectedStartTime &&
-                slot.endTime >= selectedEndTime
-              ) {
-                return tutor; // ✅ Found matching tutor
+            for (const gradeEntry of subj.grades) {
+              if (gradeEntry.grade === grade) {
+                for (const slot of gradeEntry.timeSlots) {
+                  if (
+                    slot.startTime <= selectedStartTime &&
+                    slot.endTime >= selectedEndTime
+                  ) {
+                    return tutor;
+                  }
+                }
               }
             }
           }
@@ -291,7 +300,7 @@ const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
     }
   }
 
-  return null; // No available tutor
+  return null; // ❌ No match found
 };
 
 // Updated Enrollment Route
@@ -322,14 +331,26 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
 
     if (!tutorId) {
       // Auto-assign a tutor
-      const assignedTutor = await findAvailableTutor(course.courseType, selectedDate, selectedTime);
+      const assignedTutor = await findAvailableTutor(
+        course.courseType,
+        course.name,
+        selectedDate,
+        selectedTime
+
+
+      );
+      console.log("Assigned Tutor:", assignedTutor);      
 
       if (!assignedTutor) {
-        return res.status(400).json({ error: "No tutors available for the selected date and time." });
+        return res.status(400).json({
+          error: "No tutors available for the selected date and time.",
+        });
       }
 
       tutorId = assignedTutor._id;
-      console.log(`🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`);
+      console.log(
+        `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
+      );
     }
 
     const transaction = new Transaction({
@@ -930,6 +951,41 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
   }
 });
 
+// Add new route to get grades for a subject
+router.get("/courses/subject/:subjectName", async (req, res) => {
+  try {
+    const { subjectName } = req.params;
+    
+    if (!subjectName) {
+      return res.status(400).json({ message: "Subject name is required" });
+    }
+
+    // Find all courses for the given subject
+    const courses = await Course.find({ 
+      courseType: subjectName 
+    }).select('name courseType -_id'); // Only select name and courseType fields
+
+    if (!courses || courses.length === 0) {
+      return res.status(404).json({ 
+        message: `No courses found for subject: ${subjectName}` 
+      });
+    }
+
+    // Extract unique grades from courses
+    const grades = [...new Set(courses.map(course => course.name))];
+
+    res.json({
+      subject: subjectName,
+      grades: grades
+    });
+  } catch (error) {
+    console.error("Error fetching grades for subject:", error);
+    res.status(500).json({ 
+      error: "Failed to fetch grades for subject",
+      details: error.message 
+    });
+  }
+});
 
 module.exports = router;
 
