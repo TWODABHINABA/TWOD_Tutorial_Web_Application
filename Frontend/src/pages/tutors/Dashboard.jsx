@@ -12,6 +12,482 @@ const Dashboard = () => {
   const [previousClasses, setPreviousClasses] = useState([]);
   const [subjectCounts, setSubjectCounts] = useState({});
   const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showSubjectsModal, setShowSubjectsModal] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [showUpcomingModal, setShowUpcomingModal] = useState(false);
+  const [showPreviousModal, setShowPreviousModal] = useState(false);
+  const [user, setUser] = useState(null);
+  const [expandedDates, setExpandedDates] = useState({});
+  const [subjects, setSubjects] = useState({});
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/me");
+
+        setUser(res.data);
+        setSubjectCounts(res.data.subjects);
+        setSubjects(res.data.subjects);
+        console.log("USERRRRR",user);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
+  
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const res = await api.get("/dashboard");
+        const {
+          totalStudents,
+          upcomingClasses,
+          previousClasses,
+        } = res.data;
+
+        setTotalStudents(totalStudents || 0);
+        setUpcomingClasses(upcomingClasses || []);
+        setPreviousClasses(previousClasses || []);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const res = await api.get("/students");
+      console.log("Raw students data from API:", res.data);
+      const rawStudents = res.data.students;
+      
+      // Initialize date expandedDates state
+      const initialExpandedState = {};
+      if (Array.isArray(rawStudents) && rawStudents.length > 0) {
+        const dates = [...new Set(rawStudents.map(student => student.selectedDate))];
+        dates.forEach(date => {
+          initialExpandedState[date] = false;
+        });
+      }
+      setExpandedDates(initialExpandedState);
+      setShowStudentModal(true);
+
+      // Check if rawStudents is an array and if it contains data
+      if (!Array.isArray(rawStudents) || rawStudents.length === 0) {
+        console.log("No student data found");
+        return;
+      }
+
+      // Proceed with your existing grouping logic if data exists
+      const groupedStudents = rawStudents.reduce((acc, student) => {
+        const date = student.selectedDate; // Group by selectedDate
+        const subject = student.courseId.name; // Group by course name
+        const courseType = student.courseId.courseType; // Group by course type
+        const grade = student.courseId.grade || "N/A"; // Keep original logic
+
+        // Ensure the date group exists
+        if (!acc[date]) acc[date] = {};
+
+        // Ensure the grade group exists under the date
+        if (!acc[date][grade]) acc[date][grade] = {};
+
+        // Ensure the subject group exists under the grade
+        if (!acc[date][grade][subject]) acc[date][grade][subject] = {};
+
+        // Ensure the courseType group exists under the subject
+        if (!acc[date][grade][subject][courseType]) {
+          acc[date][grade][subject][courseType] = [];
+        }
+
+        // Push student data into the courseType group
+        acc[date][grade][subject][courseType].push({
+          studentName: student.user.name,
+          studentEmail: student.user.email,
+          timeSlot: student.selectedTime,
+          status: student.status,
+        });
+
+        return acc;
+      }, {});
+
+      // Update state with the grouped data
+      setStudents(groupedStudents);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  };
+
+  const fetchSubjects = async () => {
+    try {
+      const res = await api.get("/me");
+      setSubjects(res.data.subjects);
+      setShowSubjectsModal(true);
+    } catch (err) {
+      console.error("Error fetching subjects:", err);
+    }
+  };
+
+  const toggleDateExpansion = (date) => {
+    setExpandedDates(prev => ({
+      ...prev,
+      [date]: !prev[date]
+    }));
+  };
+
+  console.log("previousClasses", previousClasses);
+  const firstFive = upcomingClasses.slice(0, 5);
+  const firstFivePrevious = previousClasses.slice(0, 5);
+  
+  return (
+    <div className="flex min-h-screen bg-gray-100 z-50">
+      <div className="absolute md:static top-0 left-0 z-50">
+        <div className="max-md:hidden">
+          <Sidebar />
+        </div>
+        <div className="md:hidden">
+          <SidebarMobile />
+        </div>
+      </div>
+
+      <div className="w-full z-0 relative ml-0">
+        <Navbar title="Dashboard" user={user} />
+
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-lg font-semibold">Total Students</h2>
+              <p className="text-2xl mt-2">{totalStudents}</p>
+              <button
+                onClick={fetchStudents}
+                className="text-sm mt-2 text-blue-600 underline hover:text-blue-800"
+              >
+                View All
+              </button>
+            </div>
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-lg font-semibold">Upcoming Classes</h2>
+              <p className="text-2xl mt-2">{upcomingClasses.length}</p>
+            </div>
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-lg font-semibold">Subjects You Teach</h2>
+              <p className="text-2xl mt-2">
+                {Object.keys(subjectCounts).length}
+              </p>
+              <button 
+                className="text-sm mt-2 text-blue-600 underline hover:text-blue-800" 
+                onClick={fetchSubjects}
+              >
+                View Subjects
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-xl font-semibold mb-4">Upcoming Classes</h2>
+              {upcomingClasses.length === 0 ? (
+                <p className="text-gray-600">No upcoming classes scheduled.</p>
+              ) : (
+                <>
+                  <ul className="divide-y divide-gray-200">
+                    {firstFive.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <span>
+                          {item.subject}, {item.grade} — {item.studentName}
+                        </span>
+                        <span>payment Status: {item.status}</span>
+                        <span className="text-gray-600 text-sm">
+                          {item.date} at {item.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {upcomingClasses.length > 5 && (
+                    <button
+                      onClick={() => setShowUpcomingModal(true)}
+                      className="mt-4 text-blue-600 hover:underline"
+                    >
+                      View All
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Modal */}
+            {showUpcomingModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">
+                      All Upcoming Classes
+                    </h3>
+                    <button
+                      onClick={() => setShowUpcomingModal(false)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <ul className="divide-y divide-gray-200">
+                    {upcomingClasses.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <span>
+                          {item.subject}, {item.grade} — {item.studentName}
+                        </span>
+                        <span>payment Status: {item.status}</span>
+                        <span className="text-gray-600 text-sm">
+                          {item.date} at {item.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Previous Classes Section */}
+          <div className="mt-6">
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-xl font-semibold mb-4">Previous Classes</h2>
+              {previousClasses.length === 0 ? (
+                <p className="text-gray-600">No previous classes recorded.</p>
+              ) : (
+                <>
+                  <ul className="divide-y divide-gray-200">
+                    {firstFivePrevious.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <span>
+                          {item.subject}, {item.grade} — {item.studentName}
+                        </span>
+                        <span>payment Status: {item.status}</span>
+                        <span className="text-gray-600 text-sm">
+                          {item.date} at {item.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {previousClasses.length > 5 && (
+                    <button
+                      onClick={() => setShowPreviousModal(true)}
+                      className="mt-4 text-blue-600 hover:underline"
+                    >
+                      View All
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Modal */}
+            {showPreviousModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">
+                      All Previous Classes
+                    </h3>
+                    <button
+                      onClick={() => setShowPreviousModal(false)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <ul className="divide-y divide-gray-200">
+                    {previousClasses.map((item, index) => (
+                      <li key={index} className="py-2 flex justify-between">
+                        <span>
+                          {item.subject}, {item.grade} — {item.studentName}
+                        </span>
+                        <span>payment Status: {item.status}</span>
+                        <span className="text-gray-600 text-sm">
+                          {item.date} at {item.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Subjects Modal - UPDATED to remove index numbers */}
+          {showSubjectsModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
+              <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto relative">
+                {/* Close button */}
+                <button
+                  onClick={() => setShowSubjectsModal(false)}
+                  className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
+                  title="Close"
+                >
+                  &times;
+                </button>
+
+                {/* Header */}
+                <h3 className="text-2xl font-bold mb-6 text-center">
+                  Subjects You Teach
+                </h3>
+
+                {/* Subjects List */}
+                {Object.keys(subjects).length === 0 ? (
+                  <p className="text-gray-500 text-center">
+                    No subjects found.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {Object.entries(subjects).map(([subject, details]) => (
+                      <div key={subject} className="p-4 border border-gray-200 rounded-md bg-gray-50">
+                        <h4 className="font-semibold text-lg mb-2">{subject}</h4>
+                        <div className="ml-2 space-y-1">
+                          {typeof details === 'object' && details !== null ? (
+                            Object.entries(details).map(([key, value], idx) => (
+                              <p key={idx}>
+                                <span className="font-medium">{key}:</span> {value}
+                              </p>
+                            ))
+                          ) : (
+                            <p>{String(details)}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Collapsible Student Modal */}
+          {showStudentModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
+              <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto relative">
+                {/* Close button */}
+                <button
+                  onClick={() => setShowStudentModal(false)}
+                  className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
+                  title="Close"
+                >
+                  &times;
+                </button>
+
+                {/* Header */}
+                <h3 className="text-2xl font-bold mb-6 text-center">
+                  Enrolled Students
+                </h3>
+
+                {/* Grouped Student List with Collapsible Dates */}
+                {students && Object.keys(students).length === 0 ? (
+                  <p className="text-gray-500 text-center">
+                    No students found.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {Object.entries(students).map(([date, grades]) => (
+                      <div key={date} className="border border-gray-200 rounded-md overflow-hidden">
+                        {/* Date Header (Clickable) */}
+                        <button 
+                          className={`w-full flex items-center justify-between p-3 text-left ${expandedDates[date] ? 'bg-blue-50' : 'bg-gray-50'}`}
+                          onClick={() => toggleDateExpansion(date)}
+                        >
+                          <span className="font-semibold text-lg">{date}</span>
+                          <span className="text-blue-600">
+                            {expandedDates[date] ? '▲' : '▼'}
+                          </span>
+                        </button>
+                        
+                        {/* Collapsible Content */}
+                        {expandedDates[date] && (
+                          <div className="p-3 border-t border-gray-200">
+                            {Object.entries(grades).map(([grade, subjects]) => (
+                              <div key={grade} className="mb-4">
+                                {/* Remove only the "Grade N/A" text by conditionally rendering the grade header */}
+                                {/* <h5 className="font-semibold text-md bg-gray-100 p-2 rounded mb-2">
+                                  {grade !== "N/A" ? `Grade ${grade}` : ""}
+                                </h5> */}
+                                
+                                {Object.entries(subjects).map(([subject, courseTypes]) => (
+                                  <div key={subject} className="ml-4 mb-3">
+                                    <h6 className="font-semibold text-md border-b border-gray-200 pb-1 mb-2">
+                                      {subject}
+                                    </h6>
+
+                                    {Object.entries(courseTypes).map(([courseType, courseStudents]) => (
+                                      <div key={courseType} className="ml-4 mb-3">
+                                        <div className="font-medium text-sm text-gray-700 mb-2">
+                                          {courseType}
+                                        </div>
+
+                                        <ul className="space-y-2">
+                                          {courseStudents.map((student, idx) => (
+                                            <li
+                                              key={idx}
+                                              className="p-3 border border-gray-200 rounded-md bg-gray-50"
+                                            >
+                                              <p>
+                                                <strong>Name:</strong>{" "}
+                                                {student.studentName}
+                                              </p>
+                                              <p>
+                                                <strong>Email:</strong>{" "}
+                                                {student.studentEmail}
+                                              </p>
+                                              <p>
+                                                <strong>Time Slot:</strong>{" "}
+                                                {student.timeSlot}
+                                              </p>
+                                              <p>
+                                                <strong>Status:</strong>{" "}
+                                                <span className={`${
+                                                  student.status === 'accepted' ? 'text-green-600' : 
+                                                  student.status === 'rejected' ? 'text-red-600' : 
+                                                  'text-yellow-600'
+                                                }`}>
+                                                  {student.status}
+                                                </span>
+                                              </p>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;import React, { useEffect, useState } from "react";
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
+import SidebarMobile from "./SidebarMobile";
+import { useNavigate } from "react-router-dom";
+import api from "../../components/User-management/api";
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [upcomingClasses, setUpcomingClasses] = useState([]);
+  const [previousClasses, setPreviousClasses] = useState([]);
+  const [subjectCounts, setSubjectCounts] = useState({});
+  const [showStudentModal, setShowStudentModal] = useState(false);
   const [students, setStudents] = useState([]);
   const [showUpcomingModal, setShowUpcomingModal] = useState(false);
   const [showPreviousModal, setShowPreviousModal] = useState(false);
