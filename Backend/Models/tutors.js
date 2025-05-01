@@ -38,22 +38,45 @@ const tutorSchema = new mongoose.Schema({
     type: String,
     default: "tutor",
   },
+  // availability: [
+  //   {
+  //     date: { type: Date, required: true },
+  //     subjects: [
+  //       {
+  //         subjectName: { type: String, required: true },
+  //         timeSlots: [
+  //           {
+  //             startTime: { type: String, required: true },
+  //             endTime: { type: String, required: true },
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //   },
+  // ],
+
   availability: [
     {
       date: { type: Date, required: true },
       subjects: [
         {
           subjectName: { type: String, required: true },
-          timeSlots: [
+          grades: [
             {
-              startTime: { type: String, required: true },
-              endTime: { type: String, required: true },
+              grade: { type: String, required: true },
+              timeSlots: [
+                {
+                  startTime: { type: String, required: true },
+                  endTime: { type: String, required: true },
+                },
+              ],
             },
           ],
         },
       ],
     },
   ],
+  
 
   createdAt: { type: Date, default: Date.now },
 });
