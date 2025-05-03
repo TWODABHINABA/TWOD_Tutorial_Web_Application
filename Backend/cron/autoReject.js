@@ -2,6 +2,7 @@ const cron = require("node-cron");
 const moment = require("moment");
 const PayLater = require("../Models/payLater"); // adjust if needed
 const Tutor = require("../Models/tutors");
+const Person = require("../Models/person");
 
 const autoRejectOutdatedBookings = async () => {
   try {
@@ -92,13 +93,42 @@ const cleanOutdatedAvailability = async () => {
 };
 
 
+// cron.schedule("0 * * * *", () => {
+//   console.log("🔁 Running auto-reject job...");
+//   autoRejectOutdatedBookings();
+//   cleanOutdatedAvailability();
+// });
+
+
+const cleanExpiredAssignments = async () => {
+  try {
+    const now = new Date();
+
+    const people = await Person.find({ "receivedAssignments.deadline": { $lte: now } });
+
+    for (const person of people) {
+      const originalCount = person.receivedAssignments.length;
+
+      person.receivedAssignments = person.receivedAssignments.filter(
+        (item) => !item.deadline || item.deadline > now
+      );
+
+      if (person.receivedAssignments.length !== originalCount) {
+        await person.save();
+        console.log(`🗑️ Removed expired assignments for ${person.email}`);
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error cleaning expired assignments:", error.message);
+  }
+};
+
+
 cron.schedule("0 * * * *", () => {
-  console.log("🔁 Running auto-reject job...");
+  console.log("🔁 Running cron jobs...");
   autoRejectOutdatedBookings();
   cleanOutdatedAvailability();
+  cleanExpiredAssignments(); 
 });
-
-
-
 
 

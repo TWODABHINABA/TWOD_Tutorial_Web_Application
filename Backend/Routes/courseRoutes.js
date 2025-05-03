@@ -369,10 +369,10 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
-        cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
-        // return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
-        // cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+        // return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
+        // cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+        return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
+        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -834,62 +834,21 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
   }
 });
 
-// router.get("/user/courses", authMiddleware, async (req, res) => {
-//   try {
-//     console.log("Authenticated user:", req.user); // Debugging
-
-//     if (!req.user || !req.user.id) {
-//       return res
-//         .status(401)
-//         .json({ error: "Unauthorized. User not authenticated." });
-//     }
-
-//     const userId = req.user.id;
-
-//     const transactions = await Transaction.find({
-//       user: userId,
-//       status: "completed",
-//     })
-//       .populate("courseId")
-//       .populate({
-//         path: "tutorId",
-//         select: "name",
-//       })
-//       .lean();
-
-//     if (!transactions.length) {
-//       return res.status(404).json({ message: "No purchased courses found" });
-//     }
-
-//     // Handle possible nulls in courseId and tutorId
-//     const formattedCourses = transactions.map((transaction) => ({
-//       courseId: transaction.courseId?._id || "Deleted",
-//       courseTypeTitle: transaction.courseId?.courseType || "Deleted",
-//       courseTitle: transaction.courseId?.name || "Deleted",
-//       courseDescription: transaction.courseId?.description || "Deleted",
-//       coursePrice: transaction.courseId?.price || "Deleted",
-//       amountPaid: transaction.amount,
-//       tutorName: transaction.tutorId?.name || "Not Selected",
-//       selectedDate: transaction.selectedDate || "Not Selected",
-//       selectedTime: transaction.selectedTime || "Not Selected",
-//       duration: transaction.duration || "Not Selected",
-//     }));
-
-//     res.json(formattedCourses);
-//   } catch (err) {
-//     console.error("Error fetching purchased courses:", err);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
-
-
 
 router.get("/user/courses", authMiddleware, async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    // 1. Fetch completed transactions
+    // 1. Fetch user with receivedAssignments
+    const user = await Person.findById(userId).populate({
+      path: "receivedAssignments.assignment",
+      model: "assignment",
+    });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // 2. Fetch completed transactions
     const transactions = await Transaction.find({
       user: userId,
       status: "completed",
@@ -898,22 +857,37 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
       .populate({ path: "tutorId", select: "name" })
       .lean();
 
-    const completedCourses = transactions.map((tx) => ({
-      tid: tx._id,
-      type: "completed",
-      courseId: tx.courseId?._id || "Deleted",
-      courseTypeTitle: tx.courseId?.courseType || "Deleted",
-      courseTitle: tx.courseId?.name || "Deleted",
-      courseDescription: tx.courseId?.description || "Deleted",
-      coursePrice: tx.courseId?.price || "Deleted",
-      amountPaid: tx.amount,
-      tutorName: tx.tutorId?.name || "Not Selected",
-      selectedDate: tx.selectedDate || "Not Selected",
-      selectedTime: tx.selectedTime || "Not Selected",
-      duration: tx.duration || "Not Selected",
-    }));
+    const completedCourses = transactions.map((tx) => {
+      const courseAssignments = user.receivedAssignments
+        .filter((ra) => ra.course?.toString() === tx.courseId?._id?.toString())
+        .map((ra) => ({
+          assignmentId: ra.assignment?._id,
+          title: ra.assignment?.title || "Untitled",
+          description: ra.assignment?.description || "No description",
+          fileUrl: ra.assignment?.fileUrl || "",
+          subject: ra.subject,
+          grade: ra.grade,
+          receivedAt: ra.receivedAt,
+        }));
 
-    // 2. Fetch PayLater transactions (pending + accepted)
+      return {
+        tid: tx._id,
+        type: "completed",
+        courseId: tx.courseId?._id || "Deleted",
+        courseTypeTitle: tx.courseId?.courseType || "Deleted",
+        courseTitle: tx.courseId?.name || "Deleted",
+        courseDescription: tx.courseId?.description || "Deleted",
+        coursePrice: tx.courseId?.price || "Deleted",
+        amountPaid: tx.amount,
+        tutorName: tx.tutorId?.name || "Not Selected",
+        selectedDate: tx.selectedDate || "Not Selected",
+        selectedTime: tx.selectedTime || "Not Selected",
+        duration: tx.duration || "Not Selected",
+        assignments: courseAssignments,
+      };
+    });
+
+    // 3. Fetch PayLater transactions (pending + accepted)
     const payLaterCourses = await payLater.find({
       user: userId,
       status: { $in: ["pending for tutor acceptance", "accepted", "completed", "failed"] },
@@ -922,21 +896,36 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
       .populate({ path: "tutorId", select: "name" })
       .lean();
 
-    const additionalCourses = payLaterCourses.map((pl) => ({
-      tid: pl._id,
-      type: pl.status, // either "pending for tutor acceptance" or "accepted"
-      showPayNow: pl.status === "accepted",
-      courseId: pl.courseId?._id || "Deleted",
-      courseTypeTitle: pl.courseId?.courseType || "Deleted",
-      courseTitle: pl.courseId?.name || "Deleted",
-      courseDescription: pl.courseId?.description || "Deleted",
-      coursePrice: pl.courseId?.price || "Deleted",
-      amountPaid: pl.amount || 0,
-      tutorName: pl.tutorId?.name || "Not Selected",
-      selectedDate: pl.selectedDate || "Not Selected",
-      selectedTime: pl.selectedTime || "Not Selected",
-      duration: pl.duration || "Not Selected",
-    }));
+    const additionalCourses = payLaterCourses.map((pl) => {
+      const courseAssignments = user.receivedAssignments
+        .filter((ra) => ra.course?.toString() === pl.courseId?._id?.toString())
+        .map((ra) => ({
+          assignmentId: ra.assignment?._id,
+          title: ra.assignment?.title || "Untitled",
+          description: ra.assignment?.description || "No description",
+          fileUrl: ra.assignment?.fileUrl || "",
+          subject: ra.subject,
+          grade: ra.grade,
+          receivedAt: ra.receivedAt,
+        }));
+
+      return {
+        tid: pl._id,
+        type: pl.status,
+        showPayNow: pl.status === "accepted",
+        courseId: pl.courseId?._id || "Deleted",
+        courseTypeTitle: pl.courseId?.courseType || "Deleted",
+        courseTitle: pl.courseId?.name || "Deleted",
+        courseDescription: pl.courseId?.description || "Deleted",
+        coursePrice: pl.courseId?.price || "Deleted",
+        amountPaid: pl.amount || 0,
+        tutorName: pl.tutorId?.name || "Not Selected",
+        selectedDate: pl.selectedDate || "Not Selected",
+        selectedTime: pl.selectedTime || "Not Selected",
+        duration: pl.duration || "Not Selected",
+        assignments: courseAssignments,
+      };
+    });
 
     const allCourses = [...completedCourses, ...additionalCourses];
 
@@ -950,6 +939,7 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // Add new route to get grades for a subject
 router.get("/courses/subject/:subjectName", async (req, res) => {

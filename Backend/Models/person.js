@@ -51,6 +51,17 @@ const personSchema = new mongoose.Schema({
     type: Date 
   },
   purchasedCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "course" }],
+  receivedAssignments: [
+    {
+      assignment: { type: mongoose.Schema.Types.ObjectId, ref: "Assignment" },
+      course: { type: mongoose.Schema.Types.ObjectId, ref: "course" },
+      date: String,      // e.g. "2025-04-30"
+      subject: String,   // e.g. "Math"
+      grade: String,     // e.g. "Grade 10"
+      receivedAt: { type: Date, default: Date.now },
+      deadline: { type: Date }
+    }
+  ]
 });
 
 personSchema.pre("save", async function (next) {

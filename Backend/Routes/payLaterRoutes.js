@@ -26,35 +26,30 @@ const convertTo24HourFormat = (time12h) => {
   return `${hours}:${minutes}`;
 };
 
-const findAvailableTutor = async (subject, grade, selectedDate, selectedTime) => {
+const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
   const selectedStartTime = convertTo24HourFormat(
     selectedTime.split("-")[0].trim()
-  );
+  ); 
   const selectedEndTime = convertTo24HourFormat(
     selectedTime.split("-")[1].trim()
-  );
+  ); 
 
   const tutors = await Tutor.find({
-    "availability.date": selectedDate,
-    "availability.subjects.subjectName": subject,
-    "availability.subjects.grades.grade": grade,
+    "availability.date": selectedDate, 
+    "availability.subjects.subjectName": subject, 
   });
-console.log("Tutors found:", tutors);
+
   for (const tutor of tutors) {
     for (const subjectEntry of tutor.availability) {
-      if (new Date(subjectEntry.date).toISOString().split("T")[0] === selectedDate) {
+      if (subjectEntry.date.toISOString().split("T")[0] === selectedDate) {
         for (const subj of subjectEntry.subjects) {
           if (subj.subjectName === subject) {
-            for (const gradeEntry of subj.grades) {
-              if (gradeEntry.grade === grade) {
-                for (const slot of gradeEntry.timeSlots) {
-                  if (
-                    slot.startTime <= selectedStartTime &&
-                    slot.endTime >= selectedEndTime
-                  ) {
-                    return tutor;
-                  }
-                }
+            for (const slot of subj.timeSlots) {
+              if (
+                slot.startTime <= selectedStartTime &&
+                slot.endTime >= selectedEndTime
+              ) {
+                return tutor; 
               }
             }
           }
@@ -63,7 +58,7 @@ console.log("Tutors found:", tutors);
     }
   }
 
-  return null; // ❌ No match found
+  return null; 
 };
 
 
@@ -98,13 +93,9 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
       // Auto-assign a tutor
       const assignedTutor = await findAvailableTutor(
         course.courseType,
-        course.name,
         selectedDate,
         selectedTime
-
-
       );
-      console.log("Assigned Tutor:", assignedTutor);      
 
       if (!assignedTutor) {
         return res.status(400).json({
@@ -270,10 +261,10 @@ router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
-        cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
-        // return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
-        // cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+        // return_url: `https://twod-tutorial-web-application-phi.vercel.app/success?transactionId=${transaction._id}`,
+        // cancel_url: `https://twod-tutorial-web-application-phi.vercel.app/cancel?transactionId=${transaction._id}`,
+        return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
+        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
