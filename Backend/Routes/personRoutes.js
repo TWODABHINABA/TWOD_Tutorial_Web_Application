@@ -18,6 +18,10 @@ require("../passport");
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const PayLater = require("../Models/payLater");
+const Transaction = require("../Models/transaction");
+const sendEmail = require("../emailService");
+const Course = require("../Models/course");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -585,204 +589,259 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+router.get("/bookings/:tutorId", async (req, res) => {
+  try {
+    const { tutorId } = req.params;
+    
+    // Fetch PayLater bookings
+    const payLaterBookings = await PayLater.find({ tutorId })
+      .populate("user", "name email")
+      .populate("courseId", "name courseType");
+    // Fetch Transaction bookings
+    const transactionBookings = await Transaction.find({ tutorId })
+      .populate("user", "name email")
+      .populate("courseId", "name courseType");
+    // Combine and format both types of bookings
+    const combinedBookings = [
+      ...payLaterBookings.map(booking => ({
+        ...booking.toObject(),
+        type: 'payLater',
+        studentName: booking.user.name,
+        studentEmail: booking.user.email,
+        courseName: booking.courseId.name,
+        courseType: booking.courseId.courseType
+      })),
+      ...transactionBookings.map(booking => ({
+        ...booking.toObject(),
+        type: 'transaction',
+        studentName: booking.user.name,
+        studentEmail: booking.user.email,
+        courseName: booking.courseId.name,
+        courseType: booking.courseId.courseType
+      }))
+    ];
+
+    res.status(200).json({ data: combinedBookings });
+  } catch (err) {
+    console.error("Error fetching tutor bookings:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Send email to tutor
+router.post("/tutors/:tutorId/send-email", async (req, res) => {
+    try {
+        const { tutorId } = req.params;
+        const { subject, message } = req.body;
+
+        const tutor = await Tutor.findById(tutorId);
+        if (!tutor) {
+            return res.status(404).json({ message: "Tutor not found" });
+        }
+
+        await sendEmail(tutor.email, subject, message);
+
+        
+
+        
+        res.status(200).json({ message: "Email sent successfully" });
+    } catch (err) {
+        console.error("Error sending email:", err);
+        res.status(500).json({ error: "Failed to send email" });
+    }
+});
+
+// Delete tutor
+router.delete("/tutors/:tutorId", async (req, res) => {
+    try {
+        const { tutorId } = req.params;
+
+        const tutor = await Tutor.findByIdAndDelete(tutorId);
+        if (!tutor) {
+            return res.status(404).json({ message: "Tutor not found" });
+        }
+
+        // Also delete any associated bookings
+        // await PayLater.deleteMany({ tutorId });
+        // await Transaction.deleteMany({ tutorId });
+
+        res.status(200).json({ message: "Tutor deleted successfully" });
+    } catch (err) {
+        console.error("Error deleting tutor:", err);
+        res.status(500).json({ error: "Failed to delete tutor" });
+    }
+});
+
+router.delete("/users/:userId", async (req, res) => {
+  try {
+      const { userId } = req.params;
+
+      const user = await Person.findByIdAndDelete(userId);
+      if (!user) {
+          return res.status(404).json({ message: "user not found" });
+      }
+
+      // Also delete any associated bookings
+      // await PayLater.deleteMany({ userId });
+      // await Transaction.deleteMany({ userId });
+
+      res.status(200).json({ message: "user deleted successfully" });
+  } catch (err) {
+      console.error("Error deleting user:", err);
+      res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
+// Get all users
+router.get("/users", async (req, res) => {
+    try {
+        const users = await Person.find({ role: "user" }).select("-password");
+        res.status(200).json(users);
+    } catch (err) {
+        console.error("Error fetching users:", err);
+        res.status(500).json({ error: "Failed to fetch users" });
+    }
+});
+
+// Get bookings for a specific user
+router.get("/bookings/user/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        console.log(userId);
+        // Fetch PayLater bookings
+        const payLaterBookings = await PayLater.find({ user: userId })
+            .populate("user", "name email")
+            .populate("courseId", "name courseType")
+            .populate("tutorId", "name email");
+        // Fetch Transaction bookings
+        const transactionBookings = await Transaction.find({ user: userId })
+            .populate("user", "name email")
+            .populate("courseId", "name courseType")
+            .populate("tutorId", "name email");
+        
+        // Combine and format both types of bookings
+        const combinedBookings = [
+            ...payLaterBookings.map(booking => ({
+                ...booking.toObject(),
+                type: 'payLater',
+                studentName: booking.user.name,
+                studentEmail: booking.user.email,
+                courseName: booking.courseId.name,
+                courseType: booking.courseId.courseType,
+                tutorName: booking.tutorId.name,
+                tutorEmail: booking.tutorId.email
+            })),
+            ...transactionBookings.map(booking => ({
+                ...booking.toObject(),
+                type: 'transaction',
+                studentName: booking.user.name,
+                studentEmail: booking.user.email,
+                courseName: booking.courseId.name,
+                courseType: booking.courseId.courseType,
+                tutorName: booking.tutorId.name,
+                tutorEmail: booking.tutorId.email
+            }))
+        ];
+
+        res.status(200).json({ data: combinedBookings });
+    } catch (err) {
+        console.error("Error fetching user bookings:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Send email to user
+router.post("/users/:userId/send-email", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { subject, message } = req.body;
+
+        const user = await Person.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        await sendEmail(user.email, subject, message);
+        res.status(200).json({ message: "Email sent successfully" });
+    } catch (err) {
+        console.error("Error sending email:", err);
+        res.status(500).json({ error: "Failed to send email" });
+    }
+});
+
+// Get course revenue statistics
+router.get("/statistics/course-revenue", async (req, res) => {
+    try {
+        // Get all courses
+        const courses = await Course.find();
+        
+        // Get revenue for each course
+        const courseRevenue = await Promise.all(courses.map(async (course) => {
+            // Get transactions
+            const transactions = await Transaction.find({ courseId: course._id });
+            const transactionRevenue = transactions.reduce((sum, transaction) => {
+                return sum + parseFloat(transaction.amount);
+            }, 0);
+
+            // Get payLater bookings
+            const payLaterBookings = await PayLater.find({ courseId: course._id });
+            const payLaterRevenue = payLaterBookings.reduce((sum, booking) => {
+                return sum + parseFloat(booking.amount);
+            }, 0);
+
+            // Calculate total revenue
+            const totalRevenue = transactionRevenue + payLaterRevenue;
+            
+            return {
+                courseId: course._id,
+                courseName: course.name,
+                courseType: course.courseType,
+                revenue: totalRevenue
+            };
+        }));
+
+        res.status(200).json({ data: courseRevenue });
+    } catch (err) {
+        console.error("Error fetching course revenue:", err);
+        res.status(500).json({ error: "Failed to fetch course revenue" });
+    }
+});
+
+// Get tutor revenue statistics
+router.get("/statistics/tutor-revenue", async (req, res) => {
+    try {
+        // Get all tutors
+        const tutors = await Tutor.find();
+        
+        // Get revenue for each tutor
+        const tutorRevenue = await Promise.all(tutors.map(async (tutor) => {
+            // Get transactions
+            const transactions = await Transaction.find({ tutorId: tutor._id });
+            const transactionRevenue = transactions.reduce((sum, transaction) => {
+                return sum + parseFloat(transaction.amount);
+            }, 0);
+
+            // Get payLater bookings
+            const payLaterBookings = await PayLater.find({ tutorId: tutor._id });
+            const payLaterRevenue = payLaterBookings.reduce((sum, booking) => {
+                return sum + parseFloat(booking.amount);
+            }, 0);
+
+            // Calculate total revenue
+            const totalRevenue = transactionRevenue + payLaterRevenue;
+            
+            return {
+                tutorId: tutor._id,
+                tutorName: tutor.name,
+                revenue: totalRevenue
+            };
+        }));
+
+        res.status(200).json({ data: tutorRevenue });
+    } catch (err) {
+        console.error("Error fetching tutor revenue:", err);
+        res.status(500).json({ error: "Failed to fetch tutor revenue" });
+    }
+});
 
 module.exports = router;
-
-// router.post("/login", async (req, res) => {
-//   const { email, password } = req.body;
-//   try {
-//     const loginUser = await Person.findOne({ email });
-
-//     if (!loginUser) {
-//       const loginUser = await Tutor.findOne({ email });
-//       if (!loginUser)
-//         return res.status(400).json({ message: "Email not found" });
-//       const isMatch = await bcrypt.compare(password, loginUser.password);
-//       if (!isMatch)
-//         return res.status(400).json({ message: "Invalid Password" });
-//       if (loginUser.isFirstLogin) {
-//         return res
-//           .status(401)
-//           .json({
-//             message: "Set a new password",
-//             redirectTo: "/set-password-tutor",
-//           });
-//       }
-//     } else {
-//       const isPasswordMatch = await loginUser.comparePassword(password);
-
-//       if (!isPasswordMatch) {
-//         return res.status(400).json({ message: "Invalid Password" });
-//       }
-//     }
-//     const token = jwt.sign(
-//       { id: loginUser._id, role: loginUser.role },
-//       JWT_SECRET,
-//       {
-//         expiresIn: "1h",
-//       }
-//     );
-
-//     res.json({ token, role: loginUser.role });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error logging in" });
-//   }
-// });
-
-// router.post("/set-password-tutor", async (req, res) => {
-//   const { email, newPassword } = req.body;
-//   const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-//   await Tutor.findOneAndUpdate(
-//     { email },
-//     { password: hashedPassword, isFirstLogin: false }
-//   );
-
-//   res.json({ message: "Password updated successfully!" });
-// });
-
-// router.get("/me", authMiddleware, async (req, res) => {
-//   if (req.isAuthenticated()) {
-//     console.log(req.user);
-//     try {
-//       const id = req.user.id;
-//       const user = await Person.findById(id).select("-password");
-//       if(!user){
-//         const user=await Tutor.findById(id).select("-password");
-//       }
-//       if (!user) {
-//         console.log("EROOOOOOOOOOOOOOOOOORORORORORORORORO");
-//         return res.status(404).json({ message: "User not found" });
-//       }
-//       console.log(user);
-//       res.json(user);
-//     } catch (error) {
-//       res.status(500).json(error, "Not Found");
-//     }
-//   } else {
-//     res.status(401).json({ message: "Not authenticated" });
-//   }
-// });
-
-// router.put(
-//   "/update/:id",
-//   authMiddleware,
-//   upload.single("profilePicture"),
-//   async (req, res) => {
-//     try {
-//       const { id } = req.params;
-//       const updates = {};
-
-//       if (req.body.name) updates.name = req.body.name;
-//       if (req.body.phone) updates.phone = req.body.phone;
-//       if (req.body.birthday) updates.birthday = req.body.birthday;
-//       if (req.body.email) updates.email = req.body.email;
-
-//       if (req.file) {
-//         updates.profilePicture = "/uploads/" + req.file.filename;
-//       }
-
-//       const updatedUser = await Person.findByIdAndUpdate(
-//         id,
-//         { $set: updates },
-//         { new: true }
-//       );
-
-//       if (!updatedUser) {
-//         return res.status(404).json({ error: "User Not Found" });
-//       }
-
-//       res.status(200).json(updatedUser);
-//     } catch (err) {
-//       console.error("Error Updating Data", err);
-//       res.status(500).json({ error: "Internal Server Error" });
-//     }
-//   }
-// );
-
-
-// const isValidEmail = (email) =>
-//   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(email);
-// const isValidPhone = (phone) => /^\d+$/.test(phone);
-// const isValidBirthday = (birthday) =>
-//   /^\d{4}-[A-Za-z]{3}-\d{2}$/.test(birthday);
-
-// router.put(
-//   "/update/:id",
-//   authMiddleware,
-//   upload.single("profilePicture"),
-//   async (req, res) => {
-//     try {
-//       const { id } = req.params;
-//       const updates = {};
-
-//       // Name validation (optional)
-//       if (req.body.name) updates.name = req.body.name;
-
-//       // Phone validation
-//       if (req.body.phone) {
-//         if (!isValidPhone(req.body.phone)) {
-//           return res.status(400).json({ message: "Invalid phone number." });
-//         }
-//         updates.phone = req.body.phone;
-//       }
-
-//       // Birthday validation
-//       if (req.body.birthday) {
-//         if (!isValidBirthday(req.body.birthday)) {
-//           return res.status(400).json({ message: "Invalid date format. Use 'YYYY-MMM-DD'." });
-//         }
-//         updates.birthday = req.body.birthday;
-//       }
-
-//       // Email validation
-//       if (req.body.email) {
-//         if (!isValidEmail(req.body.email)) {
-//           return res.status(400).json({ message: "Invalid email format. Use '@something.com'." });
-//         }
-//         const existingUser = await Person.findOne({ email: req.body.email });
-//         const existingTutor = await Tutor.findOne({ email: req.body.email });
-//         if (existingUser || existingTutor) {
-//           return res.status(400).json({ message: "Email already exists" });
-//         }
-//         updates.email = req.body.email;
-//       }
-
-//       // Description field
-//       if (req.body.description) updates.description = req.body.description;
-
-//       // Subjects (Convert to array if provided)
-//       if (req.body.subjects) updates.subjects = req.body.subjects.split(",");
-
-//       // Handle profile picture
-//       if (req.file) {
-//         updates.profilePicture = "/uploads/" + req.file.filename;
-//       }
-
-//       // First update in Person collection
-//       let updatedUser = await Person.findByIdAndUpdate(
-//         id,
-//         { $set: updates },
-//         { new: true }
-//       );
-
-//       // If no person found, try updating in Tutor collection
-//       if (!updatedUser) {
-//         updatedUser = await Tutor.findByIdAndUpdate(
-//           id,
-//           { $set: updates },
-//           { new: true }
-//         );
-//       }
-
-//       if (!updatedUser) {
-//         return res.status(404).json({ error: "User Not Found" });
-//       }
-
-//       res.status(200).json(updatedUser);
-//     } catch (err) {
-//       console.error("Error Updating Data", err);
-//       res.status(500).json({ error: "Internal Server Error" });
-//     }
-//   }
-// );

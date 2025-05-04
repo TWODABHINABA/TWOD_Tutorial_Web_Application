@@ -98,13 +98,11 @@ const SearchBar = () => {
           break;
 
         case "tutor":
-          // Navigate to tutor profile page
-          if (item._id) {
-            // console.log('hello')
-            navigate(`/tutors/${item.name}`);
-            // console.log(`/tutor/${item._id}`);
+          // Navigate to tutors page with the tutor name as parameter
+          if (item.name) {
+            navigate(`/about/${encodeURIComponent(item.name)}`);
           } else {
-            console.error("Tutor ID not found in search result:", item);
+            console.error("Tutor name not found in search result:", item);
           }
           break;
 
