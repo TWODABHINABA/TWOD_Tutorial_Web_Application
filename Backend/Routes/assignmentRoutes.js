@@ -8,9 +8,10 @@ const PayLater = require("../Models/payLater");
 const Transaction = require("../Models/transaction");
 const Person = require("../Models/person");
 const authMiddleware = require("../Auth/Authentication");
-const sendEmail = require("../emailService");
 const Notification = require("../Models/transaction");
 const Assignment = require("../Models/assignment");
+const sendEmail = require("../emailService");
+const moment = require("moment");
 
 router.post("/upload-assignment", authMiddleware, async (req, res) => {
   try {
@@ -34,12 +35,17 @@ router.post("/upload-assignment", authMiddleware, async (req, res) => {
   }
 });
 
-
 router.get("/assignments/students", authMiddleware, async (req, res) => {
   try {
     const { date } = req.query;
 
-    const payLaterFilter = date ? { selectedDate: date } : {};
+    const allowedStatuses = ["accepted", "pending", "completed"];
+
+    const payLaterFilter = {
+      ...(date && { selectedDate: date }),
+      status: { $in: allowedStatuses }, // ✅ filter by status
+    };
+
     const transactionFilter = date ? { selectedDate: date } : {};
 
     const [payLaterData, transactionData] = await Promise.all([
@@ -63,7 +69,8 @@ router.get("/assignments/students", authMiddleware, async (req, res) => {
 
       if (!grouped[dateKey]) grouped[dateKey] = {};
       if (!grouped[dateKey][subject]) grouped[dateKey][subject] = {};
-      if (!grouped[dateKey][subject][grade]) grouped[dateKey][subject][grade] = [];
+      if (!grouped[dateKey][subject][grade])
+        grouped[dateKey][subject][grade] = [];
 
       grouped[dateKey][subject][grade].push(student);
     });
@@ -75,7 +82,6 @@ router.get("/assignments/students", authMiddleware, async (req, res) => {
   }
 });
 
-
 router.get("/get-assignments", authMiddleware, async (req, res) => {
   try {
     const tutorId = req.user?.id;
@@ -84,16 +90,176 @@ router.get("/get-assignments", authMiddleware, async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const assignments = await Assignment.find({ tutorId }).sort({ createdAt: -1 });
+    const assignments = await Assignment.find({ tutorId }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({ success: true, assignments });
   } catch (error) {
     console.error("Error fetching assignments:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch assignments" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch assignments" });
   }
 });
 
+router.get("/get-assignment/:id", authMiddleware, async (req, res) => {
+  try {
+    const { id: assignmentId } = req.params;
+    const userId = req.user.id;
 
+    // Check if user has received this assignment
+    const user = await Person.findById(userId);
 
+    const hasAccess = user?.receivedAssignments?.some(
+      (item) => item.assignment.toString() === assignmentId
+    );
+
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have access to this assignment",
+      });
+    }
+
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Assignment not found" });
+    }
+
+    res.status(200).json({ success: true, assignment });
+  } catch (error) {
+    console.error("❌ Error fetching assignment securely:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.post(
+  "/send-assignment-to-students",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { assignmentId, date, subject, grade } = req.body;
+
+      if (!assignmentId || !date || !subject || !grade) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing fields" });
+      }
+
+      const assignment = await Assignment.findById(assignmentId);
+      if (!assignment) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Assignment not found" });
+      }
+
+      const allowedStatuses = ["accepted", "pending", "completed"];
+
+      // Find relevant PayLater and Transaction students
+      const payLaterFilter = {
+        selectedDate: date,
+        status: { $in: allowedStatuses },
+      };
+
+      const transactionFilter = { selectedDate: date };
+
+      const [payLaterData, transactionData] = await Promise.all([
+        PayLater.find(payLaterFilter).populate("courseId").populate("user"),
+        Transaction.find(transactionFilter)
+          .populate("courseId")
+          .populate("user"),
+      ]);
+
+      // Filter by subject and grade
+      const matchingPayLater = payLaterData.filter(
+        (entry) =>
+          entry.courseId?.courseType === subject &&
+          entry.courseId?.name === grade
+      );
+
+      const matchingTransactions = transactionData.filter(
+        (entry) =>
+          entry.courseId?.courseType === subject &&
+          entry.courseId?.name === grade
+      );
+
+      // Track how many students received
+      let updatedCount = 0;
+
+      const allMatchedUsers = [
+        ...matchingPayLater.map((entry) => ({
+          user: entry.user,
+          course: entry.courseId,
+        })),
+        ...matchingTransactions.map((entry) => ({
+          user: entry.user,
+          course: entry.courseId,
+        })),
+      ];
+
+      for (const { user, course } of allMatchedUsers) {
+        if (!user || !user._id) continue;
+
+        // Avoid duplicate assignment
+        const alreadyReceived = user.receivedAssignments?.some(
+          (item) =>
+            item.assignment.toString() === assignmentId &&
+            item.date === date &&
+            item.subject === subject &&
+            item.grade === grade
+        );
+
+        if (!alreadyReceived) {
+          await Person.findByIdAndUpdate(user._id, {
+            $push: {
+              receivedAssignments: {
+                assignment: assignment._id,
+                course: course._id,
+                date,
+                subject,
+                grade,
+                receivedAt: new Date(), 
+                deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+              },
+            },
+          });
+          
+
+          // const assignmentViewLink = `http://localhost:5173/assignment-view/${assignment._id}`;
+          const assignmentViewLink = `https://twod-tutorial-web-application-phi.vercel.app/assignment-view/${assignment._id}`;
+
+          const deadlineDate = moment().add(3, 'days').format("MMMM Do YYYY, h:mm A"); // e.g., May 3rd 2025, 4:00 PM
+
+          await sendEmail(
+            user.email,
+            `New Assignment: ${assignment.courseName}`,
+            `You have a new assignment in ${assignment.courseName} - ${assignment.courseType}`,
+            `
+              <p>Hello ${user.name || "Student"},</p>
+              <p>You have received a new assignment for <strong>${assignment.courseName}</strong> - <strong>${assignment.courseType}</strong>.</p>
+              <p><strong>Description:</strong> ${assignment.description || "No description provided"}</p>
+              <p>You can <a href="${assignmentViewLink}" target="_blank">view and download the assignment here</a>.</p>
+              <p><strong>Note:</strong> This assignment must be completed before <strong>${deadlineDate}</strong>. After that, it will be automatically removed.</p>
+              <p>Best regards,<br/>Your Learning Team</p>
+            `
+          );
+          updatedCount++;
+        }
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Assignments delivered and stored successfully.",
+        updated: updatedCount,
+      });
+    } catch (err) {
+      console.error("❌ Error sending assignment:", err);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
+);
 
 module.exports = router;

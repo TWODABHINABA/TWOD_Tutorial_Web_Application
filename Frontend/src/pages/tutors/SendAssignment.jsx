@@ -53,17 +53,6 @@ const SendAssignment = () => {
     setShowModal(false);
   };
 
-  const handleSendAssignments = () => {
-    const toSend = Object.entries(selectedAssignments).map(
-      ([key, assignment]) => {
-        const [date, subject, grade] = key.split("__");
-        return { date, subject, grade, assignmentId: assignment._id };
-      }
-    );
-
-    // Send `toSend` array to backend here via axios/fetch
-    console.log("Sending assignments to backend:", toSend);
-  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -96,6 +85,58 @@ const SendAssignment = () => {
     fetchData();
   }, []);
 
+
+  const handleSendAssignments = async () => {
+    const toSend = Object.entries(selectedAssignments).map(([key, assignment]) => {
+      const [date, subject, grade] = key.split("__");
+      return { date, subject, grade, assignmentId: assignment._id };
+    });
+  
+    let totalSent = 0;
+    let totalRequests = toSend.length;
+    let failedGroups = [];
+  
+    if (toSend.length === 0) {
+      alert("❗Please select at least one assignment to send.");
+      return;
+    }
+  
+    try {
+      for (const item of toSend) {
+        try {
+          const res = await api.post("/send-assignment-to-students", item, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+  
+          if (res.data.success) {
+            console.log(`✅ Assignment sent to ${item.grade} - ${item.subject} (${item.date})`);
+            totalSent += res.data.updated;
+          } else {
+            console.warn(`❌ Failed to send assignment to ${item.grade} - ${item.subject} (${item.date})`);
+            failedGroups.push(`${item.grade} - ${item.subject} (${item.date})`);
+          }
+        } catch (err) {
+          console.error(`❌ Error sending to ${item.grade} - ${item.subject} (${item.date}):`, err);
+          failedGroups.push(`${item.grade} - ${item.subject} (${item.date})`);
+        }
+      }
+  
+      let message = `📩 Assignments sent successfully to ${totalSent} students across ${totalRequests} group(s).`;
+      if (failedGroups.length > 0) {
+        message += `\n⚠️ Failed to send to:\n- ${failedGroups.join("\n- ")}`;
+      }
+  
+      alert(message);
+    } catch (err) {
+      console.error("❌ Unexpected error during assignment sending:", err);
+      alert("An unexpected error occurred while sending assignments. Please try again.");
+    }
+  };
+  
+  
+
   if (loading)
     return (
       <div className="fixed inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50">
@@ -105,7 +146,7 @@ const SendAssignment = () => {
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
-      {/* Sidebar */}
+
       <div className="absolute md:static top-0 left-0 z-50">
         <div className="max-md:hidden">
           <Sidebar />
@@ -115,7 +156,7 @@ const SendAssignment = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+
       <div className="w-full z-0 relative">
         <Navbar title="Dashboard" user={user} />
 
@@ -185,7 +226,7 @@ const SendAssignment = () => {
           )}
         </div>
 
-        {/* Popup Modal */}
+
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg w-[90%] max-w-lg shadow-lg">
@@ -232,107 +273,3 @@ const SendAssignment = () => {
 };
 
 export default SendAssignment;
-
-// <div className="flex bg-gray-50 min-h-screen">
-//   {/* Sidebar */}
-//   <div className="absolute md:static top-0 left-0 z-50">
-//     <div className="max-md:hidden">
-//       <Sidebar />
-//     </div>
-//     <div className="md:hidden">
-//       <SidebarMobile />
-//     </div>
-//   </div>
-
-//   {/* Main Content */}
-//   <div className="w-full z-0 relative">
-//     <Navbar title="Dashboard" user={user} />
-
-//     <div className="p-6">
-//       <h1 className="text-2xl font-bold mb-4">Assignment Groups</h1>
-
-//       {Object.entries(groupedData).map(([date, subjects]) => (
-//         <div
-//           key={date}
-//           className="mb-6 border rounded-lg p-4 shadow-sm bg-white"
-//         >
-//           <h2 className="text-xl font-semibold mb-4">{date}</h2>
-
-//           {/* Loop through subjects and then grades */}
-//           {Object.entries(subjects).map(([subject, grades]) =>
-//             Object.entries(grades).map(([grade, students]) => (
-//               <div
-//                 key={`${subject}-${grade}`}
-//                 className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4"
-//               >
-//                 <div className="flex justify-between items-center mb-2">
-//                   <h3 className="text-lg font-semibold">
-//                     {subject} - Grade: {grade}
-//                   </h3>
-//                   <button
-//                     className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
-//                     onClick={() =>
-//                       handleAttachClick({ date, subject, grade })
-//                     }
-//                   >
-//                     Attach Assignment
-//                   </button>
-//                 </div>
-//                 <ul className="list-disc list-inside ml-4">
-//                   {students.map((student, index) => (
-//                     <li key={index}>
-//                       {student.studentName} - {student.email} (
-//                       {student.timeSlot})
-//                     </li>
-//                   ))}
-//                 </ul>
-//               </div>
-//             ))
-//           )}
-//         </div>
-//       ))}
-//     </div>
-
-//     {/* Popup Modal */}
-//     {showModal && (
-//       <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-//         <div className="bg-white p-6 rounded-lg w-[90%] max-w-lg shadow-lg">
-//           <h2 className="text-lg font-semibold mb-4">
-//             Select an Assignment
-//           </h2>
-//           {assignments.length === 0 ? (
-//             <p>No assignments found.</p>
-//           ) : (
-//             <ul className="space-y-2 max-h-60 overflow-y-auto">
-//               {assignments.map((assignment) => (
-//                 <li
-//                   key={assignment._id}
-//                   className="border p-3 rounded hover:bg-gray-100 cursor-pointer"
-//                   onClick={() => handleSelectAssignment(assignment)}
-//                 >
-//                   <h3 className="font-medium">
-//                     {assignment.courseName} - {assignment.courseType}
-//                   </h3>
-//                   <p className="text-sm text-gray-600">
-//                     {assignment.description}
-//                   </p>
-//                   <p className="text-xs text-gray-400">
-//                     Questions: {assignment.questions.length}
-//                   </p>
-//                 </li>
-//               ))}
-//             </ul>
-//           )}
-//           <div className="flex justify-end mt-4">
-//             <button
-//               className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-//               onClick={() => setShowModal(false)}
-//             >
-//               Cancel
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     )}
-//   </div>
-// </div>

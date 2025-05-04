@@ -36,8 +36,12 @@ import SetPasswordTutor from './pages/login_signup/SetPasswordTutor'
 import TutorAddAssignment from './pages/tutors/TutorAddAssignment'
 import Assignment from './pages/tutors/Assignment'
 import SendAssignment from './pages/tutors/SendAssignment'
+<<<<<<< HEAD
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminControls from './pages/admin/AdminControls'
+=======
+import AssignmentViewPage from './pages/Assignment/AssignmentViewPage'
+>>>>>>> 008cb256d5eb4279fb07a39e7a72e34ebe9b5b1e
 
 function App() {
   // const isAdmin=localStorage.getItem("role");
@@ -78,8 +82,12 @@ function App() {
         <Route path='/tutor-assignment' element={<Assignment/>}/>
         <Route path='/tutor-add-assignment' element={<TutorAddAssignment/>}/>  
         <Route path='/tutor-send-assignment' element={<SendAssignment/>}/>
+<<<<<<< HEAD
         <Route path='/admin-dashboard' element={<AdminDashboard/>}/>
         <Route path='/admin-controls' element={<AdminControls/>}/>
+=======
+        <Route path="/assignment-view/:id" element={<AssignmentViewPage />} />
+>>>>>>> 008cb256d5eb4279fb07a39e7a72e34ebe9b5b1e
       </Routes>
     </Router>
   )
