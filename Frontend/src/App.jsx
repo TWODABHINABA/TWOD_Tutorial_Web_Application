@@ -36,6 +36,8 @@ import SetPasswordTutor from './pages/login_signup/SetPasswordTutor'
 import TutorAddAssignment from './pages/tutors/TutorAddAssignment'
 import Assignment from './pages/tutors/Assignment'
 import SendAssignment from './pages/tutors/SendAssignment'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminControls from './pages/admin/AdminControls'
 import AssignmentViewPage from './pages/Assignment/AssignmentViewPage'
 
 function App() {
@@ -47,6 +49,7 @@ function App() {
         {/* <Route path="/login" element={<Login />} /> */}
         <Route path='/register' element={<Register/>}/>
         <Route path="/about" element={<About />} />
+        <Route path="/about/:tutorName" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/user" element={<UserInfo />} />
         <Route path="/pricing" element={<Pricing/>}/>
@@ -76,6 +79,8 @@ function App() {
         <Route path='/tutor-assignment' element={<Assignment/>}/>
         <Route path='/tutor-add-assignment' element={<TutorAddAssignment/>}/>  
         <Route path='/tutor-send-assignment' element={<SendAssignment/>}/>
+        <Route path='/admin-dashboard' element={<AdminDashboard/>}/>
+        <Route path='/admin-controls' element={<AdminControls/>}/>
         <Route path="/assignment-view/:id" element={<AssignmentViewPage />} />
       </Routes>
     </Router>

@@ -365,16 +365,24 @@ const UserInfo = () => {
               </h2>
 
               <div className="space-y-3 w-full">
-                {user.role === "tutor" ? (
-                  <p
-                    className="cursor-pointer hover:text-orange-600"
-                    onClick={() => navigate("/tutor-dashboard")}
-                  >
-                    Tutor Dashboard
-                  </p>
-                ) : (
-                  <p></p>
-                )}
+              {user.role === "tutor" ? (
+  <p
+    className="cursor-pointer hover:text-orange-600"
+    onClick={() => navigate("/tutor-dashboard")}
+  >
+    Tutor Dashboard
+  </p>
+) : user.role === "admin" ? (
+  <p
+    className="cursor-pointer hover:text-orange-600"
+    onClick={() => navigate("/admin-dashboard")}
+  >
+    Admin Dashboard
+  </p>
+) : (
+  <p></p>
+)}
+
                 <p className="cursor-pointer hover:text-orange-600">
                   Account Settings
                 </p>
