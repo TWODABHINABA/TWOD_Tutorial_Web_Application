@@ -26,30 +26,35 @@ const convertTo24HourFormat = (time12h) => {
   return `${hours}:${minutes}`;
 };
 
-const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
+const findAvailableTutor = async (subject, grade, selectedDate, selectedTime) => {
   const selectedStartTime = convertTo24HourFormat(
     selectedTime.split("-")[0].trim()
-  ); 
+  );
   const selectedEndTime = convertTo24HourFormat(
     selectedTime.split("-")[1].trim()
-  ); 
+  );
 
   const tutors = await Tutor.find({
-    "availability.date": selectedDate, 
-    "availability.subjects.subjectName": subject, 
+    "availability.date": selectedDate,
+    "availability.subjects.subjectName": subject,
+    "availability.subjects.grades.grade": grade,
   });
-
+console.log("Tutors found:", tutors);
   for (const tutor of tutors) {
     for (const subjectEntry of tutor.availability) {
-      if (subjectEntry.date.toISOString().split("T")[0] === selectedDate) {
+      if (new Date(subjectEntry.date).toISOString().split("T")[0] === selectedDate) {
         for (const subj of subjectEntry.subjects) {
           if (subj.subjectName === subject) {
-            for (const slot of subj.timeSlots) {
-              if (
-                slot.startTime <= selectedStartTime &&
-                slot.endTime >= selectedEndTime
-              ) {
-                return tutor; 
+            for (const gradeEntry of subj.grades) {
+              if (gradeEntry.grade === grade) {
+                for (const slot of gradeEntry.timeSlots) {
+                  if (
+                    slot.startTime <= selectedStartTime &&
+                    slot.endTime >= selectedEndTime
+                  ) {
+                    return tutor;
+                  }
+                }
               }
             }
           }
@@ -58,7 +63,7 @@ const findAvailableTutor = async (subject, selectedDate, selectedTime) => {
     }
   }
 
-  return null; 
+  return null; // ❌ No match found
 };
 
 
@@ -93,8 +98,11 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
       // Auto-assign a tutor
       const assignedTutor = await findAvailableTutor(
         course.courseType,
+        course.name,
         selectedDate,
         selectedTime
+
+
       );
 
       if (!assignedTutor) {
