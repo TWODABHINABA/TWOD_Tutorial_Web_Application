@@ -12,7 +12,6 @@ const UseLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     setIsAuthenticated(false);
-    navigate(0);
     navigate("/");
     setShowLoginModal(true)
   };
@@ -43,7 +42,7 @@ const UseLogout = () => {
 
     // Check token on load and every minute
     checkTokenExpiry();
-    const interval = setInterval(checkTokenExpiry, 60000);
+    const interval = setInterval(checkTokenExpiry, 800);
 
     return () => clearInterval(interval);
   }, []);

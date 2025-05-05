@@ -17,6 +17,19 @@ router.post("/upload-assignment", authMiddleware, async (req, res) => {
   try {
     const { courseName, courseType, description, questions } = req.body;
 
+    const existing = await Assignment.findOne({
+      tutorId: req.user.id,
+      courseName: { $regex: new RegExp(`^${courseName}$`, "i") },
+      courseType: { $regex: new RegExp(`^${courseType}$`, "i") },
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "Assignment for this subject and grade already exists.",
+      });
+    }
+
     const newAssignment = new Assignment({
       tutorId: req.user.id,
       courseName,
@@ -32,6 +45,65 @@ router.post("/upload-assignment", authMiddleware, async (req, res) => {
     res
       .status(500)
       .json({ success: false, error: "Failed to upload assignment" });
+  }
+});
+
+router.get("/get-assignment", async (req, res) => {
+  const { courseName, courseType } = req.query;
+
+  try {
+    const assignment = await Assignment.findOne({ courseName, courseType });
+    if (!assignment) {
+      return res.status(404).json({ message: "No assignment found" });
+    }
+
+    res.status(200).json(assignment);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+router.put("/update-assignment/:id", authMiddleware, async (req, res) => {
+  try {
+    const { description, questions } = req.body;
+    const { id } = req.params;
+
+    console.log("IDDDDDDDDDDDDDDD", id);
+
+    const assignment = await Assignment.findOne({
+      _id: id,
+      tutorId: req.user.id,
+    });
+
+    if (!assignment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Assignment not found." });
+    }
+
+    if (description !== undefined) assignment.description = description;
+    if (questions !== undefined) assignment.questions = questions;
+
+    await assignment.save();
+    res.status(200).json({ success: true, assignment });
+  } catch (error) {
+    console.error("Error updating assignment:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to update assignment" });
+  }
+});
+
+router.get("/grades-by-subject/:subject", async (req, res) => {
+  try {
+    const { subject } = req.params;
+
+    const grades = await Course.distinct("name", { courseType: subject });
+
+    res.status(200).json({ success: true, grades });
+  } catch (error) {
+    console.error("Error fetching grades:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch grades" });
   }
 });
 
@@ -100,6 +172,65 @@ router.get("/get-assignments", authMiddleware, async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Failed to fetch assignments" });
+  }
+});
+
+router.get("/assignments/already-sent", authMiddleware, async (req, res) => {
+  try {
+    const tutorId = req.user.id;
+
+    const persons = await Person.find({
+      "receivedAssignments.0": { $exists: true },
+    })
+      .populate("receivedAssignments.assignment")
+      .populate("receivedAssignments.course")
+      .lean();
+
+    const grouped = {};
+
+    for (const person of persons) {
+      const assignments = person.receivedAssignments || [];
+
+      for (const item of assignments) {
+        const { date, subject, grade, assignment, deadline } = item;
+
+        if (!assignment || assignment.tutorId.toString() !== tutorId.toString())
+          continue;
+
+        const dateKey = date;
+        const subjectKey = subject || "Unknown Subject";
+        const gradeKey = grade || "Unknown Grade";
+
+        const studentData = {
+          studentName: person.name || "No Name",
+          email: person.email || "No Email",
+          timeSlot: "Not Available", // You can adjust this if needed
+          assignmentId: assignment._id,
+          assignmentTitle: assignment.courseName,
+          description: assignment.description,
+        };
+
+        if (!grouped[dateKey]) grouped[dateKey] = {};
+        if (!grouped[dateKey][subjectKey]) grouped[dateKey][subjectKey] = {};
+        if (!grouped[dateKey][subjectKey][gradeKey])
+          grouped[dateKey][subjectKey][gradeKey] = {
+            students: [],
+            assignment: {
+              id: assignment._id,
+              title: assignment.courseName,
+              description: assignment.description,
+              deadline: deadline || null,
+            },
+          };
+
+        grouped[dateKey][subjectKey][gradeKey].students.push(studentData);
+      }
+    }
+
+    res.status(200).json({ success: true, grouped });
+  } catch (error) {
+    console.error("❌ Error fetching already sent assignments:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -221,17 +352,18 @@ router.post(
                 date,
                 subject,
                 grade,
-                receivedAt: new Date(), 
+                receivedAt: new Date(),
                 deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
               },
             },
           });
-          
 
           // const assignmentViewLink = `http://localhost:5173/assignment-view/${assignment._id}`;
           const assignmentViewLink = `https://twod-tutorial-web-application-phi.vercel.app/assignment-view/${assignment._id}`;
 
-          const deadlineDate = moment().add(3, 'days').format("MMMM Do YYYY, h:mm A"); // e.g., May 3rd 2025, 4:00 PM
+          const deadlineDate = moment()
+            .add(3, "days")
+            .format("MMMM Do YYYY, h:mm A"); // e.g., May 3rd 2025, 4:00 PM
 
           await sendEmail(
             user.email,

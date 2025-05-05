@@ -4,6 +4,7 @@ import api from "../../components/User-management/api";
 import Modal from "../login_signup/Modal";
 import CustomNavbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
+import { ClipLoader } from "react-spinners";
 
 const AssignmentViewPage = () => {
   const { id } = useParams();
@@ -57,16 +58,23 @@ const AssignmentViewPage = () => {
     return <div className="text-red-600 p-4">{error}</div>;
   }
 
-  if (!assignment) {
-    return <div className="p-4">Loading assignment...</div>;
-  }
+  if (!assignment)
+    return (
+      <div className="fixed inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50">
+        <ClipLoader size={80} color="#FFA500" />
+      </div>
+    );
 
   if (error) {
     return <div className="text-red-600 p-4">{error}</div>;
   }
 
   if (!assignment) {
-    return <div className="p-4">Loading assignment...</div>;
+    return (
+      <div className="fixed inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50">
+        <ClipLoader size={80} color="#FFA500" />
+      </div>
+    );
   }
 
   const totalMarks = assignment.questions?.reduce(

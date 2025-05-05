@@ -23,7 +23,6 @@ const Dashboard = () => {
 
         setUser(res.data);
         setSubjectCounts(res.data.subjects);
-        console.log("USERRRRR",user);
       } catch (err) {
         console.error("Error fetching user:", err);
       }
@@ -52,48 +51,37 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, []);
-  // const fetchStudents = async () => {
-  //   try {
-  //     const res = await api.get("/students");
-  //     setStudents(res.data.students);
-  //     console.log(res.data.students);
-  //     setShowStudentModal(true);
-  //   } catch (error) {
-  //     console.error("Error fetching students:", error);
-  //   }
-  // };
 
   const fetchStudents = async () => {
     try {
       const res = await api.get("/students");
-      console.log("Raw students data from API:", res.data); // Check the response structure
+      console.log("Raw students data from API:", res.data); 
       const rawStudents = res.data.students;
       setShowStudentModal(true);
 
-      // Check if rawStudents is an array and if it contains data
+
       if (!Array.isArray(rawStudents) || rawStudents.length === 0) {
         console.log("No student data found");
         return;
       }
 
-      // Proceed with your existing grouping logic if data exists
       const groupedStudents = rawStudents.reduce((acc, student) => {
-        const date = student.selectedDate; // Group by selectedDate
-        const subject = student.courseId.name; // Group by course name
-        const courseType = student.courseId.courseType; // Group by course type
+        const date = student.selectedDate; 
+        const subject = student.courseId.name; 
+        const courseType = student.courseId.courseType; 
 
-        // Ensure the date group exists
+
         if (!acc[date]) acc[date] = {};
 
-        // Ensure the subject group exists under the date
+
         if (!acc[date][subject]) acc[date][subject] = {};
 
-        // Ensure the courseType group exists under the subject
+
         if (!acc[date][subject][courseType]) {
           acc[date][subject][courseType] = [];
         }
 
-        // Push student data into the courseType group
+
         acc[date][subject][courseType].push({
           studentName: student.user.name,
           studentEmail: student.user.email,
@@ -104,8 +92,7 @@ const Dashboard = () => {
         return acc;
       }, {});
 
-      // Update state with the grouped data
-      setStudents(groupedStudents); // Make sure `setStudents` is properly defined
+      setStudents(groupedStudents); 
     } catch (error) {
       console.error("Error fetching students:", error);
     }

@@ -8,7 +8,6 @@ const personSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    // required:true
   },
   birthday: {
     type: Date,
@@ -19,21 +18,16 @@ const personSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: async function (value) {
-        const Tutor = require("./tutors"); // ✅ Require inside function to prevent circular dependency
+        const Tutor = require("./tutors"); 
         const existingTutor = await Tutor.findOne({ email: value });
         return !existingTutor;
       },
       message: "Email is already registered as a Tutor",
     },
   },
-  // email: {
-  //   type: String,
-  //   unique: true,
-  //   required: true,
-  // },
+
   password: {
     type: String,
-    // required:true
   },
   profilePicture: {
     type: String,
@@ -53,11 +47,11 @@ const personSchema = new mongoose.Schema({
   purchasedCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "course" }],
   receivedAssignments: [
     {
-      assignment: { type: mongoose.Schema.Types.ObjectId, ref: "Assignment" },
+      assignment: { type: mongoose.Schema.Types.ObjectId, ref: "assignment" },
       course: { type: mongoose.Schema.Types.ObjectId, ref: "course" },
-      date: String,      // e.g. "2025-04-30"
-      subject: String,   // e.g. "Math"
-      grade: String,     // e.g. "Grade 10"
+      date: String,     
+      subject: String,   
+      grade: String,    
       receivedAt: { type: Date, default: Date.now },
       deadline: { type: Date }
     }

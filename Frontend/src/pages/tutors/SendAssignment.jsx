@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import SidebarMobile from "./SidebarMobile";
 import Navbar from "./Navbar";
 import { ClipLoader } from "react-spinners";
+import Toast from "../login_signup/Toast";
 
 const SendAssignment = () => {
   const [groupedData, setGroupedData] = useState({});
@@ -13,8 +14,26 @@ const SendAssignment = () => {
   const [assignments, setAssignments] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedAssignments, setSelectedAssignments] = useState({});
+  const [alreadySentAssignments, setAlreadySentAssignments] = useState({});
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   //   const today = new Date().toISOString().split("T")[0];
+
+  const fetchAlreadySentAssignments = async () => {
+    try {
+      const res = await api.get("/assignments/already-sent", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (res.data.success) {
+        setAlreadySentAssignments(res.data.grouped); // Set grouped data for already sent assignments
+      }
+    } catch (err) {
+      console.error("Failed to fetch already sent assignments", err);
+    }
+  };
   const fetchAssignments = async () => {
     try {
       const res = await api.get("/get-assignments", {
@@ -33,6 +52,7 @@ const SendAssignment = () => {
   useEffect(() => {
     if (user) {
       fetchAssignments();
+      fetchAlreadySentAssignments();
     }
   }, [user]);
 
@@ -53,17 +73,17 @@ const SendAssignment = () => {
     setShowModal(false);
   };
 
+  const fetchUser = async () => {
+    try {
+      const res = await api.get("/me");
+      setUser(res.data);
+      console.log(res.data);
+    } catch (err) {
+      console.error("Error fetching user:", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await api.get("/me");
-        setUser(res.data);
-        console.log(res.data);
-      } catch (err) {
-        console.error("Error fetching user:", err);
-      }
-    };
     fetchUser();
   }, []);
 
@@ -85,22 +105,23 @@ const SendAssignment = () => {
     fetchData();
   }, []);
 
-
   const handleSendAssignments = async () => {
-    const toSend = Object.entries(selectedAssignments).map(([key, assignment]) => {
-      const [date, subject, grade] = key.split("__");
-      return { date, subject, grade, assignmentId: assignment._id };
-    });
-  
+    const toSend = Object.entries(selectedAssignments).map(
+      ([key, assignment]) => {
+        const [date, subject, grade] = key.split("__");
+        return { date, subject, grade, assignmentId: assignment._id };
+      }
+    );
+
     let totalSent = 0;
     let totalRequests = toSend.length;
     let failedGroups = [];
-  
+
     if (toSend.length === 0) {
       alert("❗Please select at least one assignment to send.");
       return;
     }
-  
+
     try {
       for (const item of toSend) {
         try {
@@ -109,33 +130,54 @@ const SendAssignment = () => {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
-  
+
           if (res.data.success) {
-            console.log(`✅ Assignment sent to ${item.grade} - ${item.subject} (${item.date})`);
+            console.log(
+              `✅ Assignment sent to ${item.grade} - ${item.subject} (${item.date})`
+            );
             totalSent += res.data.updated;
           } else {
-            console.warn(`❌ Failed to send assignment to ${item.grade} - ${item.subject} (${item.date})`);
+            console.warn(
+              `❌ Failed to send assignment to ${item.grade} - ${item.subject} (${item.date})`
+            );
             failedGroups.push(`${item.grade} - ${item.subject} (${item.date})`);
           }
         } catch (err) {
-          console.error(`❌ Error sending to ${item.grade} - ${item.subject} (${item.date}):`, err);
+          console.error(
+            `❌ Error sending to ${item.grade} - ${item.subject} (${item.date}):`,
+            err
+          );
           failedGroups.push(`${item.grade} - ${item.subject} (${item.date})`);
         }
       }
-  
+
       let message = `📩 Assignments sent successfully to ${totalSent} students across ${totalRequests} group(s).`;
       if (failedGroups.length > 0) {
         message += `\n⚠️ Failed to send to:\n- ${failedGroups.join("\n- ")}`;
       }
-  
-      alert(message);
+
+      setToast({
+        show: true,
+        message,
+        type: "success",
+      });
+      setTimeout(() => {
+        setToast(false);
+        navigate(0);
+      }, 1500);
+      await fetchUser();
+      setSelectedAssignments({});
     } catch (err) {
-      console.error("❌ Unexpected error during assignment sending:", err);
-      alert("An unexpected error occurred while sending assignments. Please try again.");
+      const message =
+        err.response?.data?.message ||
+        "Unexpected error during assignment sending:";
+      setToast({
+        show: true,
+        message,
+        type: "error",
+      });
     }
   };
-  
-  
 
   if (loading)
     return (
@@ -146,7 +188,13 @@ const SendAssignment = () => {
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
-
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false })}
+        />
+      )}
       <div className="absolute md:static top-0 left-0 z-50">
         <div className="max-md:hidden">
           <Sidebar />
@@ -155,7 +203,6 @@ const SendAssignment = () => {
           <SidebarMobile />
         </div>
       </div>
-
 
       <div className="w-full z-0 relative">
         <Navbar title="Dashboard" user={user} />
@@ -175,30 +222,72 @@ const SendAssignment = () => {
                   const key = getGroupKey({ date, subject, grade });
                   const selectedAssignment = selectedAssignments[key];
 
+                  const normalize = (val) =>
+                    typeof val === "string"
+                      ? val.trim().toLowerCase()
+                      : String(val).trim().toLowerCase();
+
+                  const receivedAssignment = user?.receivedAssignments?.find(
+                    (a) =>
+                      normalize(a.date).startsWith(normalize(date)) &&
+                      normalize(a.subject) === normalize(subject) &&
+                      normalize(a.grade) === normalize(grade)
+                  );
+
+                  // Find the already sent assignment from the fetched data
+                  const alreadySentAssignment =
+                    alreadySentAssignments?.[date]?.[subject]?.[grade];
+
                   return (
                     <div
                       key={key}
                       className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4"
                     >
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-semibold">
                           {subject} - Grade: {grade}
                         </h3>
-                        <button
-                          className={`text-sm px-3 py-1 rounded ${
-                            selectedAssignment
-                              ? "bg-green-100 text-green-800 hover:bg-green-200"
-                              : "bg-blue-600 text-white hover:bg-blue-700"
-                          }`}
-                          onClick={() =>
-                            handleAttachClick({ date, subject, grade })
-                          }
-                        >
-                          {selectedAssignment
-                            ? `${selectedAssignment.courseName} - ${selectedAssignment.courseType} (Click to change)`
-                            : "Attach Assignment"}
-                        </button>
+
+                        {alreadySentAssignment ? (
+                          <div className="text-right text-sm text-green-700">
+                            <p className="font-medium">✅ Assignment Sent</p>
+                            <p>
+                              <strong>Title:</strong>{" "}
+                              {alreadySentAssignment.assignment?.title ||
+                                "Untitled"}
+                            </p>
+                            <p>
+                              <strong>Deadline:</strong>{" "}
+                              {alreadySentAssignment.assignment?.deadline
+                                ? new Date(
+                                    alreadySentAssignment.assignment.deadline
+                                  ).toLocaleDateString("en-US", {
+                                    weekday: "long",
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })
+                                : "No deadline"}
+                            </p>
+                          </div>
+                        ) : (
+                          <button
+                            className={`text-sm px-3 py-1 rounded ${
+                              selectedAssignment
+                                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                : "bg-blue-600 text-white hover:bg-blue-700"
+                            }`}
+                            onClick={() =>
+                              handleAttachClick({ date, subject, grade })
+                            }
+                          >
+                            {selectedAssignment
+                              ? `${selectedAssignment.courseName} - ${selectedAssignment.courseType} (Click to change)`
+                              : "📎 Attach Assignment"}
+                          </button>
+                        )}
                       </div>
+
                       <ul className="list-disc list-inside ml-4">
                         {students.map((student, index) => (
                           <li key={index}>
@@ -225,7 +314,6 @@ const SendAssignment = () => {
             </div>
           )}
         </div>
-
 
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
