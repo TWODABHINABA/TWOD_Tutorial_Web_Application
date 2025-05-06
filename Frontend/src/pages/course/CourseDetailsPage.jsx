@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import api from "../../components/User-management/api";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
+  const location = useLocation();
   const [course, setCourse] = useState(null);
   const [feedback, setFeedback] = useState({ rating: "", comment: "" });
   const [loading, setLoading] = useState(true);
@@ -93,6 +94,32 @@ const CourseDetailsPage = () => {
     }
   }, [courseId]);
 
+  useEffect(() => {
+    // Check if we have pre-filled data from Book Again
+    if (location.state?.showEnrollModal) {
+      console.log("Received prefill data:", location.state.prefillData);
+      const { prefillData } = location.state;
+      
+      if (prefillData) {
+        // Set all the required fields
+        setSelectedTutor(prefillData.tutorId || "");
+        setSelectedDate(new Date(prefillData.selectedDate));
+        setSelectedTimeSlot(prefillData.selectedTime);
+        setSelectedSubject(prefillData.subject || prefillData.courseType);
+        setSelectedGrade(prefillData.grade);
+
+        // Find and set the session based on duration
+        const matchingSession = sessions.find(s => s.duration === prefillData.duration);
+        if (matchingSession) {
+          setSelectedSession(matchingSession);
+          setSelectedDuration(prefillData.duration);
+        }
+
+        // Call handleEnrollClick to open modal and fetch tutors
+        handleEnrollClick();
+      }
+    }
+  }, [location.state, sessions]);
 
   const fetchSessions = async () => {
     try {
@@ -168,7 +195,7 @@ const CourseDetailsPage = () => {
       const response = await api.get(`/courses/${courseId}/tutors`);
       console.log("Fetched Tutors:", response.data);
       setTutors(response.data);
-      setShowEnrollModal(true); 
+      setShowEnrollModal(true);
     } catch (error) {
       console.error("❌ Error fetching tutors:", error);
     }
@@ -908,7 +935,7 @@ const CourseDetailsPage = () => {
                               Selected Session
                             </h3>
                             <p className="text-gray-600">
-                              Duration: {selectedSession.duration}
+                              Duration: {selectedDuration ||selectedSession.duration}
                             </p>
                             <p className="text-gray-600">
                               {/* Price: $.{" "}
@@ -1021,7 +1048,7 @@ const CourseDetailsPage = () => {
                             <select
                               className="w-full p-2 border rounded mb-4"
                               value={
-                                selectedSession?.duration ||
+                                selectedSession?.duration ||  selectedDuration ||
                                 "30 Minutes Session"
                               }
                               onChange={(e) => {

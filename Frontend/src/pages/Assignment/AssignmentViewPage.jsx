@@ -12,6 +12,9 @@ const AssignmentViewPage = () => {
   const [assignment, setAssignment] = useState(null);
   const [error, setError] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [showTextArea, setShowTextArea] = useState({});
 
   useEffect(() => {
     const fetchAssignment = async () => {
@@ -47,6 +50,38 @@ const AssignmentViewPage = () => {
 
     fetchAssignment();
   }, [id, navigate]);
+
+  const handleAnswerClick = (questionId) => {
+    setShowTextArea(prev => ({
+      ...prev,
+      [questionId]: true
+    }));
+  };
+
+  const handleAttach = (questionId, answer) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
+    setShowTextArea(prev => ({
+      ...prev,
+      [questionId]: false
+    }));
+  };
+
+  const handleEdit = (questionId) => {
+    setEditingQuestion(questionId);
+    setShowTextArea(prev => ({
+      ...prev,
+      [questionId]: true
+    }));
+  };
+
+  const handleSubmitAnswers = () => {
+    // Function to be implemented later
+    alert("Submitting answers...");
+    console.log("Submitting answers:", answers);
+  };
 
   if (showLoginModal) {
     return (
@@ -112,11 +147,72 @@ const AssignmentViewPage = () => {
                   <p className="italic text-sm text-gray-600">
                     Marks: {q.number}
                   </p>
+                  
+                  {/* Answer Section */}
+                  <div className="mt-2">
+                    {!showTextArea[q._id] && !answers[q._id] && (
+                      <button
+                        onClick={() => handleAnswerClick(q._id)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                      >
+                        Answer
+                      </button>
+                    )}
+
+                    {showTextArea[q._id] && (
+                      <div className="mt-2">
+                        <textarea
+                          className="w-full p-2 border rounded"
+                          rows="4"
+                          placeholder="Type your answer here..."
+                          value={answers[q._id] || ""}
+                          onChange={(e) => setAnswers(prev => ({
+                            ...prev,
+                            [q._id]: e.target.value
+                          }))}
+                        />
+                        <button
+                          onClick={() => handleAttach(q._id, answers[q._id])}
+                          className="mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                        >
+                          Attach
+                        </button>
+                      </div>
+                    )}
+
+                    {answers[q._id] && !showTextArea[q._id] && (
+                      <div className="mt-2">
+                        <p className="text-gray-700 truncate max-w-full">
+                          {answers[q._id].length > 100 
+                            ? `${answers[q._id].substring(0, 100)}...` 
+                            : answers[q._id]}
+                        </p>
+                        <button
+                          onClick={() => handleEdit(q._id)}
+                          className="text-blue-500 hover:text-blue-700"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
           ) : (
             <p>No questions available.</p>
+          )}
+
+          {/* Submit Button */}
+          {Object.keys(answers).length > 0 && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={handleSubmitAnswers}
+                className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 text-lg font-semibold"
+              >
+                Submit Assignment
+              </button>
+            </div>
           )}
         </div>
         {showLoginModal && (
