@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../components/User-management/api";
 import TypewriterText from "./TypewriterText";
 
@@ -101,57 +101,39 @@ const ChatBot = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const updatedData = { ...userData };
-    let nextQuestion = "";
+    const userText = input.trim();
 
-    if (!userData.interests) {
-      updatedData.interests = input;
-      nextQuestion = "Got it! What's your research field?";
-    } else if (!userData.researchField) {
-      updatedData.researchField = input;
-      nextQuestion = "Awesome! What are your strongest skills?";
-    } else {
-      updatedData.strengths = input;
-
-      try {
-        const response = await api.post("/recommend", updatedData);
-        const { reply, courses } = response.data;
-
-        console.log("Received Courses in Frontend:", courses); // ✅ Debugging
-
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { text: input, sender: "user" },
-          { text: reply, sender: "bot", courses }, // ✅ Ensure courses are stored
-          { text: "Was this helpful? (Yes/No)", sender: "bot" },
-        ]);
-      } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { text: input, sender: "user" },
-          { text: "⚠️ Unable to fetch courses. Try again later.", sender: "bot" },
-        ]);
-      }
-
-      setInput("");
-      return;
-    }
-
-    setUserData(updatedData);
+    // Show user's message immediately
     setMessages((prevMessages) => [
       ...prevMessages,
-      { text: input, sender: "user" },
+      { text: userText, sender: "user" },
     ]);
-    setTimeout(() => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: nextQuestion, sender: "bot" },
-      ]);
-    }, 50);
 
     setInput("");
+
+    try {
+      const response = await api.post("/chatbot", { userMessage: userText });
+      const { reply } = response.data;
+
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { text: reply, sender: "bot" },
+      ]);
+    } catch (error) {
+      console.error("Chatbot error:", error);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          text: "⚠️ Something went wrong. Please try again later.",
+          sender: "bot",
+        },
+      ]);
+    }
   };
+
+  useEffect(() => {
+    setMessages([{ text: "Hi! How can I help you today?", sender: "bot" }]);
+  }, []);
 
   const fetchCourseId = async (courseName, courseType) => {
     try {
@@ -183,7 +165,51 @@ const ChatBot = () => {
             </button>
           </div>
 
-          {/* <div className="p-4 max-h-64 overflow-y-auto space-y-4">
+          <div className="p-4 max-h-64 overflow-y-auto space-y-4">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`p-2 rounded-lg max-w-[90%] break-words whitespace-pre-line ${
+                  msg.sender === "user"
+                    ? "bg-orange-100 text-right ml-auto"
+                    : "bg-gray-200 text-left mr-auto"
+                }`}
+              >
+                {msg.sender === "bot" ? (
+                  <TypewriterText text={msg.text} />
+                ) : (
+                  msg.text
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center p-3 border-t border-gray-300">
+            <input
+              type="text"
+              className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              placeholder="Type a message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            />
+            <button
+              className="ml-2 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition"
+              onClick={sendMessage}
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default ChatBot;
+
+{
+  /* <div className="p-4 max-h-64 overflow-y-auto space-y-4">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -229,76 +255,5 @@ const ChatBot = () => {
                 )}
               </div>
             ))}
-          </div> */}
-
-          <div className="p-4 max-h-64 overflow-y-auto space-y-4">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`p-2 rounded-lg max-w-[90%] break-words whitespace-pre-line ${
-                  msg.sender === "user"
-                    ? "bg-orange-100 text-right ml-auto"
-                    : "bg-gray-200 text-left mr-auto"
-                }`}
-              >
-                {msg.sender === "bot" ? (
-                  <TypewriterText text={msg.text} />
-                ) : (
-                  msg.text
-                )}
-
-                {msg.sender === "bot" &&
-                  msg.courses &&
-                  msg.courses.length > 0 && (
-                    <ul className="mt-2 space-y-2">
-                      {msg.courses.map((course, i) => (
-                        <li
-                          key={i}
-                          className="flex justify-between items-center bg-gray-100 p-2 rounded-md"
-                        >
-                          <span>
-                            {course.name} ({course.courseType})
-                          </span>
-
-                          <button
-                            onClick={async (e) => {
-                              e.preventDefault();
-                              window.location.href = `/courses/${course._id}`;
-                            }}
-                            className="text-orange-500 hover:underline text-sm"
-                          >
-                            ➝ View
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center p-3 border-t border-gray-300">
-            <input
-              type="text"
-              className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
-              placeholder="Type a message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
-            <button
-              className="ml-2 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition"
-              onClick={sendMessage}
-            >
-              Send
-            </button>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
-
-export default ChatBot;
-
-
-
+          </div> */
+}

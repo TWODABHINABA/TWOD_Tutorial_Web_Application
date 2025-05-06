@@ -4,132 +4,326 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Course = require("../Models/course");
 const Tutor = require("../Models/tutors");
 const router = express.Router();
+const Assignment=require("../Models/assignment");
+const PayLater=require("../Models/payLater");
+const Transaction=require("../Models/transaction");
+const GlobalSessionPricing=require("../Models/GlobalSessionPricing");
 // const { genAI } = require("../config/gemini");
 const session = require("../Auth/Authentication");
 
-const genAI = new GoogleGenerativeAI("AIzaSyCGpoyzO4bvzea1s9NA0R847e2vC7ofemY");
+const genAI = new GoogleGenerativeAI("AIzaSyC4DDFrnigy4pm9GLlvfPh2x0BYY_LOljU");
 
-// router.post("/recommend", async (req, res) => {
+// router.post("/chatbot", async (req, res) => {
+//   const { userMessage } = req.body;
+
 //   try {
-//     const { interests, researchField, strengths } = req.body;
 
-//     let courses = await Course.find(
-//       {
+//     const cleanedInput = userMessage.toLowerCase();
+
+
+//     const subjects = ['math', 'science', 'english', 'biology', 'chemistry', 'physics', 'history', 'geography', 'coding', 'programming', 'python', 'javascript'];
+
+
+//     const matchedSubject = subjects.find(sub => cleanedInput.includes(sub));
+
+
+//     let courseResults = [];
+//     let assignmentResults = [];
+//     let payLaterResults = [];
+//     let transactionResults = [];
+//     let sessionPricingResults = [];
+
+
+//     if (matchedSubject) {
+//       courseResults = await Course.find({
 //         $or: [
-//           { category: { $regex: interests, $options: "i" } },
-//           { description: { $regex: researchField, $options: "i" } },
-//           { tags: { $in: Array.isArray(strengths) ? strengths : [strengths] } },
-//         ],
-//       },
-//       { name: 1, courseType: 1, _id: 1 }
-//     );
+//           { name: { $regex: matchedSubject, $options: "i" } },
+//           { courseType: { $regex: matchedSubject, $options: "i" } },
+//           { description: { $regex: matchedSubject, $options: "i" } },
+//           { "curriculum.lessons.title": { $regex: matchedSubject, $options: "i" } }
+//         ]
+//       });
+//     } else {
 
-//     if (courses.length === 0) {
-//       courses = await Course.find({}, { name: 1, courseType: 1, _id: 1 }).limit(
-//         5
-//       );
+//       courseResults = await Course.find({
+//         $or: [
+//           { name: { $regex: userMessage, $options: "i" } },
+//           { description: { $regex: userMessage, $options: "i" } },
+//           { "curriculum.lessons.title": { $regex: userMessage, $options: "i" } }
+//         ]
+//       });
 //     }
 
-//     const courseList = courses
-//       .map(
-//         (course, index) =>
-//           `${index + 1}. **${course.name}** - ${
-//             course.courseType || "Category Not Available"
-//           }`
-//       )
-//       .join("\n");
 
-//     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-//     const prompt = `
-//           You are a course recommendation assistant for an online learning platform.
-//           A user is looking for courses based on:
-//           - Interests: ${interests}
-//           - Research Field: ${researchField}
-//           - Strengths: ${strengths}
-
-//           Here are some available courses from the database:
-//           ${courseList}
-
-//           Your task: Recommend the **5-10 most relevant courses** from the above list.
-//           - Only use courses from the provided list.
-//           - Mention **only the course name and course type**.
-//           - Keep it **clear and structured**.
-
-//           **Example format for response:**
-//           1. **Grade 10 Math** - Math
-//           2. **Organic Chemistry Basics** - Chemistry
-//         `;
-
-//     const result = await model.generateContent({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }],
+//     assignmentResults = await Assignment.find({
+//       $or: [
+//         { courseName: { $regex: userMessage, $options: "i" } },
+//         { courseType: { $regex: userMessage, $options: "i" } },
+//         { "questions.text": { $regex: userMessage, $options: "i" } }
+//       ]
 //     });
 
-//     const aiReply =
-//       result.response?.candidates?.[0]?.content?.parts?.[0]?.text ||
-//       "Here are some general courses you might be interested in.";
 
-//     res.json({ reply: aiReply, courses });
+//     payLaterResults = await PayLater.find({
+//       $or: [
+//         { selectedDate: { $regex: userMessage, $options: "i" } },
+//         { selectedTime: { $regex: userMessage, $options: "i" } }
+//       ]
+//     }).populate("courseId");
+
+ 
+//     transactionResults = await Transaction.find({
+//       $or: [
+//         { selectedDate: { $regex: userMessage, $options: "i" } },
+//         { selectedTime: { $regex: userMessage, $options: "i" } }
+//       ]
+//     }).populate("courseId");
+
+
+//     sessionPricingResults = await GlobalSessionPricing.find({
+//       "sessions.features": { $regex: userMessage, $options: "i" }
+//     });
+
+
+//     const contextParts = [];
+
+//     if (courseResults.length) {
+//       contextParts.push("**Matched Courses:**");
+//       courseResults.forEach(c => {
+//         contextParts.push(`- ${c.name} (${c.courseType}) - ${c.description}`);
+//       });
+//     }
+
+//     if (assignmentResults.length) {
+//       contextParts.push("\n**Matched Assignments:**");
+//       assignmentResults.forEach(a => {
+//         contextParts.push(`- ${a.courseName} (${a.courseType}): ${a.description}`);
+//       });
+//     }
+
+//     if (payLaterResults.length) {
+//       contextParts.push("\n**Matched PayLater Enrollments:**");
+//       payLaterResults.forEach(p => {
+//         contextParts.push(`- ${p.courseId?.name || 'Course'} on ${p.selectedDate} at ${p.selectedTime}`);
+//       });
+//     }
+
+//     if (transactionResults.length) {
+//       contextParts.push("\n**Matched Transactions:**");
+//       transactionResults.forEach(t => {
+//         contextParts.push(`- ${t.courseId?.name || 'Course'} on ${t.selectedDate} at ${t.selectedTime}`);
+//       });
+//     }
+
+//     if (sessionPricingResults.length) {
+//       contextParts.push("\n**Matched Session Features:**");
+//       sessionPricingResults.forEach(g => {
+//         g.sessions.forEach(s => {
+//           contextParts.push(`- ${s.duration} for ₹${s.price} with features: ${s.features.join(", ")}`);
+//         });
+//       });
+//     }
+
+//     const finalContext = contextParts.join("\n");
+
+//     let aiReply;
+
+//     if (finalContext.trim() === "") {
+//       aiReply = "Sorry, I couldn't find any information related to your question in our system.";
+//     } else {
+
+//       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+//       const result = await model.generateContent({
+//         contents: [{
+//           role: "user",
+//           parts: [{
+//             text: `Based on the data below, answer the user's question:\n\n${finalContext}\n\nUser Question: ${userMessage}`
+//           }]
+//         }]
+//       });
+
+//       aiReply = result.response?.candidates?.[0]?.content?.parts?.[0]?.text || "Here's what I found.";
+//     }
+
+//     return res.json({ reply: aiReply });
+
 //   } catch (error) {
-//     console.error("Error in recommendation:", error);
-//     res.status(500).json({ message: "Error generating recommendations" });
+//     console.error("AI Chatbot error:", error);
+//     return res.status(500).json({ message: "Chatbot failed to generate a response." });
 //   }
 // });
 
-router.post("/recommend", async (req, res) => {
+
+let conversationMemory = {
+  lastMentionedCourse: null,
+  lastCourseType: null
+};
+
+router.post("/chatbot", async (req, res) => {
+  const { userMessage } = req.body;
+
   try {
-    const { interests, researchField, strengths } = req.body;
-
-    console.log("Received Data:", { interests, researchField, strengths });
-
-    let courses = await Course.find(
-      {
-        $or: [
-          { category: { $regex: interests, $options: "i" } },
-          { description: { $regex: researchField, $options: "i" } },
-          { tags: { $in: Array.isArray(strengths) ? strengths : [strengths] } },
-        ],
-      },
-      { name: 1, courseType: 1, _id: 1 }
-    );
-
-    console.log("Fetched Courses:", courses); // ✅ Check if courses are coming
-
-    // If no exact match, recommend nearest available courses
-    if (courses.length === 0) {
-      console.log("No exact match. Fetching recommended courses...");
-      courses = await Course.find({}, { name: 1, courseType: 1, _id: 1 }).limit(5);
+    if (!userMessage || typeof userMessage !== "string") {
+      return res.status(400).json({ message: "Invalid user message." });
     }
 
-    console.log("Final Courses Sent:", courses);
+    const cleanedInput = userMessage.trim().toLowerCase();
 
-    const courseList = courses
-      .map((course, index) => `${index + 1}. **${course.name}** - ${course.courseType}`)
-      .join("\n");
+    const subjects = [
+      "math", "science", "english", "biology", "chemistry", "physics",
+      "history", "geography", "coding", "programming", "python", "javascript"
+    ];
+
+    const matchedSubject = subjects.find(subject =>
+      cleanedInput.includes(subject)
+    );
+
+    // Search courses
+    const courseQuery = matchedSubject
+      ? {
+          $or: [
+            { name: { $regex: matchedSubject, $options: "i" } },
+            { courseType: { $regex: matchedSubject, $options: "i" } },
+            { description: { $regex: matchedSubject, $options: "i" } },
+            { "curriculum.lessons.title": { $regex: matchedSubject, $options: "i" } }
+          ]
+        }
+      : {
+          $or: [
+            { name: { $regex: userMessage, $options: "i" } },
+            { courseType: { $regex: userMessage, $options: "i" } },
+            { description: { $regex: userMessage, $options: "i" } },
+            { "curriculum.lessons.title": { $regex: userMessage, $options: "i" } }
+          ]
+        };
+
+    const courseResults = await Course.find(courseQuery);
+
+    // Update memory
+    if (courseResults.length === 1) {
+      conversationMemory.lastMentionedCourse = courseResults[0].name;
+      conversationMemory.lastCourseType = courseResults[0].courseType;
+    }
+
+    const rememberedCourseName = conversationMemory.lastMentionedCourse;
+
+    const assignmentResults = await Assignment.find({
+      $or: [
+        { courseName: { $regex: userMessage, $options: "i" } },
+        { courseType: { $regex: userMessage, $options: "i" } },
+        { "questions.text": { $regex: userMessage, $options: "i" } }
+      ]
+    });
+
+    const payLaterResults = await PayLater.find({
+      $or: [
+        { selectedDate: { $regex: userMessage, $options: "i" } },
+        { selectedTime: { $regex: userMessage, $options: "i" } }
+      ]
+    }).populate("courseId");
+
+    const transactionResults = await Transaction.find({
+      $or: [
+        { selectedDate: { $regex: userMessage, $options: "i" } },
+        { selectedTime: { $regex: userMessage, $options: "i" } }
+      ]
+    }).populate("courseId");
+
+    // Check if user asked for price or duration
+    const asksForPricing = /price|cost|fees?|how much/.test(cleanedInput);
+    const asksForDuration = /duration|time|how long/.test(cleanedInput);
+
+    let sessionPricingResults = [];
+
+    if (asksForPricing || asksForDuration) {
+      sessionPricingResults = await GlobalSessionPricing.find({});
+    }
+
+    // Compose response context
+    const contextParts = [];
+
+    if (courseResults.length) {
+      contextParts.push("**Matched Courses:**");
+      for (const course of courseResults) {
+        contextParts.push(`- ${course.name} (${course.courseType}): ${course.description}`);
+      }
+    }
+
+    if (sessionPricingResults.length) {
+      contextParts.push(`\n**Session Pricing & Duration (Dynamic):**`);
+      const sessions = sessionPricingResults[0]?.sessions || [];
+      sessions.forEach(session => {
+        contextParts.push(`- ${session.duration} — ₹${session.price} — Features: ${session.features.join(", ")}`);
+      });
+    }
+
+    if (assignmentResults.length) {
+      contextParts.push("\n**Matched Assignments:**");
+      assignmentResults.forEach(a => {
+        contextParts.push(`- ${a.courseName} (${a.courseType}) — ${a.description}`);
+      });
+    }
+
+    if (payLaterResults.length) {
+      contextParts.push("\n**Matched PayLater Enrollments:**");
+      payLaterResults.forEach(p => {
+        contextParts.push(`- ${p.courseId?.name || "Course"} on ${p.selectedDate} at ${p.selectedTime}`);
+      });
+    }
+
+    if (transactionResults.length) {
+      contextParts.push("\n**Matched Transactions:**");
+      transactionResults.forEach(t => {
+        contextParts.push(`- ${t.courseId?.name || "Course"} on ${t.selectedDate} at ${t.selectedTime}`);
+      });
+    }
+
+    const finalContext = contextParts.join("\n");
 
     let aiReply;
-    try {
+    if (!finalContext.trim()) {
+      // Fallback if no context found but user asked for pricing/duration
+      if (asksForPricing || asksForDuration) {
+        const fallbackPricing = sessionPricingResults[0]?.sessions || [];
+        if (fallbackPricing.length) {
+          aiReply = `We offer dynamic pricing based on session duration. Here's the pricing:\n` +
+            fallbackPricing.map(s => `- ${s.duration}: ₹${s.price} (Includes: ${s.features.join(", ")})`).join("\n");
+        } else {
+          aiReply = "We offer dynamic pricing and session durations, but no details are available at the moment.";
+        }
+      } else {
+        aiReply = "Sorry, I couldn't find any information related to your question in our system.";
+      }
+    } else {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
       const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: courseList }] }],
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: `You're an educational assistant. Use only the internal data provided below to answer the user's question clearly:\n\n${finalContext}\n\nUser Question: ${userMessage}`
+              }
+            ]
+          }
+        ]
       });
 
       aiReply =
         result.response?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "Here are some recommended courses.";
-    } catch (aiError) {
-      console.error("AI failed, using fallback courses:", aiError);
-      aiReply = `We couldn't generate recommendations right now. Here are some suggested courses:\n\n${courseList}`;
+        "Here’s what I found based on our records.";
     }
 
-    res.json({
-      reply: aiReply,
-      courses: courses, // ✅ Send the actual course data
-    });
+    return res.json({ reply: aiReply });
+
   } catch (error) {
-    console.error("Error in recommendation:", error);
-    res.status(500).json({ message: "Error generating recommendations" });
+    console.error("AI Chatbot error:", error.message || error);
+    return res.status(500).json({ message: "Chatbot failed to generate a response." });
   }
 });
+
+
+
+
 
 module.exports = router;
