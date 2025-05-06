@@ -44,6 +44,7 @@ const SendAssignment = () => {
 
       if (res.data.success) {
         setAssignments(res.data.assignments);
+        console.log("Assignments", res.data.assignments);
       }
     } catch (err) {
       console.error("Failed to fetch assignments", err);
