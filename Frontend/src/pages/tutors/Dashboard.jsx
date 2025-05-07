@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [showUpcomingModal, setShowUpcomingModal] = useState(false);
   const [showPreviousModal, setShowPreviousModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [openDate, setOpenDate] = useState(null);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -55,10 +57,9 @@ const Dashboard = () => {
   const fetchStudents = async () => {
     try {
       const res = await api.get("/students");
-      console.log("Raw students data from API:", res.data); 
+      console.log("Raw students data from API:", res.data);
       const rawStudents = res.data.students;
       setShowStudentModal(true);
-
 
       if (!Array.isArray(rawStudents) || rawStudents.length === 0) {
         console.log("No student data found");
@@ -66,21 +67,17 @@ const Dashboard = () => {
       }
 
       const groupedStudents = rawStudents.reduce((acc, student) => {
-        const date = student.selectedDate; 
-        const subject = student.courseId.name; 
-        const courseType = student.courseId.courseType; 
-
+        const date = student.selectedDate;
+        const subject = student.courseId.name;
+        const courseType = student.courseId.courseType;
 
         if (!acc[date]) acc[date] = {};
 
-
         if (!acc[date][subject]) acc[date][subject] = {};
-
 
         if (!acc[date][subject][courseType]) {
           acc[date][subject][courseType] = [];
         }
-
 
         acc[date][subject][courseType].push({
           studentName: student.user.name,
@@ -92,7 +89,7 @@ const Dashboard = () => {
         return acc;
       }, {});
 
-      setStudents(groupedStudents); 
+      setStudents(groupedStudents);
     } catch (error) {
       console.error("Error fetching students:", error);
     }
@@ -270,104 +267,20 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* {showStudentModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
-              <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto relative">
-
-                <button
-                  onClick={() => setShowStudentModal(false)}
-                  className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
-                  title="Close"
-                >
-                  &times;
-                </button>
-
-
-                <h3 className="text-2xl font-bold mb-4 text-center">
-                  Enrolled Students
-                </h3>
-
-
-                {students.length === 0 ? (
-                  <p className="text-gray-500 text-center">
-                    No students found.
-                  </p>
-                ) : (
-                  <ul className="space-y-4">
-                    {students.map(({ student, transactions }) => (
-                      <li
-                        key={student._id}
-                        className="border border-gray-200 p-4 rounded-md bg-gray-50"
-                      >
-                        <p>
-                          <strong>Name:</strong> {student.name}
-                        </p>
-                        <p>
-                          <strong>Email:</strong> {student.email}
-                        </p>
-                        <p>
-                          <strong>Phone:</strong> {student.phone || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Purchased Courses:</strong>
-                          <ul>
-                            {transactions.map((txn, idx) => {
-                              const courseName = txn.courseId?.name || "Course";
-                              const courseType = txn.courseId?.courseType || "N/A";
-
- 
-                              const selectedDate = new Date(txn.selectedDate); 
-                              const startTimeStr = txn.selectedTime.split("-")[0].trim(); 
-
-                              const [time, modifier] = startTimeStr.split(" ");
-                              let [hours, minutes] = time.split(":").map(Number);
-                              if (modifier === "PM" && hours !== 12) hours += 12;
-                              if (modifier === "AM" && hours === 12) hours = 0;
-
-                              selectedDate.setHours(hours);
-                              selectedDate.setMinutes(minutes);
-                              selectedDate.setSeconds(0);
-
-                              const now = new Date();
-                              const classStatus = selectedDate > now ? "Upcoming" : "Completed";
-
-                              let paymentStatus = "Pending";
-                              if (txn.status === "completed") paymentStatus = "Paid";
-                              else if (txn.status === "accepted") paymentStatus = "Accepted (Pay Later)";
-                              else if (txn.status === "pending for tutor acceptance") paymentStatus = "Pending for Tutor Acceptance (you have to accept the class)";
-                              else if (txn.status === "rejected") paymentStatus = "Rejected";
-
-                              return (
-                                <li key={idx}>
-                                  {courseName}, {courseType} — <strong>{classStatus}</strong> | Payment: <strong>{paymentStatus}</strong>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </p>
-
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          )} */}
-
           {showStudentModal && (
             <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
-              <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto relative">
+              <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto relative">
                 {/* Close button */}
                 <button
                   onClick={() => setShowStudentModal(false)}
-                  className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
+                  className="absolute top-4 right-5 text-gray-500 hover:text-gray-800 text-2xl font-bold"
                   title="Close"
                 >
                   &times;
                 </button>
 
                 {/* Header */}
-                <h3 className="text-2xl font-bold mb-4 text-center">
+                <h3 className="text-3xl font-semibold text-gray-800 mb-6 text-center border-b pb-2">
                   Enrolled Students
                 </h3>
 
@@ -377,58 +290,120 @@ const Dashboard = () => {
                     No students found.
                   </p>
                 ) : (
-                  <div>
-                    {Object.entries(students).map(([date, subjects]) => (
-                      <div key={date} className="mb-6">
-                        <h4 className="font-semibold text-lg mb-2">{date}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                    {Object.entries(
+                      Object.fromEntries(
+                        Object.entries(students).sort(([dateA], [dateB]) => {
+                          const today = new Date().toISOString().split("T")[0];
+                          const dA = new Date(dateA);
+                          const dB = new Date(dateB);
+                          const todayDate = new Date(today);
 
-                        {Object.entries(subjects).map(
-                          ([subject, courseTypes]) => (
-                            <div key={subject} className="ml-4">
-                              <h5 className="font-semibold text-md mb-2">
-                                {subject}
-                              </h5>
+                          const getOrder = (date) => {
+                            if (
+                              date.toISOString().split("T")[0] ===
+                              todayDate.toISOString().split("T")[0]
+                            )
+                              return 0; // today
+                            if (date > todayDate) return 1; // upcoming
+                            return 2; // past
+                          };
 
-                              {Object.entries(courseTypes).map(
-                                ([courseType, courseStudents]) => (
-                                  <div key={courseType} className="ml-4">
-                                    <h6 className="font-semibold text-sm mb-2">
-                                      {courseType}
-                                    </h6>
+                          const orderA = getOrder(dA);
+                          const orderB = getOrder(dB);
 
-                                    <ul className="space-y-2">
-                                      {courseStudents.map((student, idx) => (
-                                        <li
-                                          key={idx}
-                                          className="p-2 border border-gray-200 rounded-md bg-gray-50"
-                                        >
-                                          <p>
-                                            <strong>Name:</strong>{" "}
-                                            {student.studentName}
-                                          </p>
-                                          <p>
-                                            <strong>Email:</strong>{" "}
-                                            {student.studentEmail}
-                                          </p>
-                                          <p>
-                                            <strong>Time Slot:</strong>{" "}
-                                            {student.timeSlot}
-                                          </p>
-                                          <p>
-                                            <strong>Status:</strong>{" "}
-                                            {student.status}
-                                          </p>
-                                        </li>
-                                      ))}
-                                    </ul>
+                          if (orderA !== orderB) return orderA - orderB;
+                          return dA - dB;
+                        })
+                      )
+                    ).map(([date, subjects]) => {
+                      const today = new Date().toISOString().split("T")[0];
+                      const dateType =
+                        date === today
+                          ? "today"
+                          : new Date(date) > new Date(today)
+                          ? "upcoming"
+                          : "past";
+
+                      const bgColor =
+                        dateType === "today"
+                          ? "bg-green-50 border border-green-300"
+                          : dateType === "upcoming"
+                          ? "bg-blue-50 border border-blue-300"
+                          : "bg-gray-100 border border-gray-300";
+
+                      return (
+                        <div
+                          key={date}
+                          className={`${bgColor} rounded-lg shadow-sm mb-4`}
+                        >
+                          {/* Toggle Button */}
+                          <button
+                            className="w-full text-left px-4 py-3 text-lg font-medium text-gray-800 hover:bg-gray-200 transition rounded-t-lg"
+                            onClick={() =>
+                              setOpenDate((prevDate) =>
+                                prevDate === date ? null : date
+                              )
+                            }
+                          >
+                            {date}
+                          </button>
+
+                          {/* Expanded Details */}
+                          {openDate === date && (
+                            <div className="px-4 py-4 bg-white border-t border-gray-200 rounded-b-lg space-y-4">
+                              {Object.entries(subjects).map(
+                                ([subject, courseTypes]) => (
+                                  <div key={subject}>
+                                    <h5 className="text-md font-semibold text-gray-700 mb-2">
+                                      {subject}
+                                    </h5>
+
+                                    {Object.entries(courseTypes).map(
+                                      ([courseType, courseStudents]) => (
+                                        <div key={courseType} className="ml-4">
+                                          <h6 className="text-sm font-medium text-gray-600 mb-2">
+                                            {courseType}
+                                          </h6>
+
+                                          <ul className="space-y-2">
+                                            {courseStudents.map(
+                                              (student, idx) => (
+                                                <li
+                                                  key={idx}
+                                                  className="border rounded-md p-3 bg-gray-50 hover:bg-gray-100 transition"
+                                                >
+                                                  <p>
+                                                    <strong>Name:</strong>{" "}
+                                                    {student.studentName}
+                                                  </p>
+                                                  <p>
+                                                    <strong>Email:</strong>{" "}
+                                                    {student.studentEmail}
+                                                  </p>
+                                                  <p>
+                                                    <strong>Time Slot:</strong>{" "}
+                                                    {student.timeSlot}
+                                                  </p>
+                                                  <p>
+                                                    <strong>Status:</strong>{" "}
+                                                    {student.status}
+                                                  </p>
+                                                </li>
+                                              )
+                                            )}
+                                          </ul>
+                                        </div>
+                                      )
+                                    )}
                                   </div>
                                 )
                               )}
                             </div>
-                          )
-                        )}
-                      </div>
-                    ))}
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

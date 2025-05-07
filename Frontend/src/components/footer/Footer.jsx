@@ -67,7 +67,7 @@ const CustomFooter = () => {
               </div>
             )}
 
-            {isRoleAdmin === "tutor" && (
+            {/* {isRoleAdmin === "tutor" && (
               <div>
                 <h3 className="text-lg font-semibold mb-2 uppercase text-white">
                   Tutor CONTROL
@@ -92,7 +92,7 @@ const CustomFooter = () => {
                   </li>
                 </ul>
               </div>
-            )}
+            )} */}
 
             <div>
               <h3 className="text-lg font-semibold mb-2 uppercase text-white">
