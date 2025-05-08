@@ -94,8 +94,9 @@ const SendAssignment = () => {
         const res = await api.get("/assignments/students"); // No date query
         if (res.data.success) {
           setGroupedData(res.data.grouped);
+          console.log("Grouped DataAAAAAAAAAAAAAAAAAAAAA", res.data.grouped); 
         }
-        console.log("Grouped Data", groupedData);
+        
       } catch (err) {
         console.error("Error fetching assignment data:", err);
       } finally {

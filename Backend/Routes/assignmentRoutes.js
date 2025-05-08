@@ -48,13 +48,19 @@ router.post("/upload-assignment", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/get-assignment", async (req, res) => {
+router.get("/get-assignment", authMiddleware, async (req, res) => {
   const { courseName, courseType } = req.query;
+  const tutorId = req.user.id;
 
   try {
-    const assignment = await Assignment.findOne({ courseName, courseType });
+    const assignment = await Assignment.findOne({
+      courseName,
+      courseType,
+      tutorId, // ✅ filter by current tutor
+    });
+
     if (!assignment) {
-      return res.status(404).json({ message: "No assignment found" });
+      return res.status(404).json({ message: "No assignment found for this tutor" });
     }
 
     res.status(200).json(assignment);
@@ -62,6 +68,7 @@ router.get("/get-assignment", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
+
 
 router.put("/update-assignment/:id", authMiddleware, async (req, res) => {
   try {
@@ -107,18 +114,71 @@ router.get("/grades-by-subject/:subject", async (req, res) => {
   }
 });
 
+// router.get("/assignments/students", authMiddleware, async (req, res) => {
+//   try {
+//     const { date } = req.query;
+
+//     const allowedStatuses = ["accepted", "pending", "completed"];
+
+//     const payLaterFilter = {
+//       ...(date && { selectedDate: date }),
+//       status: { $in: allowedStatuses }, // ✅ filter by status
+//     };
+
+//     const transactionFilter = date ? { selectedDate: date } : {};
+
+//     const [payLaterData, transactionData] = await Promise.all([
+//       PayLater.find(payLaterFilter).populate("user courseId").lean(),
+//       Transaction.find(transactionFilter).populate("user courseId").lean(),
+//     ]);
+
+//     const allEnrollments = [...payLaterData, ...transactionData];
+
+//     const grouped = {};
+
+//     allEnrollments.forEach((entry) => {
+//       const dateKey = entry.selectedDate;
+//       const subject = entry.courseId?.courseType || "Unknown Subject";
+//       const grade = entry.courseId?.name || "Unknown Grade";
+//       const student = {
+//         studentName: entry.user?.name || "No Name",
+//         email: entry.user?.email || "No Email",
+//         timeSlot: entry.selectedTime || "Not Provided",
+//       };
+
+//       if (!grouped[dateKey]) grouped[dateKey] = {};
+//       if (!grouped[dateKey][subject]) grouped[dateKey][subject] = {};
+//       if (!grouped[dateKey][subject][grade])
+//         grouped[dateKey][subject][grade] = [];
+
+//       grouped[dateKey][subject][grade].push(student);
+//     });
+
+//     res.status(200).json({ success: true, grouped });
+//   } catch (err) {
+//     console.error("Error fetching students:", err);
+//     res.status(500).json({ success: false, error: "Failed to fetch students" });
+//   }
+// });
+
+
 router.get("/assignments/students", authMiddleware, async (req, res) => {
   try {
     const { date } = req.query;
 
     const allowedStatuses = ["accepted", "pending", "completed"];
+    const tutorId = req.user.id;
 
     const payLaterFilter = {
       ...(date && { selectedDate: date }),
-      status: { $in: allowedStatuses }, // ✅ filter by status
+      status: { $in: allowedStatuses },
+      tutorId: tutorId, // ✅ filter by logged-in tutor
     };
 
-    const transactionFilter = date ? { selectedDate: date } : {};
+    const transactionFilter = {
+      ...(date && { selectedDate: date }),
+      tutorId: tutorId, // ✅ filter by logged-in tutor
+    };
 
     const [payLaterData, transactionData] = await Promise.all([
       PayLater.find(payLaterFilter).populate("user courseId").lean(),
@@ -153,6 +213,7 @@ router.get("/assignments/students", authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch students" });
   }
 });
+
 
 router.get("/get-assignments", authMiddleware, async (req, res) => {
   try {

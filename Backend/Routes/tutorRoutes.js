@@ -971,12 +971,15 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     const subjectCounts = {};
     const uniqueStudentIds = new Set();
 
-    const payLaterEnrollments = await PayLater.find({
-      tutorId,
-      status: {
-        $in: ["accepted", "completed", "pending for tutor acceptance"],
-      },
-    }).populate("courseId user");
+    // const payLaterEnrollments = await PayLater.find({
+    //   tutorId,
+    //   status: {
+    //     $in: ["accepted", "completed", "pending for tutor acceptance"],
+    //   },
+    // }).populate("courseId user");
+
+    const payLaterEnrollments = await PayLater.find({ tutorId }).populate("courseId user");
+
 
     payLaterEnrollments.forEach((enroll) => {
       const subject = enroll.courseId?.subject;
@@ -989,10 +992,13 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
       }
     });
 
-    const transactionEnrollments = await Transaction.find({
-      tutorId,
-      status: "completed",
-    }).populate("courseId user"); // 👈 also populate user
+    // const transactionEnrollments = await Transaction.find({
+    //   tutorId,
+    //   status: "completed",
+    // }).populate("courseId user"); // 👈 also populate user
+
+    const transactionEnrollments = await Transaction.find({ tutorId }).populate("courseId user");
+
 
     transactionEnrollments.forEach((enroll) => {
       const subject = enroll.courseId?.subject;
@@ -1102,27 +1108,24 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
 
 router.get("/students", authMiddleware, async (req, res) => {
   try {
-    const payLater = await PayLater.find()
+    const tutorId = req.user.id;
+
+    const payLater = await PayLater.find({ tutorId }) // 🔹 Filter by tutor ID
       .populate({
         path: "user",
         select: "-password",
       })
       .populate("courseId");
 
-    const transactions = await Transaction.find()
+    const transactions = await Transaction.find({ tutorId }) // 🔹 Filter by tutor ID
       .populate({
         path: "user",
         select: "-password",
       })
       .populate("courseId");
-
-    // Log data to ensure it's being fetched correctly
-    console.log("PayLater data:", payLater);
-    console.log("Transaction data:", transactions);
 
     const allEnrollments = [...payLater, ...transactions];
 
-    // Ensure we are returning the data
     res.status(200).json({ students: allEnrollments });
   } catch (err) {
     console.error("Error fetching student list:", err);

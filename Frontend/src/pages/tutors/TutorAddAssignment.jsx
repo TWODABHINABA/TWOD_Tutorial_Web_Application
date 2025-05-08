@@ -139,15 +139,15 @@ const TutorAddAssignment = () => {
           setIsEditing(false);
         }
       } catch (err) {
-        console.error("Error fetching assignment:", err);
-        setToast({
-          show: true,
-          message: "No existing assignment found.",
-          type: "info",
-        });
-        setTimeout(() => {
-          setToast(false);
-        }, 1500);
+        // console.error("Error fetching assignment:", err);
+        // setToast({
+        //   show: true,
+        //   message: "No existing assignment found.",
+        //   type: "info",
+        // });
+        // setTimeout(() => {
+        //   setToast(false);
+        // }, 1500);
         setExistingAssignment(null);
         setIsEditing(false);
       }
