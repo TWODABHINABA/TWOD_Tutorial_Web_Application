@@ -39,51 +39,54 @@ import SendAssignment from './pages/tutors/SendAssignment'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminControls from './pages/admin/AdminControls'
 import AssignmentViewPage from './pages/Assignment/AssignmentViewPage'
+import { CurrencyProvider } from './currencyConfig/CurrencyContext'
 
 function App() {
   // const isAdmin=localStorage.getItem("role");
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        {/* <Route path="/login" element={<Login />} /> */}
-        <Route path='/register' element={<Register/>}/>
-        <Route path="/about" element={<About />} />
-        <Route path="/about/:tutorName" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/user" element={<UserInfo />} />
-        <Route path="/pricing" element={<Pricing/>}/>
-        <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
-        <Route path="/tutors/:tutorName" element={<About/>}/>
-        {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
-        <Route path="/courses/:courseId" element={<CourseDetailsPage />} />
-        <Route path="/add-course" element={<AddCourse />} />
-        <Route path="/auth-success" element={<AuthSuccess />} />
-        <Route path="/set-password" element={<SetPasswordWrapper />} />
-        <Route path="/set-password-tutor" element={<SetPasswordTutor />} />
-        <Route path="/success" element={<SuccessPage />} />
-        <Route path="/cancel" element={<CancelPage />} />
-        <Route path="/add-tutor" element={<AddTutor />} />
-        <Route path="/add-availability" element={<AddAvailability />} />
-        <Route path="/add-session-time" element={<SessionAdmin />} />
-        <Route path="/purchased-course" element={<PurchasedCourse />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-        <Route path="/forgot-password-page" element={<ForgotPasswordFlow/>} />
-        <Route path="/course-summary" element={<CourseSummary/>}/>
-        <Route path='/tutor-dashboard' element={<Dashboard/>}/>
-        <Route path='/tutor-controls' element={<Controls/>}/>
-        <Route path='/tutor-add-course' element={<TutorAddCourse/>}/>
-        <Route path='/tutor-add-availability' element={<TutorAddAvailability/>}/>
-        <Route path='/tutor-requests' element={<Requests/>}/>
-        <Route path='/tutor-assignment' element={<Assignment/>}/>
-        <Route path='/tutor-add-assignment' element={<TutorAddAssignment/>}/>  
-        <Route path='/tutor-send-assignment' element={<SendAssignment/>}/>
-        <Route path='/admin-dashboard' element={<AdminDashboard/>}/>
-        <Route path='/admin-controls' element={<AdminControls/>}/>
-        <Route path="/assignment-view/:id" element={<AssignmentViewPage />} />
-      </Routes>
-    </Router>
+    <CurrencyProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          {/* <Route path="/login" element={<Login />} /> */}
+          <Route path='/register' element={<Register/>}/>
+          <Route path="/about" element={<About />} />
+          <Route path="/about/:tutorName" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/user" element={<UserInfo />} />
+          <Route path="/pricing" element={<Pricing/>}/>
+          <Route path="/category/:categoryName" element={<CategoryCoursesPage />} />
+          <Route path="/tutors/:tutorName" element={<About/>}/>
+          {/* <Route path="/course/:courseName" element={<CourseDetailsPage />} /> */}
+          <Route path="/courses/:courseId" element={<CourseDetailsPage />} />
+          <Route path="/add-course" element={<AddCourse />} />
+          <Route path="/auth-success" element={<AuthSuccess />} />
+          <Route path="/set-password" element={<SetPasswordWrapper />} />
+          <Route path="/set-password-tutor" element={<SetPasswordTutor />} />
+          <Route path="/success" element={<SuccessPage />} />
+          <Route path="/cancel" element={<CancelPage />} />
+          <Route path="/add-tutor" element={<AddTutor />} />
+          <Route path="/add-availability" element={<AddAvailability />} />
+          <Route path="/add-session-time" element={<SessionAdmin />} />
+          <Route path="/purchased-course" element={<PurchasedCourse />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/forgot-password-page" element={<ForgotPasswordFlow/>} />
+          <Route path="/course-summary" element={<CourseSummary/>}/>
+          <Route path='/tutor-dashboard' element={<Dashboard/>}/>
+          <Route path='/tutor-controls' element={<Controls/>}/>
+          <Route path='/tutor-add-course' element={<TutorAddCourse/>}/>
+          <Route path='/tutor-add-availability' element={<TutorAddAvailability/>}/>
+          <Route path='/tutor-requests' element={<Requests/>}/>
+          <Route path='/tutor-assignment' element={<Assignment/>}/>
+          <Route path='/tutor-add-assignment' element={<TutorAddAssignment/>}/>  
+          <Route path='/tutor-send-assignment' element={<SendAssignment/>}/>
+          <Route path='/admin-dashboard' element={<AdminDashboard/>}/>
+          <Route path='/admin-controls' element={<AdminControls/>}/>
+          <Route path="/assignment-view/:id" element={<AssignmentViewPage />} />
+        </Routes>
+      </Router>
+    </CurrencyProvider>
   )
 }
 

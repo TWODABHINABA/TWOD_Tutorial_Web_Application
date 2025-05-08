@@ -1,21 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
 import api from "../../components/User-management/api";
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useCurrencyConverter } from '../../currencyConfig/useCurrencyConverter';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
-
-// Function to generate a random color
-const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-};
 
 // Function to generate HSL colors with good contrast
 const generateHSLColors = (count) => {
@@ -49,6 +40,7 @@ const AdminDashboard = () => {
     const [courseRevenue, setCourseRevenue] = useState([]);
     const [tutorRevenue, setTutorRevenue] = useState([]);
     const [user, setUser] = useState(null);
+    const { convertAndFormat } = useCurrencyConverter();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -247,7 +239,7 @@ const AdminDashboard = () => {
                         const value = context.raw;
                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                         const percentage = ((value / total) * 100).toFixed(2);
-                        return `${context.label}: $${value} (${percentage}%)`;
+                        return `${context.label}: ${convertAndFormat(value)} (${percentage}%)`;
                     }
                 }
             }
@@ -405,7 +397,7 @@ const AdminDashboard = () => {
                                                     <span className="text-sm">{course.courseName}</span>
                                                     <span className="text-sm">&nbsp;&nbsp;{course.courseType}</span>
                                                 </div>
-                                                <span className="text-sm font-medium">${course.revenue}</span>
+                                                <span className="text-sm font-medium">{convertAndFormat(course.revenue)}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -444,7 +436,7 @@ const AdminDashboard = () => {
                                                     />
                                                     <span className="text-sm">{tutor.tutorName}</span>
                                                 </div>
-                                                <span className="text-sm font-medium">${tutor.revenue}</span>
+                                                <span className="text-sm font-medium">{convertAndFormat(tutor.revenue)}</span>
                                             </div>
                                         ))}
                                     </div>

@@ -6,6 +6,7 @@ import Footer from "../../components/footer/Footer";
 import { ClipLoader } from "react-spinners";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { useCurrencyConverter } from '../../currencyConfig/useCurrencyConverter';
 
 const PurchasedCourse = () => {
   const token = localStorage.getItem("token");
@@ -14,6 +15,7 @@ const PurchasedCourse = () => {
   const isAdmin = localStorage.getItem("role");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const { convertAndFormat } = useCurrencyConverter();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
@@ -167,10 +169,10 @@ const PurchasedCourse = () => {
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-semibold text-green-600">
-                            {course.type === "accepted" && `$${course.amountPaid}`}
-                            {course.type === "failed" && `$${course.amountPaid}`}
-                            {course.type === "completed" && `$${course.amountPaid}`}
-                            {course.type === "pending for tutor acceptance" && `$${course.amountPaid}`}
+                            {course.type === "accepted" && convertAndFormat(parseFloat(course.amountPaid || 0))}
+                            {course.type === "failed" && convertAndFormat(parseFloat(course.amountPaid || 0))}
+                            {course.type === "completed" && convertAndFormat(parseFloat(course.amountPaid || 0))}
+                            {course.type === "pending for tutor acceptance" && convertAndFormat(parseFloat(course.amountPaid || 0))}
                           </p>
                           <p className={`text-xs font-medium ${
                             course.type === "failed" ? "text-red-600" :

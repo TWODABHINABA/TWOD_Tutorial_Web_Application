@@ -144,22 +144,36 @@ const TutorAddAvailability = () => {
   };
 
   const handleAddDate = () => {
-    if (!selectedDate || !selectedSubject || !selectedGrade) return; // ✅ Ensure date, subject, and grade are selected
+    if (!selectedDate || !selectedSubject || !selectedGrade) return;
+
+    // Check if selected date is in the past
+    const selectedDateTime = new Date(selectedDate);
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Reset time to start of day
+
+    if (selectedDateTime < currentDate) {
+      setToast({
+        show: true,
+        message: "Cannot select a past date",
+        type: "error"
+      });
+      return;
+    }
 
     setNewAvailableDates((prevDates) => {
       const exists = prevDates.some(
         (d) => d.date === selectedDate && d.subject === selectedSubject && d.grade === selectedGrade
       );
 
-      if (exists) return prevDates; // ✅ Prevent duplicate entries
+      if (exists) return prevDates;
 
       return [
         ...prevDates,
-        { date: selectedDate, subject: selectedSubject, grade: selectedGrade, timeSlots: [] }, // ✅ Initialize time slots with grade
+        { date: selectedDate, subject: selectedSubject, grade: selectedGrade, timeSlots: [] },
       ];
     });
 
-    setSelectedDate(""); // ✅ Reset date selection after adding
+    setSelectedDate("");
   };
 
   const handleRemoveDate = (date, subject, grade) => {
@@ -171,6 +185,33 @@ const TutorAddAvailability = () => {
   const handleAddTimeSlotToDate = (date, subject, startTime, endTime) => {
     if (!startTime || !endTime) return;
 
+    // Check if the date is today
+    const selectedDate = new Date(date);
+    const currentDate = new Date();
+    const isToday = selectedDate.toDateString() === currentDate.toDateString();
+
+    if (isToday) {
+      const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+      
+      if (startTime < currentTime) {
+        setToast({
+          show: true,
+          message: "Cannot select a past time for today",
+          type: "error"
+        });
+        return;
+      }
+    }
+
+    if (startTime >= endTime) {
+      setToast({
+        show: true,
+        message: "End time must be after start time",
+        type: "error"
+      });
+      return;
+    }
+
     setNewAvailableDates((prevDates) =>
       prevDates.map((d) => {
         if (d.date === date && d.subject === subject) {
@@ -179,7 +220,7 @@ const TutorAddAvailability = () => {
             (slot) => slot.startTime === startTime && slot.endTime === endTime
           );
 
-          if (exists) return d; // Avoid duplicates
+          if (exists) return d;
 
           return {
             ...d,
@@ -190,7 +231,6 @@ const TutorAddAvailability = () => {
       })
     );
 
-    // ✅ Reset start and end time after adding
     setStartTime("");
     setEndTime("");
   };
@@ -545,6 +585,7 @@ const TutorAddAvailability = () => {
                       className="w-full p-2 border rounded"
                       onChange={(e) => setSelectedDate(e.target.value)}
                       value={selectedDate}
+                      min={new Date().toISOString().split('T')[0]}
                     />
                     <button
                       className="bg-gray-500 text-white p-2 rounded disabled:opacity-50"
@@ -609,6 +650,7 @@ const TutorAddAvailability = () => {
                           placeholder="Start Time"
                           value={startTime}
                           onChange={(e) => setStartTime(e.target.value)}
+                          min={selectedDate === new Date().toISOString().split('T')[0] ? new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }) : '00:00'}
                         />
                         <input
                           type="time"
@@ -616,6 +658,7 @@ const TutorAddAvailability = () => {
                           placeholder="End Time"
                           value={endTime}
                           onChange={(e) => setEndTime(e.target.value)}
+                          min={startTime || (selectedDate === new Date().toISOString().split('T')[0] ? new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }) : '00:00')}
                         />
                         <button
                           className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"

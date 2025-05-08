@@ -10,6 +10,7 @@ import Footer from "../../components/footer/Footer";
 import Modal from "../../pages/login_signup/Modal";
 import { formatDate } from "./EnrollmentCalendar";
 import { useNavigate } from "react-router-dom";
+import { useCurrencyConverter } from '../../currencyConfig/useCurrencyConverter';
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -37,6 +38,7 @@ const CourseDetailsPage = () => {
   const [updatedCourse, setUpdatedCourse] = useState({});
   const isRoleAdmin = localStorage.getItem("role");
   const navigate = useNavigate();
+  const { convertAndFormat } = useCurrencyConverter();
 
   const handleCourseSummary = () => {
     if (
@@ -854,12 +856,7 @@ const CourseDetailsPage = () => {
                           </span>
                         </p>
                         <p className="text-gray-1200">
-                          {/* Price: $.{" "}
-                            {formatPrice(selectedSession?.price).toLocaleString(
-                              "en-IN"
-                            )}
-                            .00 */}
-                          Price: ${selectedSession?.price}
+                          Price: {convertAndFormat(parseFloat(selectedSession?.price || 0))}
                         </p>
                       </div>
                     )}
@@ -938,13 +935,8 @@ const CourseDetailsPage = () => {
                               Duration: {selectedDuration ||selectedSession.duration}
                             </p>
                             <p className="text-gray-600">
-                              {/* Price: $.{" "}
-                                {formatPrice(
-                                  selectedSession.price
-                                ).toLocaleString("en-IN")}
-                                .00 */}
-                              Price: ${selectedSession?.price}
-                            </p>
+                              Price: {convertAndFormat(parseFloat(selectedSession?.price || 0))}
+                            </p>  
                           </div>
                         )}
 
