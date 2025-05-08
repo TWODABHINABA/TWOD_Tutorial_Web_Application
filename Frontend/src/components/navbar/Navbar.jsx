@@ -16,6 +16,7 @@ import Modal from "../../pages/login_signup/Modal";
 import ExploreDropdown from "../exploredropdown/ExploreDropdown";
 import SearchBar from "../search/SearchBar";
 import authLogout from "../useLogout/UseLogout";
+import CountrySelector from "../CountrySelector/CountrySelector";
 
 const AnimatedNavbarLink = ({ children, to, ignoreActive = false }) => {
   const location = useLocation();
@@ -85,6 +86,8 @@ const CustomNavbar = () => {
 
           {/* RIGHT Side - Auth Buttons and Mobile Search Icon */}
           <div className="flex items-center gap-4 md:order-2">
+            <CountrySelector />
+            
             {isAuthenticated && (
               <AnimatedNavbarLink to="/user">
                 <FaUserTie size={20} color="orange" title="UserInfo" />

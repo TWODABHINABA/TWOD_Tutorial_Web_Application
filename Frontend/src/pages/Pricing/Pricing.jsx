@@ -6,11 +6,14 @@ import CustomNavbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import api from "../../components/User-management/api";
 import { ClipLoader } from "react-spinners";
+import { useCurrencyConverter } from '../../currencyConfig/useCurrencyConverter';
 
 const PricingPage = () => {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { convertAndFormat } = useCurrencyConverter();
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -84,7 +87,7 @@ const PricingPage = () => {
                 className="text-2xl font-bold text-blue-600 mt-2"
                 data-aos="fade-left"
               >
-                ${plan.price}
+                {convertAndFormat(parseFloat(plan.price || 0))}
               </p>
               <p className="text-gray-600 mt-2" data-aos="fade-right">
                 {plan.description}

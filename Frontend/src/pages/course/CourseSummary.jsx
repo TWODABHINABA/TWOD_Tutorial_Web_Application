@@ -3,11 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import PaymentFooter from "../../components/footer/PaymentFooter";
 import PaymentNavbar from "../../components/navbar/PaymentNavbar";
+import { useCurrencyConverter } from '../../currencyConfig/useCurrencyConverter';
 
 const CourseSummaryPage = () => {
   const token = localStorage.getItem("token");
   const location = useLocation();
   const navigate = useNavigate();
+  const { convertAndFormat } = useCurrencyConverter();
 
   const {
     course,
@@ -201,7 +203,7 @@ const response = await api.post(
               <div>
                 <dt className="text-sm font-medium text-gray-500">Price</dt>
                 <dd className="mt-1 text-gray-900">
-                  ${selectedSession.price ?? course.price}
+                  {convertAndFormat(parseFloat(selectedSession?.price || 0))}
                 </dd>
               </div>
               {selectedTutor && (
