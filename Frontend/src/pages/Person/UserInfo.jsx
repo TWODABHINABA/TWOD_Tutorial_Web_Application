@@ -106,26 +106,25 @@ const UserInfo = () => {
   const handleValidation = (name, value) => {
     let errorMsg = "";
     let isValid = true;
-  
+
     if (name === "email") {
       isValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/.test(value);
       if (!isValid) errorMsg = "Invalid email format. Use '@something.com'";
     }
-  
+
     if (name === "phone") {
       isValid = /^\d{10}$/.test(value);
       if (!isValid) errorMsg = "Phone number must be 10 digits.";
     }
-  
+
     if (name === "birthday") {
       isValid = /^\d{4}-\d{2}-\d{2}$/.test(value);
       if (!isValid) errorMsg = "Birthday must be in 'YYYY-MM-DD' format.";
     }
-  
+
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
     setValid((prev) => ({ ...prev, [name]: isValid }));
   };
-  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -365,23 +364,23 @@ const UserInfo = () => {
               </h2>
 
               <div className="space-y-3 w-full">
-              {user.role === "tutor" ? (
-  <p
-    className="cursor-pointer hover:text-orange-600"
-    onClick={() => navigate("/tutor-dashboard")}
-  >
-    Tutor Dashboard
-  </p>
-) : user.role === "admin" ? (
-  <p
-    className="cursor-pointer hover:text-orange-600"
-    onClick={() => navigate("/admin-dashboard")}
-  >
-    Admin Dashboard
-  </p>
-) : (
-  <p></p>
-)}
+                {user.role === "tutor" ? (
+                  <p
+                    className="cursor-pointer hover:text-orange-600"
+                    onClick={() => navigate("/tutor-dashboard")}
+                  >
+                    Tutor Dashboard
+                  </p>
+                ) : user.role === "admin" ? (
+                  <p
+                    className="cursor-pointer hover:text-orange-600"
+                    onClick={() => navigate("/admin-dashboard")}
+                  >
+                    Admin Dashboard
+                  </p>
+                ) : (
+                  <p></p>
+                )}
 
                 <p className="cursor-pointer hover:text-orange-600">
                   Account Settings
@@ -478,7 +477,6 @@ const UserInfo = () => {
                     </div>
                   ))}
 
-     
                   {user.role === "tutor" && (
                     <>
                       <div>

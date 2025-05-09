@@ -1223,4 +1223,73 @@ router.post(
   }
 );
 
+router.get("/all-class", authMiddleware, async (req, res) => {
+  try {
+    const tutorId  = req.user.id;
+
+    // 🚫 Exclude these statuses
+    const excludedStatuses = [
+      "failed",
+      "pending",
+      "pending for tutor acceptance",
+      "rejected",
+    ];
+
+
+    const payLaterStudents = await PayLater.find({
+      tutorId,
+      status: { $nin: excludedStatuses },
+    })
+      .populate("user", "name email")
+      .populate("courseId", "name courseType")
+      .populate("tutorId", "name") 
+      .lean();
+
+
+    const transactionStudents = await Transaction.find({
+      tutorId,
+      status: { $nin: ["failed", "pending"] },
+    })
+      .populate("user", "name email")
+      .populate("courseId", "name courseType")
+      .populate("tutorId", "name") 
+      .lean();
+
+
+    const formattedPayLater = payLaterStudents.map((entry) => ({
+      studentName: entry.user?.name || "N/A",
+      studentEmail: entry.user?.email || "N/A",
+      courseName: entry.courseId?.name || "N/A",
+      courseType: entry.courseId?.courseType || "N/A",
+      timeSlot: entry.selectedTime || "N/A",
+      selectedDate: entry.selectedDate || "N/A",
+      status: entry.status,
+      tutorName: entry.tutorId?.name || "N/A",
+      source: "PayLater",
+    }));
+
+    const formattedTransaction = transactionStudents.map((entry) => ({
+      studentName: entry.user?.name || "N/A",
+      studentEmail: entry.user?.email || "N/A",
+      courseName: entry.courseId?.name || "N/A",
+      courseType: entry.courseId?.courseType || "N/A",
+      timeSlot: entry.selectedTime || "N/A",
+      selectedDate: entry.selectedDate || "N/A",
+      status: entry.status,
+      tutorName: entry.tutorId?.name || "N/A",
+      source: "Transaction",
+    }));
+
+
+    const allStudents = [...formattedPayLater, ...formattedTransaction].sort(
+      (a, b) => new Date(a.selectedDate) - new Date(b.selectedDate)
+    );
+
+    res.status(200).json({ success: true, students: allStudents });
+  } catch (error) {
+    console.error("Error fetching tutor students:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 module.exports = router;

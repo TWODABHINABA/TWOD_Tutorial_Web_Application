@@ -1,8 +1,10 @@
 import React from "react";
 import { FiBell, FiGrid, FiHelpCircle } from "react-icons/fi";
 import BellDropdown from "./BellDropdown";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ title = "Dashboard", user }) => {
+  const navigate=useNavigate();
   return (
     <nav className="flex justify-between max-sm:justify-items-stretch max-sm:pl-16 items-center p-3 max-sm:p-[14px] bg-orange-50 border-b border-orange-300">
       <div className="text-xl sm:text-2xl font-bold text-orange-500 max-sm:text-lg sm:pl-[36%]">
@@ -19,7 +21,7 @@ const Navbar = ({ title = "Dashboard", user }) => {
         <button className="text-orange-500 hover:text-orange-600">
           <FiHelpCircle className="text-lg md:text-2xl" />
         </button>
-        <button className="flex items-center">
+        <button className="flex items-center" onClick={()=>navigate("/user")}>
           <img
             src={`https://twod-tutorial-web-application-3brq.onrender.com${
               user?.profilePicture || "/placeholder.jpg"
