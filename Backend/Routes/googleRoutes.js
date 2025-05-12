@@ -295,7 +295,7 @@ router.post("/chatbot", async (req, res) => {
         aiReply = "Sorry, I couldn't find any information related to your question in our system.";
       }
     } else {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" });
       const result = await model.generateContent({
         contents: [
           {
