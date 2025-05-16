@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
+import AdminSidebarMobile from "./AdminSidebarMobile";
 import api from "../../components/User-management/api";
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -247,13 +248,20 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-100 z-50">
-            <div className="max-md:hidden fixed top-0 left-0 h-full w-60 z-50">
-                <AdminSidebar />
+        <div className="flex min-h-screen bg-gray-100">
+            <div className="absolute md:static top-0 left-0 z-50">
+                <div className="max-md:hidden">
+                    <AdminSidebar />
+                </div>
+                <div className="md:hidden">
+                    <AdminSidebarMobile />
+                </div>
             </div>
-            <div className="w-full z-0 relative md:ml-60">
-                <AdminNavbar user = {user} />
-                <div className="p-4">
+
+            <div className="w-full z-0 relative ml-0 m d:ml-[225px]">
+                <AdminNavbar title="Dashboard" user={user} />
+                
+                <div className="p-4 md:p-6">
                     {/* Tutors Section */}
                     <div className="mb-8">
                         <div className="flex justify-between items-center mb-4">
@@ -267,36 +275,36 @@ const AdminDashboard = () => {
                                 </button>
                             )}
                         </div>
-                        <div className="bg-white rounded shadow p-4">
-                            <table className="min-w-full">
-                                <thead>
+                        <div className="bg-white rounded-lg shadow p-4 overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="py-2 px-4 border-b text-left">Name</th>
-                                        <th className="py-2 px-4 border-b text-left">Email</th>
-                                        <th className="py-2 px-4 border-b text-left">Actions</th>
+                                        <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="bg-white divide-y divide-gray-200">
                                     {displayedTutors.map((tutor) => (
-                                        <tr key={tutor._id}>
-                                            <td className="py-2 px-4 border-b">{tutor.name}</td>
-                                            <td className="py-2 px-4 border-b">{tutor.email}</td>
-                                            <td className="py-2 px-4 border-b">
-                                                <div className="flex space-x-2">
+                                        <tr key={tutor._id} className="hover:bg-gray-50">
+                                            <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">{tutor.name}</td>
+                                            <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">{tutor.email}</td>
+                                            <td className="py-2 px-4 whitespace-nowrap text-sm">
+                                                <div className="flex flex-wrap gap-2">
                                                     <button
-                                                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                                                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
                                                         onClick={() => handleTutorClick(tutor)}
                                                     >
                                                         View Bookings
                                                     </button>
                                                     <button
-                                                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
                                                         onClick={() => handleSendEmail(tutor)}
                                                     >
                                                         Send Mail
                                                     </button>
                                                     <button
-                                                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
                                                         onClick={() => handleDeleteTutor(tutor)}
                                                     >
                                                         Delete
@@ -311,7 +319,7 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Users Section */}
-                    <div>
+                    <div className="mb-8">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-bold">Users</h2>
                             {users.length > 5 && (
@@ -323,36 +331,36 @@ const AdminDashboard = () => {
                                 </button>
                             )}
                         </div>
-                        <div className="bg-white rounded shadow p-4">
-                            <table className="min-w-full">
-                                <thead>
+                        <div className="bg-white rounded-lg shadow p-4 overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="py-2 px-4 border-b text-left">Name</th>
-                                        <th className="py-2 px-4 border-b text-left">Email</th>
-                                        <th className="py-2 px-4 border-b text-left">Actions</th>
+                                        <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="bg-white divide-y divide-gray-200">
                                     {displayedUsers.map((user) => (
-                                        <tr key={user._id}>
-                                            <td className="py-2 px-4 border-b">{user.name}</td>
-                                            <td className="py-2 px-4 border-b">{user.email}</td>
-                                            <td className="py-2 px-4 border-b">
-                                                <div className="flex space-x-2">
+                                        <tr key={user._id} className="hover:bg-gray-50">
+                                            <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
+                                            <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
+                                            <td className="py-2 px-4 whitespace-nowrap text-sm">
+                                                <div className="flex flex-wrap gap-2">
                                                     <button
-                                                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                                                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
                                                         onClick={() => handleUserClick(user)}
                                                     >
                                                         View Bookings
                                                     </button>
                                                     <button
-                                                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
                                                         onClick={() => handleSendEmailToUser(user)}
                                                     >
                                                         Send Mail
                                                     </button>
                                                     <button
-                                                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
                                                         onClick={() => handleDeleteUser(user)}
                                                     >
                                                         Delete
@@ -367,11 +375,11 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Course Revenue Statistics */}
-                    <div className="mt-8">
+                    <div className="mb-8">
                         <h2 className="text-2xl font-bold mb-4">Course Revenue Statistics</h2>
-                        <div className="bg-white rounded shadow p-4">
-                            <div className="flex flex-col md:flex-row">
-                                <div className="w-full md:w-2/3 h-[400px]">
+                        <div className="bg-white rounded-lg shadow p-4">
+                            <div className="flex flex-col lg:flex-row gap-6">
+                                <div className="w-full lg:w-2/3 h-[400px]">
                                     {courseRevenue.length > 0 ? (
                                         <Pie 
                                             data={coursePieChartData} 
@@ -384,9 +392,9 @@ const AdminDashboard = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4">
+                                <div className="w-full lg:w-1/3">
                                     <h3 className="text-lg font-semibold mb-2">Revenue Details</h3>
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 overflow-y-auto max-h-[400px]">
                                         {courseRevenue.map((course, index) => (
                                             <div key={course.courseId} className="flex justify-between items-center">
                                                 <div className="flex items-center">
@@ -407,11 +415,11 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Tutor Revenue Statistics */}
-                    <div className="mt-8">
+                    <div className="mb-8">
                         <h2 className="text-2xl font-bold mb-4">Tutor Revenue Statistics</h2>
-                        <div className="bg-white rounded shadow p-4">
-                            <div className="flex flex-col md:flex-row">
-                                <div className="w-full md:w-2/3 h-[400px]">
+                        <div className="bg-white rounded-lg shadow p-4">
+                            <div className="flex flex-col lg:flex-row gap-6">
+                                <div className="w-full lg:w-2/3 h-[400px]">
                                     {tutorRevenue.length > 0 ? (
                                         <Pie 
                                             data={tutorPieChartData} 
@@ -424,9 +432,9 @@ const AdminDashboard = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4">
+                                <div className="w-full lg:w-1/3">
                                     <h3 className="text-lg font-semibold mb-2">Revenue Details</h3>
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 overflow-y-auto max-h-[400px]">
                                         {tutorRevenue.map((tutor, index) => (
                                             <div key={tutor.tutorId} className="flex justify-between items-center">
                                                 <div className="flex items-center">

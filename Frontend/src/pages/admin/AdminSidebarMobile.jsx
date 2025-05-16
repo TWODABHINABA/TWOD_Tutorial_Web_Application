@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export default function MobileSidebar() {
+export default function AdminSidebarMobile() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
   // Derive active label from the current path
   const getActiveLabel = (pathname) => {
-    if (pathname.startsWith("/tutor-dashboard")) return "Dashboard";
-    if (pathname.startsWith("/tutor-controls")) return "Controls";
-    // if (pathname.startsWith("/tutor-products")) return "Products";
-    // if (pathname.startsWith("/tutor-analytics")) return "Analytics";
-    // if (pathname.startsWith("/tutor-members")) return "Members";
+    if (pathname.startsWith("/admin-dashboard")) return "Dashboard";
+    if (pathname.startsWith("/admin-controls")) return "Controls";
+    // if (pathname.startsWith("/admin-products")) return "Products";
+    // if (pathname.startsWith("/admin-analytics")) return "Analytics";
+    // if (pathname.startsWith("/admin-members")) return "Members";
     return "";
   };
+
   const active = getActiveLabel(location.pathname);
+
   const handleNav = (label, path) => {
     navigate(path);
     setOpen(false);
@@ -51,7 +54,7 @@ export default function MobileSidebar() {
       >
         {/* Header with Close */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-orange-600">Menu</h2>
+          <h2 className="text-lg font-semibold text-orange-600">Admin Menu</h2>
           <button
             className="text-2xl text-orange-500 focus:outline-none"
             onClick={() => setOpen(false)}
@@ -64,34 +67,34 @@ export default function MobileSidebar() {
         <nav className="mt-4 flex flex-col space-y-1 px-2">
           <NavButton
             label="Dashboard"
-            to="/tutor-dashboard"
+            to="/admin-dashboard"
             active={active === "Dashboard"}
-            onClick={() => handleNav("Dashboard", "/tutor-dashboard")}
+            onClick={() => handleNav("Dashboard", "/admin-dashboard")}
           />
           <NavButton
             label="Controls"
-            to="/tutor-controls"
+            to="/admin-controls"
             active={active === "Controls"}
-            onClick={() => handleNav("Controls", "/tutor-controls")}
-          />
-          <NavButton
-            label="Requests"
-            to="/tutor-requests"
-            active={active === "requests"}
-            onClick={() => handleNav("Requests", "/tutor-requests")}
+            onClick={() => handleNav("Controls", "/admin-controls")}
           />
           {/* <NavButton
-            label="Analytics"
-            to="/tutor-analytics"
-            active={active === "Analytics"}
-            onClick={() => handleNav("Analytics", "/tutor-analytics")}
-          /> */}
-          <NavButton
-            label="Assignment"
-            to="/tutor-assignment"
-            active={active === "Assignment"}
-            onClick={() => handleNav("Assignment", "/tutor-assignment")}
+            label="Products"
+            to="/admin-products"
+            active={active === "Products"}
+            onClick={() => handleNav("Products", "/admin-products")}
           />
+          <NavButton
+            label="Analytics"
+            to="/admin-analytics"
+            active={active === "Analytics"}
+            onClick={() => handleNav("Analytics", "/admin-analytics")}
+          />
+          <NavButton
+            label="Members"
+            to="/admin-members"
+            active={active === "Members"}
+            onClick={() => handleNav("Members", "/admin-members")}
+          /> */}
         </nav>
       </div>
     </div>
@@ -114,4 +117,4 @@ function NavButton({ label, to, active, onClick }) {
       {label}
     </button>
   );
-}
+} 
