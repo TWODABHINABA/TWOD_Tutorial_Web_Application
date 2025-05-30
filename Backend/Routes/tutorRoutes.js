@@ -171,6 +171,32 @@ router.get("/tutors/me", authMiddleware, async (req, res) => {
   }
 });
 
+
+router.get("/tutors/:id", async (req, res) => {
+  const tutorId = req.params.id;
+
+  // Handle cases where user didn’t select any tutor (frontend default)
+  if (!tutorId || tutorId === "No Preference") {
+    return res.status(400).json({ error: "Please select a tutor." });
+  }
+
+  try {
+    const tutor = await Tutor.findById(tutorId).select(
+      "name profilePicture description subjects phone birthday"
+    );
+
+    if (!tutor) {
+      return res.status(404).json({ error: "Tutor not found." });
+    }
+
+    res.json(tutor);
+  } catch (error) {
+    console.error("Error fetching tutor:", error);
+    res.status(500).json({ error: "Server error fetching tutor." });
+  }
+});
+
+
 router.get("/tutors/availability", authMiddleware, async (req, res) => {
   try {
     const tutorId = req.user.id; // Get logged-in tutor's ID

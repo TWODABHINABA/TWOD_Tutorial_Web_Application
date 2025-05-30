@@ -3,12 +3,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../components/User-management/api";
 import PaymentFooter from "../../components/footer/PaymentFooter";
 import PaymentNavbar from "../../components/navbar/PaymentNavbar";
-import { useCurrencyConverter } from '../../currencyConfig/useCurrencyConverter';
+import { useCurrencyConverter } from "../../currencyConfig/useCurrencyConverter";
+import Modal from "../login_signup/Modal";
+import Toast from "../login_signup/Toast";
 
 const CourseSummaryPage = () => {
   const token = localStorage.getItem("token");
   const location = useLocation();
   const navigate = useNavigate();
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { convertAndFormat } = useCurrencyConverter();
 
   const {
@@ -87,9 +91,7 @@ const CourseSummaryPage = () => {
       return;
     }
 
-
     const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
-
 
     const tutorIdToSend =
       selectedTutor === "No Preference" ? null : selectedTutor;
@@ -97,7 +99,7 @@ const CourseSummaryPage = () => {
     try {
       console.log("Sending Enrollment Data:", {
         tutorId: tutorIdToSend,
-        selectedDate: formattedDate, 
+        selectedDate: formattedDate,
         selectedTime: selectedTimeSlot,
         duration: selectedDuration,
       });
@@ -126,31 +128,35 @@ const CourseSummaryPage = () => {
 
   const handlePayLater = async () => {
     if (!token) {
-      alert("Please log in first.");
-      navigate("/login");
+      sessionStorage.setItem(
+        "redirectAfterLogin",
+        window.location.pathname + window.location.search
+      );
+      setShowLoginModal(true);
       return;
     }
-  console.log("hello course summary")
+    console.log("hello course summary");
     const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
-    const tutorIdToSend = selectedTutor === "No Preference" ? null : selectedTutor;
-  
+    const tutorIdToSend =
+      selectedTutor === "No Preference" ? null : selectedTutor;
+
     try {
       const userId = JSON.parse(localStorage.getItem("user"))?.id; // or wherever you store the user
 
-const response = await api.post(
-  `/paylater/book`,
-  {
-    courseId: course._id,
-    tutorId: tutorIdToSend,
-    selectedDate: formattedDate,
-    selectedTime: selectedTimeSlot,
-    duration: selectedDuration,
-    bonus: selectedSession.bonus,
-    user: userId, // 👈 manually attach user if needed
-  },
-  { headers: { Authorization: `Bearer ${token}` } }
-);
-  
+      const response = await api.post(
+        `/paylater/book`,
+        {
+          courseId: course._id,
+          tutorId: tutorIdToSend,
+          selectedDate: formattedDate,
+          selectedTime: selectedTimeSlot,
+          duration: selectedDuration,
+          bonus: selectedSession.bonus,
+          user: userId, // 👈 manually attach user if needed
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
       if (response.data && response.data.message) {
         alert(response.data.message); // "Pay Later booking created successfully"
         navigate("/");
@@ -162,7 +168,6 @@ const response = await api.post(
       alert(error.response?.data?.error || "Failed to save Pay Later booking.");
     }
   };
-  
 
   if (!course) {
     return (
@@ -177,6 +182,13 @@ const response = await api.post(
   return (
     <div className="flex flex-col min-h-screen">
       <PaymentNavbar />
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false })}
+        />
+      )}
 
       <main className="flex-grow bg-gray-50 py-8">
         <div className="container mx-auto px-4">
@@ -258,7 +270,7 @@ const response = await api.post(
       <PaymentFooter />
 
       {/* Modal for About Tutor */}
-      {showTutorModal && (
+      {showTutorModal && selectedTutor ?(
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 px-4"
           onClick={handleCloseTutorModal}
@@ -283,14 +295,16 @@ const response = await api.post(
               <div className="flex flex-col items-center">
                 <img
                   src={
-                    tutorData.profilePicture.startsWith("http")
-                      ? tutorData.profilePicture
-                      : `https://twod-tutorial-web-application-3brq.onrender.com${tutorData.profilePicture}` ||
-                        `http://localhost:6001${tutorData.profilePicture}`
+                    tutorData.profilePicture
+                      ? tutorData.profilePicture.startsWith("http")
+                        ? tutorData.profilePicture
+                        : `https://twod-tutorial-web-application-3brq.onrender.com${tutorData.profilePicture}`
+                      : "https://via.placeholder.com/100" // fallback image
                   }
-                  alt={tutorData.name}
+                  alt={tutorData.name || "Tutor"}
                   className="w-24 h-24 rounded-full object-cover mb-4 border-2 border-orange-500"
                 />
+
                 <h2 className="text-xl font-bold text-orange-500">
                   {tutorData.name}
                 </h2>
@@ -319,14 +333,15 @@ const response = await api.post(
                   >
                     {tutorData.description}
                   </p>
-                  {tutorData.description.length > 150 && (
-                    <button
-                      onClick={() => setDescExpanded(!descExpanded)}
-                      className="text-blue-500 text-xs mt-1"
-                    >
-                      {descExpanded ? "Read Less" : "Read More"}
-                    </button>
-                  )}
+                  {tutorData.description &&
+                    tutorData.description.length > 150 && (
+                      <button
+                        onClick={() => setDescExpanded(!descExpanded)}
+                        className="text-blue-500 text-xs mt-1"
+                      >
+                        {descExpanded ? "Read Less" : "Read More"}
+                      </button>
+                    )}
                 </div>
               </div>
             ) : (
@@ -336,6 +351,9 @@ const response = await api.post(
             )}
           </div>
         </div>
+      ):(<></>)}
+      {showLoginModal && (
+        <Modal initialAction="Login" onClose={() => setShowLoginModal(false)} />
       )}
     </div>
   );
