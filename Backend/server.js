@@ -20,7 +20,7 @@ const path = require("path");
 app.use(express.json());
 
 const allowedOrigins = [
-  "https://twod-tutorial-web-application-phi.vercel.app",
+  "https://twod-tutorial-web-application-nine.vercel.app",
   "http://localhost:5173",
 ];
 

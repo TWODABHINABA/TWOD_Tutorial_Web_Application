@@ -420,7 +420,7 @@ router.post(
           });
 
           // const assignmentViewLink = `http://localhost:5173/assignment-view/${assignment._id}`;
-          const assignmentViewLink = `https://twod-tutorial-web-application-phi.vercel.app/assignment-view/${assignment._id}`;
+          const assignmentViewLink = `https://twod-tutorial-web-application-nine.vercel.app/assignment-view/${assignment._id}`;
 
           const deadlineDate = moment()
             .add(3, "days")

@@ -64,7 +64,7 @@ Below are your login credentials:
 To get started, please follow these steps:
 
 1. Click on the following link to access the tutor portal:
-   https://twod-tutorial-web-application-phi.vercel.app/
+   https://twod-tutorial-web-application-nine.vercel.app/
 
 2. On the homepage, navigate to the Login section.
 
@@ -93,7 +93,7 @@ Team TWOD Tutorials
 
 <p><strong>Steps to get started:</strong></p>
 <ol>
-  <li>Visit the tutor portal: <a href="https://twod-tutorial-web-application-phi.vercel.app/">Click Here</a></li>
+  <li>Visit the tutor portal: <a href="https://twod-tutorial-web-application-nine.vercel.app/">Click Here</a></li>
   <li>Go to the <strong>Login</strong> section.</li>
   <li>Enter your credentials above.</li>
   <li>Reset your password after logging in.</li>

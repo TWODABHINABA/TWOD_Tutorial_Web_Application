@@ -65,14 +65,14 @@ router.get("/auth/callback", (req, res, next) => {
     if (err || !user) {
       const errorMessage = info?.message || err?.message || "Something went wrong during Google login.";
       return res.redirect(
-        `https://twod-tutorial-web-application-phi.vercel.app/?error=${encodeURIComponent(errorMessage)}`
+        `https://twod-tutorial-web-application-nine.vercel.app/?error=${encodeURIComponent(errorMessage)}`
       );
     }
 
     req.logIn(user, (err) => {
       if (err) {
         return res.redirect(
-          `https://twod-tutorial-web-application-phi.vercel.app/?error=${encodeURIComponent("Login failed")}`
+          `https://twod-tutorial-web-application-nine.vercel.app/?error=${encodeURIComponent("Login failed")}`
         );
       }
 
@@ -90,18 +90,18 @@ router.get("/auth/callback/success", async (req, res) => {
 
   if (!user.password) {
     return res.redirect(
-      `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(
+      `https://twod-tutorial-web-application-nine.vercel.app/set-password?token=${token}&email=${encodeURIComponent(
         user.email
       )}` ||
         `http://localhost:5173/set-password?token=${token}&email=${encodeURIComponent(
           user.email
         )}`
-      // `https://twod-tutorial-web-application-phi.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
+      // `https://twod-tutorial-web-application-nine.vercel.app/set-password?token=${token}&email=${encodeURIComponent(user.email)}` //Abhi
     );
   }
 
   return res.redirect(
-    `https://twod-tutorial-web-application-phi.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
+    `https://twod-tutorial-web-application-nine.vercel.app/auth-success?token=${token}&name=${encodeURIComponent(
       user.name
     )}&email=${encodeURIComponent(user.email)}` ||
       `http://localhost:5173/auth-success?token=${token}&name=${encodeURIComponent(
@@ -112,7 +112,7 @@ router.get("/auth/callback/success", async (req, res) => {
 
 router.get("/auth/callback/failure", (req, res) => {
   return res.redirect(
-    `https://twod-tutorial-web-application-phi.vercel.app/?error=${encodeURIComponent("Google authentication failed")}`
+    `https://twod-tutorial-web-application-nine.vercel.app/?error=${encodeURIComponent("Google authentication failed")}`
   );
 });
 
