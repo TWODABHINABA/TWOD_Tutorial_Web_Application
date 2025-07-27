@@ -1,7 +1,8 @@
 const twilio = require("twilio");
+require("dotenv").config();
 
-const accountSid = "AC906d02294bb0ad4946c9f0b44fb07aaf";
-const authToken = "8da2b7da6609d350e8124ed2cd9dc378";
+const accountSid = process.env.TWILIO_WHATSAPP_SID;
+const authToken = process.env.TWILIO_WHATSAPP_AUTH;
 const client = twilio(accountSid, authToken);
 const FROM_NUMBER = "whatsapp:+14155238886"; // Twilio sandbox or your WhatsApp business number
 

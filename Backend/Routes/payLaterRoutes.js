@@ -212,9 +212,7 @@ router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
     const { status } = req.body;
 
     if (!["accepted", "rejected"].includes(status)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid status. Use 'accepted' or 'rejected'." });
+      return res.status(400).json({ message: "Invalid status. Use 'accepted' or 'rejected'." });
     }
 
     const updated = await PayLater.findByIdAndUpdate(
@@ -222,15 +220,16 @@ router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
       { status },
       { new: true }
     )
-      .populate("user", "name email")
+      .populate("user", "name email phone")           // include phone for WhatsApp
       .populate("courseId", "name courseType")
-      .populate("tutorId", "name email");
+      .populate("tutorId", "name email phone");       // include tutor phone if needed
 
     console.log(`✏️ Updating booking ${req.params.id} to status: ${status}`);
 
     if (!updated) {
       return res.status(404).json({ message: "Booking request not found" });
     } else {
+      // Send email as before
       await sendEmail(
         updated.user.email,
         `Your Pay Later Request has been ${status}`,
@@ -246,7 +245,7 @@ ${
 }
 
 Course Details:
-- Course Name: ${updated.courseId.name} ${updated.courseId.cousrseType}
+- Course Name: ${updated.courseId.name} ${updated.courseId.courseType}
 
 Tutor Details:
 - Name: ${updated.tutorId?.name || "Assigned Tutor"}
@@ -258,6 +257,44 @@ Best regards,
 Team TWOD Tutorials
         `
       );
+
+      // === WhatsApp Notification Logic ===
+      function formatE164(phone) {
+        phone = phone.trim();
+        if (phone.startsWith("+")) return phone;
+        if (phone.length === 10) return "+91" + phone; // adjust country code as needed
+        if (phone.length === 12 && phone.startsWith("91")) return "+" + phone;
+        throw new Error("Phone format not recognized: " + phone);
+      }
+
+      const websiteURL = "https://yourwebsite.com"; // Replace with your actual URL
+
+      let userWhatsappMsg = `Dear ${updated.user.name},
+
+Your Pay Later booking request for the course "${updated.courseId.name}" has been *${status.toUpperCase()}* by the tutor.
+
+${
+  status === "accepted"
+    ? `You may now proceed to payment and preparation for your learning journey.`
+    : `We regret to inform you the tutor has rejected your booking request. You may explore other available courses on our platform.`
+}
+
+For further assistance, please visit: ${websiteURL}
+
+Best regards,
+Your Tutoring Platform Team`;
+
+      // Send WhatsApp notification to the user (don't block response on failure)
+      if (updated.user.phone) {
+        try {
+          await sendWhatsAppMessage(formatE164(updated.user.phone), userWhatsappMsg);
+          console.log("WhatsApp sent to user:", updated.user.phone);
+        } catch (err) {
+          console.error("Failed to send WhatsApp to user:", err);
+        }
+      } else {
+        console.warn("No phone number available for user to send WhatsApp");
+      }
     }
 
     res.status(200).json({ message: `Request ${status}`, data: updated });
