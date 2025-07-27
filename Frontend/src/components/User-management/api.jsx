@@ -1,6 +1,4 @@
 import axios from "axios";
-// const API_URL = "https://twod-tutorial-web-application-3brq.onrender.com";
-// const API_URL = "https://twod-tutorial-web-application-3brq.onrender.com" || "http://localhost:6001";
 const API_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:6001" // Local server

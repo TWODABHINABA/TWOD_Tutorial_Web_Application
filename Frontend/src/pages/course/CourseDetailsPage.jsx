@@ -505,7 +505,7 @@ const CourseDetailsPage = () => {
                 <img
                   // src={`https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}`}
                   src={
-                    `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}` ||
+                    // `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}` ||
                     `http://localhost:6001${course.nameImage}`
                   }
                   alt={course.nameImage}
@@ -742,7 +742,7 @@ const CourseDetailsPage = () => {
                         <div className="flex items-start space-x-4">
                           <img
                             src={
-                              `https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}` ||
+                              // `https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}` ||
                               `http://localhost:6001${feedback.profilePicture}`
                             } //local
                             // src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}
@@ -1111,7 +1111,7 @@ const CourseDetailsPage = () => {
                         <div className="flex flex-col items-center space-y-2">
                           <img
                             src={
-                              `https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}` ||
+                              // `https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}` ||
                               `http://localhost:6001${feedback.profilePicture}`
                             } //local
                             // src={`https://twod-tutorial-web-application-3brq.onrender.com${feedback.profilePicture}`}

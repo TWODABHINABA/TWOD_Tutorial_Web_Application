@@ -6,7 +6,7 @@ const paypal = require("../config/paypal");
 const GlobalSessionPricing = require("../Models/GlobalSessionPricing");
 const Transaction = require("../Models/transaction");
 const moment = require("moment");
-
+const sendWhatsAppMessage=require("./sendWhatsappMessage");
 
 const PayLater = require("../Models/payLater");
 const Course = require("../Models/course");
@@ -26,7 +26,12 @@ const convertTo24HourFormat = (time12h) => {
   return `${hours}:${minutes}`;
 };
 
-const findAvailableTutor = async (subject, grade, selectedDate, selectedTime) => {
+const findAvailableTutor = async (
+  subject,
+  grade,
+  selectedDate,
+  selectedTime
+) => {
   const selectedStartTime = convertTo24HourFormat(
     selectedTime.split("-")[0].trim()
   );
@@ -39,10 +44,12 @@ const findAvailableTutor = async (subject, grade, selectedDate, selectedTime) =>
     "availability.subjects.subjectName": subject,
     "availability.subjects.grades.grade": grade,
   });
-console.log("Tutors found:", tutors);
+  console.log("Tutors found:", tutors);
   for (const tutor of tutors) {
     for (const subjectEntry of tutor.availability) {
-      if (new Date(subjectEntry.date).toISOString().split("T")[0] === selectedDate) {
+      if (
+        new Date(subjectEntry.date).toISOString().split("T")[0] === selectedDate
+      ) {
         for (const subj of subjectEntry.subjects) {
           if (subj.subjectName === subject) {
             for (const gradeEntry of subj.grades) {
@@ -69,31 +76,25 @@ console.log("Tutors found:", tutors);
 
 router.post("/paylater/book", authMiddleware, async (req, res) => {
   try {
-    console.log("hello paylater book");
-
     let { courseId, tutorId, selectedDate, selectedTime, duration, bonus } =
       req.body;
 
     const globalPricing = await GlobalSessionPricing.findOne();
-    if (!globalPricing) {
+    if (!globalPricing)
       return res.status(404).json({ message: "Session pricing not found" });
-    }
 
     const selectedSession = globalPricing.sessions.find(
       (session) => session.duration === duration
     );
-    if (!selectedSession) {
+    if (!selectedSession)
       return res.status(400).json({ message: "Invalid session duration" });
-    }
 
     let amount = selectedSession.price;
     const formattedPrice = parseFloat(amount.replace(/,/g, "")).toFixed(2);
-    console.log(formattedPrice);
 
     const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
+    if (!course) return res.status(404).json({ message: "Course not found" });
+
     if (!tutorId) {
       // Auto-assign a tutor
       const assignedTutor = await findAvailableTutor(
@@ -101,31 +102,22 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
         course.name,
         selectedDate,
         selectedTime
-
-
       );
-
       if (!assignedTutor) {
         return res.status(400).json({
           error: "No tutors available for the selected date and time.",
         });
       }
-
       tutorId = assignedTutor._id;
-      console.log(
-        `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
-      );
     }
     if (!courseId || !tutorId || !selectedDate || !selectedTime || !duration) {
       return res.status(400).json({ message: "All fields are required" });
     }
-
     const userId = req.user?._id || req.user?.id;
-    if (!userId) {
+    if (!userId)
       return res
         .status(401)
         .json({ message: "Unauthorized: User not found in token." });
-    }
 
     const booking = new PayLater({
       courseId,
@@ -140,6 +132,51 @@ router.post("/paylater/book", authMiddleware, async (req, res) => {
     });
 
     await booking.save();
+
+    function formatE164(phone) {
+      phone = phone.trim();
+      if (phone.startsWith("+")) return phone;
+      if (phone.length === 10) return "+91" + phone;
+      if (phone.length === 12 && phone.startsWith("91")) return "+" + phone;
+ 
+      throw new Error("Phone format not recognized: " + phone);
+    }
+
+
+    const user = await Person.findById(userId);
+    const tutor = await Tutor.findById(tutorId);
+
+ 
+    const websiteURL = "http://localhost:5173"; 
+
+    const userMsg = `Dear ${user.name},
+
+Your booking for the course "${course.name}" with tutor ${tutor.name} has been successfully recorded for ${selectedDate} at ${selectedTime}.
+
+Please note that the payment status is currently pending, as you have opted for the Pay Later option.
+
+For any questions or to make a payment, kindly visit: ${websiteURL}
+
+Thank you for choosing our services.`;
+
+    const tutorMsg = `Dear ${tutor.name},
+
+${user.name} has booked the course "${course.name}" with you for ${selectedDate} at ${selectedTime}.
+
+Please be informed that the payment is pending as the user has selected the Pay Later option.
+
+For more details, please visit: ${websiteURL}
+
+Best regards,
+Your Tutoring Platform Team`;
+
+  
+
+    sendWhatsAppMessage(formatE164(user.phone), userMsg);
+    sendWhatsAppMessage(formatE164(tutor.phone), tutorMsg);
+    console.log(formatE164(tutor.phone));
+
+
 
     res
       .status(201)
@@ -159,7 +196,7 @@ router.get("/paylater/tutor-request", authMiddleware, async (req, res) => {
     const bookings = await PayLater.find({ tutorId })
       .populate("user", "name email")
       .populate("courseId", "name courseType")
-      .populate("tutorId")
+      .populate("tutorId");
 
     console.log("✅ Bookings for this tutor:", bookings);
     res.status(200).json({ data: bookings });
@@ -170,8 +207,6 @@ router.get("/paylater/tutor-request", authMiddleware, async (req, res) => {
 });
 
 
-
-// PUT: Tutor updates request status
 router.put("/paylater/:id/status", authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
@@ -232,7 +267,6 @@ Team TWOD Tutorials
   }
 });
 
-
 router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
   try {
     const transactionId = req.params.id;
@@ -269,10 +303,10 @@ router.post("/payLater/:id/payNow", authMiddleware, async (req, res) => {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        return_url: `https://twod-tutorial-web-application-nine.vercel.app/success?transactionId=${transaction._id}`,
-        cancel_url: `https://twod-tutorial-web-application-nine.vercel.app/cancel?transactionId=${transaction._id}`,
-        // return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
-        // cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+        // return_url: `https://twod-tutorial-web-application-nine.vercel.app/success?transactionId=${transaction._id}`,
+        // cancel_url: `https://twod-tutorial-web-application-nine.vercel.app/cancel?transactionId=${transaction._id}`,
+        return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
+        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {

@@ -95,45 +95,65 @@ const TutorAddAvailability = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (!loggedInTutorId) return; // ✅ Ensure tutor ID exists before making API call
+  // Updated TutorAddAvailability.jsx
+useEffect(() => {
+  if (!loggedInTutorId) {
+    console.log("⏳ Waiting for tutor ID...");
+    return; // ✅ Ensure tutor ID exists before making API call
+  }
 
-    const fetchData = async () => {
-      try {
-        console.log(
-          "Fetching availability for logged-in tutor:",
-          loggedInTutorId
-        );
+  const fetchData = async () => {
+    try {
+      console.log("🚀 Fetching availability for logged-in tutor:", loggedInTutorId);
+      console.log("📚 Selected subject filter:", selectedSubject);
 
-        // Include subject filter if needed
-        const queryParam = selectedSubject ? `?subject=${selectedSubject}` : "";
-        const availabilityResponse = await api.get(
-          `/tutors/availability${queryParam}`
-        );
+      // Include subject filter if needed
+      const queryParam = selectedSubject ? `?subject=${selectedSubject}` : "";
+      const url = `/tutors/availability${queryParam}`;
+      
+      console.log("🌐 Making request to:", url);
+      
+      const availabilityResponse = await api.get(url);
 
-        console.log("📤 Received Availability:", availabilityResponse.data);
+      console.log("📤 Received Availability Response:", availabilityResponse);
+      console.log("📋 Availability Data:", availabilityResponse.data);
 
-        const filteredAvailability = availabilityResponse.data.availability.map(
-          (entry) => ({
-            date: entry.date,
-            subjects:
-              entry.subjects.length > 0
-                ? entry.subjects
-                : [{ subjectName: "General" }], // ✅ Ensure subjects array exists
-          })
-        );
-
-        setAvailability(filteredAvailability);
-      } catch (error) {
-        console.error(
-          "Error fetching data:",
-          error.response?.data || error.message
-        );
+      // Check if response has the expected structure
+      if (!availabilityResponse.data || !availabilityResponse.data.availability) {
+        console.error("❌ Unexpected response structure:", availabilityResponse.data);
+        return;
       }
-    };
 
-    fetchData();
-  }, [loggedInTutorId, selectedSubject]); 
+      const filteredAvailability = availabilityResponse.data.availability.map(
+        (entry) => ({
+          date: entry.date,
+          subjects:
+            entry.subjects && entry.subjects.length > 0
+              ? entry.subjects
+              : [{ subjectName: "General" }], // ✅ Ensure subjects array exists
+        })
+      );
+
+      console.log("✅ Processed availability:", filteredAvailability);
+      setAvailability(filteredAvailability);
+    } catch (error) {
+      console.error("❌ Error fetching data:", error);
+      console.error("❌ Error response:", error.response?.data);
+      console.error("❌ Error message:", error.message);
+      console.error("❌ Error status:", error.response?.status);
+      
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        console.log("🔒 Authentication failed - redirecting to login");
+        // Handle authentication failure
+      } else if (error.response?.status === 404) {
+        console.log("👤 Tutor not found");
+      }
+    }
+  };
+
+  fetchData();
+}, [loggedInTutorId, selectedSubject]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

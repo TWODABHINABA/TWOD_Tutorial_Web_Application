@@ -345,9 +345,9 @@ const UserInfo = () => {
               {updatedUser.profilePicture || user.profilePicture ? (
                 <img
                   src={
-                    updatedUser.profilePicture instanceof File
-                      ? URL.createObjectURL(updatedUser.profilePicture)
-                      : `https://twod-tutorial-web-application-3brq.onrender.com${user.profilePicture}` ||
+                    // updatedUser.profilePicture instanceof File
+                    //   ? URL.createObjectURL(updatedUser.profilePicture)
+                    //   : `https://twod-tutorial-web-application-3brq.onrender.com${user.profilePicture}` ||
                         `http://localhost:6001${user.profilePicture}`
                   }
                   alt="Profile"

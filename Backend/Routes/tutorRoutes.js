@@ -172,40 +172,27 @@ router.get("/tutors/me", authMiddleware, async (req, res) => {
 });
 
 
-router.get("/tutors/:id", async (req, res) => {
-  const tutorId = req.params.id;
-
-  // Handle cases where user didn’t select any tutor (frontend default)
-  if (!tutorId || tutorId === "No Preference") {
-    return res.status(400).json({ error: "Please select a tutor." });
-  }
-
-  try {
-    const tutor = await Tutor.findById(tutorId).select(
-      "name profilePicture description subjects phone birthday"
-    );
-
-    if (!tutor) {
-      return res.status(404).json({ error: "Tutor not found." });
-    }
-
-    res.json(tutor);
-  } catch (error) {
-    console.error("Error fetching tutor:", error);
-    res.status(500).json({ error: "Server error fetching tutor." });
-  }
-});
-
+const mongoose = require("mongoose");
 
 router.get("/tutors/availability", authMiddleware, async (req, res) => {
+  console.log("🎯 HIT /tutors/availability endpoint");
+  console.log("📍 Request URL:", req.originalUrl);
+  console.log("🔍 Request method:", req.method);
   try {
     const tutorId = req.user.id; // Get logged-in tutor's ID
     const { subject, grade } = req.query; // Optional subject and grade filter
 
+    console.log("🔍 Fetching availability for tutor ID:", tutorId);
+    console.log("🔍 Query params:", { subject, grade });
+
     const tutor = await Tutor.findById(tutorId);
     if (!tutor) {
+      console.log("❌ Tutor not found with ID:", tutorId);
       return res.status(404).json({ message: "Tutor not found" });
     }
+
+    console.log("✅ Found tutor:", tutor.name);
+    console.log("📋 Raw availability:", tutor.availability);
 
     // Filter availability by subject and grade (if provided)
     const filteredAvailability = tutor.availability
@@ -221,10 +208,48 @@ router.get("/tutors/availability", authMiddleware, async (req, res) => {
       }))
       .filter((entry) => entry.subjects.length > 0); // Remove entries with no matching subjects
 
+    console.log("📤 Sending filtered availability:", filteredAvailability);
     res.json({ availability: filteredAvailability });
   } catch (error) {
     console.error("❌ Error fetching availability:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
+router.get("/tutors/:id", async (req, res) => {
+  const tutorId = req.params.id;
+  
+  console.log("🆔 HIT /tutors/:id endpoint");
+  console.log("📍 Request URL:", req.originalUrl);
+  console.log("🔍 Fetching tutor with ID:", tutorId);
+  
+
+  if (!tutorId || tutorId === "No Preference") {
+    return res.status(400).json({ error: "Please select a tutor." });
+  }
+
+
+  if (!mongoose.Types.ObjectId.isValid(tutorId)) {
+    console.log("❌ Invalid ObjectId format:", tutorId);
+    return res.status(400).json({ error: "Invalid tutor ID." });
+  }
+
+  try {
+    const tutor = await Tutor.findById(tutorId).select(
+      "name profilePicture description subjects phone birthday"
+    );
+
+    if (!tutor) {
+      console.log("❌ Tutor not found with ID:", tutorId);
+      return res.status(404).json({ error: "Tutor not found." });
+    }
+
+    console.log("✅ Found tutor:", tutor.name);
+    res.json(tutor);
+  } catch (error) {
+    console.error("❌ Error fetching tutor:", error);
+    res.status(500).json({ error: "Server error fetching tutor." });
   }
 });
 

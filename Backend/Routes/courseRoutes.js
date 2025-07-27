@@ -10,6 +10,7 @@ const payLater = require("../Models/payLater");
 const GlobalSessionPricing = require("../Models/GlobalSessionPricing");
 const multer = require("multer");
 const path = require("path");
+const sendWhatsAppMessage=require("./sendWhatsappMessage");
 const { plus_v1 } = require("googleapis");
 
 const storage = multer.diskStorage({
@@ -229,14 +230,14 @@ router.get("/categories", async (req, res) => {
       category: cat._id,
       courseTypeImage: cat.courseTypeImage
         ? // `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` //Abhi
-          `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` ||
+          // `https://twod-tutorial-web-application-3brq.onrender.com${cat.courseTypeImage}` ||
           `http://localhost:6001${cat.courseTypeImage}`
         : null,
       courses: cat.courses.map((course) => ({
         name: course.name,
         courseType: course.courseType,
         nameImage: course.nameImage
-          ? `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}` ||
+          ? // `https://twod-tutorial-web-application-3brq.onrender.com${course.nameImage}` ||
             `http://localhost:6001${course.nameImage}`
           : null,
       })),
@@ -248,7 +249,6 @@ router.get("/categories", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
-
 
 const convertTo24HourFormat = (time12h) => {
   const [time, modifier] = time12h.split(" ");
@@ -263,7 +263,12 @@ const convertTo24HourFormat = (time12h) => {
   return `${hours}:${minutes}`;
 };
 
-const findAvailableTutor = async (subject, grade, selectedDate, selectedTime) => {
+const findAvailableTutor = async (
+  subject,
+  grade,
+  selectedDate,
+  selectedTime
+) => {
   const selectedStartTime = convertTo24HourFormat(
     selectedTime.split("-")[0].trim()
   );
@@ -276,10 +281,12 @@ const findAvailableTutor = async (subject, grade, selectedDate, selectedTime) =>
     "availability.subjects.subjectName": subject,
     "availability.subjects.grades.grade": grade,
   });
-console.log("Tutors found:", tutors);
+  console.log("Tutors found:", tutors);
   for (const tutor of tutors) {
     for (const subjectEntry of tutor.availability) {
-      if (new Date(subjectEntry.date).toISOString().split("T")[0] === selectedDate) {
+      if (
+        new Date(subjectEntry.date).toISOString().split("T")[0] === selectedDate
+      ) {
         for (const subj of subjectEntry.subjects) {
           if (subj.subjectName === subject) {
             for (const gradeEntry of subj.grades) {
@@ -336,10 +343,8 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
         course.name,
         selectedDate,
         selectedTime
-
-
       );
-      console.log("Assigned Tutor:", assignedTutor);      
+      console.log("Assigned Tutor:", assignedTutor);
 
       if (!assignedTutor) {
         return res.status(400).json({
@@ -369,10 +374,10 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
       intent: "sale",
       payer: { payment_method: "paypal" },
       redirect_urls: {
-        return_url: `https://twod-tutorial-web-application-nine.vercel.app/success?transactionId=${transaction._id}`,
-        cancel_url: `https://twod-tutorial-web-application-nine.vercel.app/cancel?transactionId=${transaction._id}`,
-        // return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
-        // cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
+        // return_url: `https://twod-tutorial-web-application-nine.vercel.app/success?transactionId=${transaction._id}`,
+        // cancel_url: `https://twod-tutorial-web-application-nine.vercel.app/cancel?transactionId=${transaction._id}`,
+        return_url: `http://localhost:5173/success?transactionId=${transaction._id}`,
+        cancel_url: `http://localhost:5173/cancel?transactionId=${transaction._id}`,
       },
       transactions: [
         {
@@ -401,7 +406,9 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
         console.error("Error creating payment:", error);
         return res.status(500).json({ error: "Payment creation failed" });
       } else {
-        const approvalUrl = payment.links.find((link) => link.rel === "approval_url");
+        const approvalUrl = payment.links.find(
+          (link) => link.rel === "approval_url"
+        );
         if (approvalUrl) {
           return res.json({ approval_url: approvalUrl.href });
         } else {
@@ -414,8 +421,6 @@ router.post("/courses/:id/enroll", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 router.get("/success", authMiddleware, async (req, res) => {
   try {
@@ -445,8 +450,7 @@ router.get("/success", authMiddleware, async (req, res) => {
           if (!payLaterTx) {
             return res.status(404).json({ message: "Transaction not found" });
           }
-
-          // Create a new Transaction entry
+          // Create Transaction based on PayLater
           transaction = new Transaction({
             user: payLaterTx.user,
             tutorId: payLaterTx.tutorId,
@@ -456,32 +460,72 @@ router.get("/success", authMiddleware, async (req, res) => {
             selectedTime: payLaterTx.selectedTime,
             duration: payLaterTx.duration,
             amount: payLaterTx.amount,
-            createdAt: new Date()
+            createdAt: new Date(),
           });
-
           await transaction.save();
-
-          // Delete the PayLater entry
           await payLater.findByIdAndDelete(transactionId);
         } else {
           transaction.status = "completed";
           await transaction.save();
         }
+
         await Person.findByIdAndUpdate(transaction.user, {
-          $addToSet: { purchasedCourses: transaction.courseId }
+          $addToSet: { purchasedCourses: transaction.courseId },
         });
 
         const course = await Course.findById(transaction.courseId);
         if (!course) {
           return res.status(404).json({ message: "Course not found" });
         }
-
         if (!course.students) course.students = [];
-
         if (!course.students.includes(req.user.id)) {
           course.students.push(req.user.id);
           await course.save();
         }
+
+        // === WhatsApp Notification Logic ===
+        const websiteURL = "http://localhost:5173";
+
+        // Fetch user and tutor info
+        const user = await Person.findById(transaction.user);
+        const tutor = await Tutor.findById(transaction.tutorId);
+
+        // Phone number formatting helper
+        function formatE164(phone) {
+          phone = phone.trim();
+          if (phone.startsWith("+")) return phone;
+          if (phone.length === 10) return "+91" + phone; // adjust country code if needed
+          if (phone.length === 12 && phone.startsWith("91")) return "+" + phone;
+          throw new Error("Phone format not recognized: " + phone);
+        }
+
+        // Professional messages with clickable URL
+        const userMsg = `Dear ${user.name},
+
+Your payment for the course "${course.name}" with tutor ${tutor.name} has been successfully received. Your session is confirmed for ${transaction.selectedDate} at ${transaction.selectedTime}.
+
+Thank you for your trust. For more details, please visit: ${websiteURL}
+
+Best regards,
+Your Tutoring Platform Team`;
+
+        const tutorMsg = `Dear ${tutor.name},
+
+${user.name} has successfully completed payment for the course "${course.name}" scheduled on ${transaction.selectedDate} at ${transaction.selectedTime}.
+
+Please prepare accordingly. More info at: ${websiteURL}
+
+Best regards,
+Your Tutoring Platform Team`;
+
+        // Send WhatsApp messages (fire and forget)
+        sendWhatsAppMessage(formatE164(user.phone), userMsg).catch(
+          console.error
+        );
+        sendWhatsAppMessage(formatE164(tutor.phone), tutorMsg).catch(
+          console.error
+        );
+        // === End WhatsApp Notification ===
 
         return res.json({
           success: true,
@@ -497,12 +541,11 @@ router.get("/success", authMiddleware, async (req, res) => {
   }
 });
 
-
 router.get("/cancel", authMiddleware, async (req, res) => {
   try {
     const { transactionId } = req.query;
 
-    if (!transactionId) { 
+    if (!transactionId) {
       return res.status(400).json({ message: "Missing transaction ID" });
     }
 
@@ -510,14 +553,14 @@ router.get("/cancel", authMiddleware, async (req, res) => {
     if (!transaction) {
       transaction = await payLater.findById(transactionId);
       if (!transaction)
-      return res.status(404).json({ message: "Transaction not found" });
+        return res.status(404).json({ message: "Transaction not found" });
     }
 
     transaction.status = "failed";
     await transaction.save();
 
     return res.redirect(
-      `https://twod-tutorial-web-application-nine.vercel.app/cancel?transactionId=${transaction._id}` 
+      `https://twod-tutorial-web-application-nine.vercel.app/cancel?transactionId=${transaction._id}`
       // ||
       //   `http://localhost:5173/cancel?transactionId=${transaction._id}`
       // `https://twod-tutorial-web-application-nine.vercel.app/cancel?transactionId=${transaction._id}`
@@ -536,7 +579,7 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
     if (!transaction) {
       transaction = await payLater.findById(transactionId);
       if (!transaction)
-      return res.status(404).json({ message: "Transaction not found" });
+        return res.status(404).json({ message: "Transaction not found" });
     }
 
     res.json({
@@ -549,7 +592,6 @@ router.get("/status/:transactionId", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 router.get("/user/courses", authMiddleware, async (req, res) => {
   try {
@@ -604,10 +646,18 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
     });
 
     // 3. Fetch PayLater transactions (pending + accepted)
-    const payLaterCourses = await payLater.find({
-      user: userId,
-      status: { $in: ["pending for tutor acceptance", "accepted", "completed", "failed"] },
-    })
+    const payLaterCourses = await payLater
+      .find({
+        user: userId,
+        status: {
+          $in: [
+            "pending for tutor acceptance",
+            "accepted",
+            "completed",
+            "failed",
+          ],
+        },
+      })
       .populate("courseId")
       .populate({ path: "tutorId", select: "name" })
       .lean();
@@ -656,89 +706,85 @@ router.get("/user/courses", authMiddleware, async (req, res) => {
   }
 });
 
-
 // Add new route to get grades for a subject
 router.get("/courses/subject/:subjectName", async (req, res) => {
   try {
     const { subjectName } = req.params;
-    
+
     if (!subjectName) {
       return res.status(400).json({ message: "Subject name is required" });
     }
 
     // Find all courses for the given subject
-    const courses = await Course.find({ 
-      courseType: subjectName 
-    }).select('name courseType -_id'); // Only select name and courseType fields
+    const courses = await Course.find({
+      courseType: subjectName,
+    }).select("name courseType -_id"); // Only select name and courseType fields
 
     if (!courses || courses.length === 0) {
-      return res.status(404).json({ 
-        message: `No courses found for subject: ${subjectName}` 
+      return res.status(404).json({
+        message: `No courses found for subject: ${subjectName}`,
       });
     }
 
     // Extract unique grades from courses
-    const grades = [...new Set(courses.map(course => course.name))];
+    const grades = [...new Set(courses.map((course) => course.name))];
 
     res.json({
       subject: subjectName,
-      grades: grades
+      grades: grades,
     });
   } catch (error) {
     console.error("Error fetching grades for subject:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Failed to fetch grades for subject",
-      details: error.message 
+      details: error.message,
     });
   }
 });
 
 module.exports = router;
 
-
-
-
 // if (!tutorId) {
-    //   const tutors = await Tutor.find({ subjects: course.courseType });
+//   const tutors = await Tutor.find({ subjects: course.courseType });
 
-    //   if (tutors.length === 0) {
-    //     return res
-    //       .status(400)
-    //       .json({ error: "No tutors available for this course" });
-    //   }
+//   if (tutors.length === 0) {
+//     return res
+//       .status(400)
+//       .json({ error: "No tutors available for this course" });
+//   }
 
-    //   const today = new Date();
-    //   const nextMonth = new Date();
-    //   nextMonth.setMonth(today.getMonth() + 1);
+//   const today = new Date();
+//   const nextMonth = new Date();
+//   nextMonth.setMonth(today.getMonth() + 1);
 
-    //   let availableTutorsWithDates = [];
+//   let availableTutorsWithDates = [];
 
-    //   tutors.forEach((tutor) => {
-    //     tutor.availability.forEach((entry) => {
-    //       const entryDate = new Date(entry.date);
-    //       if (entryDate >= today && entryDate <= nextMonth) {
-    //         availableTutorsWithDates.push({
-    //           tutorId: tutor._id,
-    //           date: entry.date,
-    //           timeSlots: entry.timeSlots,
-    //         });
-    //       }
-    //     });
-    //   });
+//   tutors.forEach((tutor) => {
+//     tutor.availability.forEach((entry) => {
+//       const entryDate = new Date(entry.date);
+//       if (entryDate >= today && entryDate <= nextMonth) {
+//         availableTutorsWithDates.push({
+//           tutorId: tutor._id,
+//           date: entry.date,
+//           timeSlots: entry.timeSlots,
+//         });
+//       }
+//     });
+//   });
 
-    //   if (availableTutorsWithDates.length === 0) {
-    //     return res
-    //       .status(400)
-    //       .json({ error: "No available tutors in the next month" });
-    //   }
+//   if (availableTutorsWithDates.length === 0) {
+//     return res
+//       .status(400)
+//       .json({ error: "No available tutors in the next month" });
+//   }
 
-    //   const selectedTutorData =
-    //     availableTutorsWithDates[
-    //       Math.floor(Math.random() * availableTutorsWithDates.length)
-    //     ];
-    //   tutorId = selectedTutorData.tutorId;
+//   const selectedTutorData =
+//     availableTutorsWithDates[
+//       Math.floor(Math.random() * availableTutorsWithDates.length)
+//     ];
+//   tutorId = selectedTutorData.tutorId;
 
-    //   console.log(
-    //     `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
-    //   );
-    // }
+//   console.log(
+//     `🎉 Auto-assigned tutor: ${tutorId} | Date: ${selectedDate} | Time: ${selectedTime}`
+//   );
+// }

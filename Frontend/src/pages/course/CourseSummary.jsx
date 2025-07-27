@@ -295,11 +295,10 @@ const CourseSummaryPage = () => {
               <div className="flex flex-col items-center">
                 <img
                   src={
-                    tutorData.profilePicture
-                      ? tutorData.profilePicture.startsWith("http")
-                        ? tutorData.profilePicture
-                        : `https://twod-tutorial-web-application-3brq.onrender.com${tutorData.profilePicture}`
-                      : "https://via.placeholder.com/100" // fallback image
+                    // `http://localhost:6001${tutorData.profilePicture}`
+                        `http://localhost:6001${tutorData.profilePicture}`||
+                        `https://twod-tutorial-web-application-3brq.onrender.com${tutorData.profilePicture}`
+                      
                   }
                   alt={tutorData.name || "Tutor"}
                   className="w-24 h-24 rounded-full object-cover mb-4 border-2 border-orange-500"
