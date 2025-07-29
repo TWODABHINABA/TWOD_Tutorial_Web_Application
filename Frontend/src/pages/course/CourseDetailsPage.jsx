@@ -11,6 +11,7 @@ import Modal from "../../pages/login_signup/Modal";
 import { formatDate } from "./EnrollmentCalendar";
 import { useNavigate } from "react-router-dom";
 import { useCurrencyConverter } from '../../currencyConfig/useCurrencyConverter';
+import CalendlyWidget from "../calendly/CalendlyWidget";
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -921,6 +922,7 @@ const CourseDetailsPage = () => {
                       </svg>
                       <span className="text-gray-600">{course.level}</span>
                     </div>
+                      <CalendlyWidget/>
                   </div>
 
                   {showEnrollModal && (
